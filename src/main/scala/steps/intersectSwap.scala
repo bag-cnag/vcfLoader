@@ -52,6 +52,9 @@ object intersectSwap {
       if  (variant == null) {
         variant= new SwapDataThin(0,"no","no",false)
       }
+       if  (band == null) {
+        band= new SwapData(0, 0, "noref", "noalt",  false, "empty",  0, 0, "0/0", "0.0")
+      }     
       if ( (currentValue == -1) ) currentValue = variant.pos
       if (variant.pos > currentValue || !variants.hasNext) {
 
@@ -60,6 +63,7 @@ object intersectSwap {
       }
       maxVariant = variant.pos
 
+    
       if (band.pos > currentValue || !bands.hasNext) {
         BandNext = false
       }
