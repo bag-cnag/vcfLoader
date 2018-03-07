@@ -40,6 +40,7 @@ object Data {
         ,"ref":{"type":"string","index":"no"}
         ,"alt":{"type":"string","index":"no"}
         ,"freqInt":{"type":"float"}
+        ,"freqCounts":{"type":"integer"}
         ,"indel":{"type":"string","index":"not_analyzed"}
         ,"effs":{"type":"nested","properties":{"codon_change":{"type":"string","index":"no"}
         ,"amino_acid_change":{"type":"string","index":"no"}
