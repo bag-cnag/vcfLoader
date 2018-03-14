@@ -1,71 +1,75 @@
 import json
 import urllib2
-
+from elasticsearch import Elasticsearch
 
 def create_index(host,port,index_name,version):
     data="""
-          {"settings":{"index":{"number_of_shards":8,"number_of_replicas":0,"refresh_interval":"1000.ms"}}
-            ,"mappings":{"""+"\""+version+"\""+"""
+          {"settings":{"index":{"number_of_shards":8,"number_of_replicas":0,"refresh_interval":"1000ms"}}
+            ,"mappings":{"""+"\"" + version + "\""+"""
             :{"_all":{"enabled":false},
-            "properties":{"chrom":{"type":"integer","index":"not_analyzed"},
-            "pos":{"type":"integer","index":"not_analyzed"}
-            ,"ref":{"type":"string","index":"no"}
-            ,"alt":{"type":"string","index":"no"}
-            ,"indel":{"type":"string","index":"not_analyzed"}
-            ,"effs":{"type":"nested","properties":{"codon_change":{"type":"string","index":"no"}
-            ,"amino_acid_change":{"type":"string","index":"no"}
-            ,"amino_acid_length":{"type":"string","index":"no"}
-            ,"codon_change":{"type":"string","index":"no"}
-            ,"effect":{"type":"string","index":"not_analyzed"}
-            ,"effect_impact":{"type":"string","index":"not_analyzed"}
-            ,"exon_rank":{"type":"string","index":"no"}
-            ,"functional_class":{"type":"string","index":"no"}
-            ,"gene_coding":{"type":"string","index":"not_analyzed"}
-            ,"gene_name":{"type":"string","index":"not_analyzed"}
-            ,"transcript_biotype":{"type":"string","index":"not_analyzed"}
-            ,"transcript_id":{"type":"string","index":"not_analyzed"}
+            "properties":{"chrom":{"type":"integer","index":"true"},
+            "pos":{"type":"integer","index":"true"}
+            ,"ref":{"type":"keyword","index":"false"}
+            ,"alt":{"type":"keyword","index":"false"}
+            ,"indel":{"type":"keyword"}
+            ,"effs":{"type":"nested","properties":{
+            "codon_change":{"type":"keyword","index":"false"}
+            ,"amino_acid_change":{"type":"keyword","index":"false"}
+            ,"amino_acid_length":{"type":"keyword","index":"false"}
+            ,"effect":{"type":"keyword"}
+            ,"effect_impact":{"type":"keyword"}
+            ,"exon_rank":{"type":"keyword","index":"false"}
+            ,"functional_class":{"type":"keyword","index":"false"}
+            ,"gene_coding":{"type":"keyword"}
+            ,"gene_name":{"type":"keyword"}
+            ,"transcript_biotype":{"type":"keyword"}
+            ,"transcript_id":{"type":"keyword"}
             }}
             ,"predictions":{"type":"nested",
-            "properties":{"cadd_phred":{"type":"float","index":"not_analyzed"}
-            ,"gerp_rs":{"type":"string","index":"no"}
-            ,"mt":{"type":"string","index":"no"}
-            ,"mutationtaster_pred":{"type":"string","index":"not_analyzed"}
-            ,"phylop46way_placental":{"type":"string","index":"no"}
-            ,"polyphen2_hvar_pred":{"type":"string","index":"not_analyzed"}
-            ,"polyphen2_hvar_score":{"type":"string","index":"no"}
-            ,"sift_pred":{"type":"string","index":"not_analyzed"}
-            ,"sift_score":{"type":"string","index":"no"}
-            ,"siphy_29way_pi":{"type":"string","index":"no"}
-            ,"UMD":{"type":"string","index":"not_analyzed"}
-            ,"clinvar":{"type":"string","index":"no"}
-            ,"clinvar_filter":{"type":"string","index":"not_analyzed"}
-            ,"clnacc":{"type":"string","index":"no"},
-            "rs":{"type":"string","index":"not_analyzed"}
+            "properties":{"cadd_phred":{"type":"float","index":"true"}
+            ,"gerp_rs":{"type":"keyword","index":"false"}
+            ,"mt":{"type":"keyword","index":"false"}
+            ,"mutationtaster_pred":{"type":"keyword"}
+            ,"phylop46way_placental":{"type":"keyword","index":"false"}
+            ,"polyphen2_hvar_pred":{"type":"keyword"}
+            ,"polyphen2_hvar_score":{"type":"keyword","index":"false"}
+            ,"sift_pred":{"type":"keyword"}
+            ,"sift_score":{"type":"keyword","index":"false"}
+            ,"siphy_29way_pi":{"type":"keyword","index":"false"}
+            ,"UMD":{"type":"keyword"}
+            ,"clinvar":{"type":"keyword","index":"false"}
+            ,"clinvar_filter":{"type":"keyword"}
+            ,"clnacc":{"type":"keyword","index":"false"},
+            "rs":{"type":"keyword"},
+            "cosmic_id":{"type": "keyword"},
+            "cosmic_cnt":{"type":"keyword"}
             }},
             "populations":{"type":"nested",
-            "properties":{"gp1_afr_af":{"type":"float","index":"no"}
-            ,"gp1_asn_af":{"type":"float","index":"no"}
-            ,"gp1_eur_af":{"type":"float","index":"no"}
+            "properties":{"gp1_afr_af":{"type":"float","index":"false"}
+            ,"af_internal":{"type":"keyword","index":"false"}
+            ,"gp1_asn_af":{"type":"float","index":"false"}
+            ,"gp1_eur_af":{"type":"float","index":"false"}
             ,"gp1_af":{"type":"float","null_value":0.0}
             ,"esp6500_aa":{"type":"float","null_value":0.0}
             ,"esp6500_ea":{"type":"float","null_value":0.0}
             ,"exac":{"type":"float","null_value":0.0}
-            ,"gmaf":{"type":"float","index":"no"}
-            ,"rd_freq":{"type":"float","index":"no"}}}
+            ,"gmaf":{"type":"float","index":"false"}
+            ,"rd_freq":{"type":"float","index":"false"}}}
             ,"samples":{"type":"nested",
             "properties":{"dp":{"type":"float"}
             ,"gq":{"type":"float"}
-            ,"ad":{"type":"float"}
-            ,"gt":{"type":"string"
-            ,"index":"not_analyzed"}
-            ,"sample":{"type":"string","index":"not_analyzed"}
-            ,"multi":{"type":"string","index":"no"},
-            "diploid":{"type":"string","index":"no"}}}}}}}
+            ,"ad":{"type":"keyword"}
+            ,"gt":{"type":"keyword"}
+            ,"sample":{"type":"keyword"}
+            ,"multi":{"type":"keyword","index":"false"},
+            "diploid":{"type":"keyword","index":"false"}}}}}}}
           """
     url="http://"+host+":"+port+"/"+index_name
-    header={"Content-Type": "application/json"}
-    response = urllib2.urlopen(url, data)
-    print("response code"+ response.content)
+    es = Elasticsearch(hosts=[host])
+    response = es.indices.create(index=index_name,ignore=400,body=data)
+    print response
+    
 def delete_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name
-    response = requests.delete(url)
+    es = Elasticsearch(hosts=[host])
+    es.indices.delete(index=index_name, ignore=[400, 404])

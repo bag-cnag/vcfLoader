@@ -18,7 +18,7 @@ APP_NAME = "My Spark Application"
 def main(hc,sqlContext):
     call(["ls", "-l"])
 
-    configuration= config.readConfig("/home/production/dpiscia/spark_jar/config.json")
+    configuration= config.readConfig("config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     for chrom in configuration["chromosome"]:
@@ -119,7 +119,7 @@ def main(hc,sqlContext):
                 .withColumnRenamed("va.samples","samples") \
                 .withColumnRenamed("va.effs","effs")
             variantsRN.printSchema()
-            variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"])
+            variantsRN.write.format("org.elasticsearch.spark.sql").save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"])
 
 
 
