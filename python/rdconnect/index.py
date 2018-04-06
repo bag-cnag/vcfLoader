@@ -1,6 +1,6 @@
 import json
 
-import requests
+import urllib2
 
 def create_index(host,port,index_name,version):
     data="""
@@ -40,6 +40,8 @@ def create_index(host,port,index_name,version):
             ,"clinvar_clnsig":{"type":"string","index":"no"}
             ,"clinvar_id":{"type":"integer","index":"no"}
             ,"rs":{"type":"string","index":"not_analyzed"}
+            ,"cosmic_id":{"type": "string","index":"no"}
+            ,"cosmic_cnt":{"type":"string","index":"no"}
             }},
             "populations":{"type":"nested",
             "properties":{"gp1_afr_af":{"type":"float","index":"no"}
@@ -67,8 +69,11 @@ def create_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name
     header={"Content-Type": "application/json"}
     response = urllib2.urlopen(url, data)
-    print("response code"+ response.content)
+    #print("response code"+ response.content)
     
 def delete_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name
-    response = requests.delete(url)
+    #response = requests.delete(url)
+    request = urllib2.Request(url)
+    request.get_method = lambda: 'DELETE'
+    response = urllib2.urlopen(request)
