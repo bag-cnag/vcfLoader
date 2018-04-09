@@ -154,13 +154,14 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
-            variants = sqlContext.read.load(destination+"/variants/chrom="+chrom).select("`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.samples`","`va.effs`")
+            variants = sqlContext.read.load(destination+"/variants/chrom="+chrom).select("`va.freqInt`","`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.samples`","`va.effs`")
             variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
                 .withColumnRenamed("va.populations","populations") \
                 .withColumnRenamed("va.indel","indel") \
                 .withColumnRenamed("va.alt","alt") \
                 .withColumnRenamed("v.ref","ref") \
                 .withColumnRenamed("va.pos","pos") \
+                .withColumnRenamed("va.freqInt","freqInt") \
                 .withColumnRenamed("va.samples","samples") \
                 .withColumnRenamed("va.effs","effs") \
                 .withColumnRenamed("va.clinvar_filter","clinvar_filter") \
