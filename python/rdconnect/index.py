@@ -12,6 +12,7 @@ def create_index(host,port,index_name,version):
             ,"ref":{"type":"string","index":"no"}
             ,"alt":{"type":"string","index":"no"}
             ,"indel":{"type":"string","index":"not_analyzed"}
+            ,"freqInt":{"type":"float","index":"not_analyzed"} 
             ,"effs":{"type":"nested","properties":{"codon_change":{"type":"string","index":"no"}
             ,"amino_acid_change":{"type":"string","index":"no"}
             ,"amino_acid_length":{"type":"string","index":"no"}
@@ -40,10 +41,11 @@ def create_index(host,port,index_name,version):
             ,"clinvar_clnsig":{"type":"string","index":"no"}
             ,"clinvar_id":{"type":"integer","index":"no"}
             ,"rs":{"type":"string","index":"not_analyzed"}
+            ,"cosmic_id":{"type": "string","index":"no"}
+            ,"cosmic_cnt":{"type":"string","index":"no"}
             }},
             "populations":{"type":"nested",
             "properties":{"gp1_afr_af":{"type":"float","index":"no"}
-            ,"af_internal":{"type":"float","index":"no"}
             ,"gp1_asn_af":{"type":"float","index":"no"}
             ,"gp1_eur_af":{"type":"float","index":"no"}
             ,"gp1_af":{"type":"float","null_value":0.0}
