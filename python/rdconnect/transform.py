@@ -32,7 +32,9 @@ def transform(dataset,destination,chrom):
                                                         sift_score : va.dbnsfp.SIFT_score.split(";").map(x=> removedot(x,0)).min(),
                                                         cadd_phred  : va.cadd.max(),
                                                         clinvar_id : va.clinvar_id,
-                                                        clinvar_clnsig : va.clinvar_clnsig
+                                                        clinvar_clnsig : va.clinvar_clnsig,
+                                                        cosmic_id: va.dbnsfp.COSMIC_ID,
+                                                        cosmic_cnt: va.dbnsfp.`COSMIC_CNT `
                                                         }]''']
                         ).annotate_variants_expr(['va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand)',])\
         .variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/chrom="+chrom)
