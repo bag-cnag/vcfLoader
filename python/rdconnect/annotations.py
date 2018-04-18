@@ -85,3 +85,8 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig_filter, mapping_expr_for_clnsig_filter)
     expr += "va.clinvar_filter = " + annotation_expr
     annotateVCF(hc,variants,annotationPath,destinationPath,expr)
+
+def annotateSomaticSamples(dataset):
+    return dataset.annotate_variants_expr("va.samples = gs.filter(x => x.dp > 7).map(g=>  {gq: g.gq, dp : g.dp, gt:intToGenotype(g.gt), gtInt : g.gt,adBug : g.ad, ad : if(g.gt >0) truncateAt(g.ad[1]/g.ad.sum.toFloat,2) else truncateAt(g.ad[0]/g.ad.sum.toFloat,2), sample: s, nprogs: va.info.NPROGS, progs: va.info.PROGS.split('[.]').map(p => {name: p})}).collect()") \
+                  .annotate_variants_expr("va = let c = va in drop(va,info,rsid,qual,filter\
+s)")
