@@ -130,12 +130,11 @@ def main(hc,sqlContext):
                 .withColumnRenamed("va.samples","samples") \
                 .withColumnRenamed("va.effs","effs") \
                 .withColumnRenamed("va.clinvar_filter","clinvar_filter") \
-                .withColumn("chrom",lit(chrom))
-            id_column = concat(col("chrom").cast(StringType()), col("pos").cast(StringType()), col("ref"), col("alt"))
-            variantsRN = variantsRN.withColumn("id",id_column)
+                .withColumn("chrom",lit(chrom)) 
+            id_column = concat(col("chrom").cast(StringType()), lit("-"), col("pos").cast(StringType()), lit("-"), col("ref"), lit("-"), col("alt"))
+            variantsRN = variantsRN.withColumn("id",id_column) 
             variantsRN.printSchema()
             variantsRN.write.format("org.elasticsearch.spark.sql").options(**es_conf).option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"],mode='append')
-
 
 
 if __name__ == "__main__":
