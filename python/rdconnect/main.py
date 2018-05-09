@@ -115,10 +115,13 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
+            update_params = "new_samples: samples"
+            update_script = "ctx._source.samples += new_samples"
             es_conf = {
                 "es.mapping.id": "id",
-                "es.mapping.exclude": "id",
-                "es.write.operation": "upsert"
+                "es.write.operation": "upsert",
+                "es.update.script.params": update_params,
+                "es.update.script.inline": update_script
             }
             variants = sqlContext.read.load(destination+"/variants/chrom="+chrom).select("`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.samples`","`va.effs`")
             variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
