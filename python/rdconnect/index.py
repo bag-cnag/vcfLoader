@@ -42,6 +42,8 @@ def create_index(host,port,index_name,version):
             ,"clinvar_clnsigconf":{"type":"string","index":"no"}
             ,"clinvar_id":{"type":"integer","index":"no"}
             ,"rs":{"type":"string","index":"not_analyzed"}
+            ,"cosmic_id":{"type": "string","index":"no"}
+            ,"cosmic_cnt":{"type":"string","index":"no"}
             }},
             "populations":{"type":"nested",
             "properties":{"gp1_afr_af":{"type":"float","index":"no"}
