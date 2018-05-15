@@ -13,9 +13,14 @@ def importDBTable(hc,sourcePath,destinationPath,number_partitions):
     #select(['C3', 'C1', 'C2']) select which column we are interested or drop
     dbnsfpTable.rename({'1000Gp1_AF':'Gp1_AF1000','1000Gp1_AC':'Gp1_AC1000','1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','ESP6500_EA_AF ':'ESP6500_EA_AF','GERP++_RS':'GERP_RS'}).repartition(number_partitions).write(destinationPath,overwrite=True) 
 
-def annotatedbnsfp(hc,variants, dbsfp_path,destinationPath):
-    dbnsfp = hc.read_table(dbsfp_path)
-    variants.annotate_variants_table(dbnsfp,root='va.dbnsfp').write(destinationPath,overwrite=True)
+def annotatedbnsfp(hc, variants, annotations_table, destination_path):
+    variants.annotate_variants_table(annotations_table,root='va.dbnsfp').write(destination_path,overwrite=True)
+
+def annotatedCadd(hc, variants, annotations_path, destination_path):
+    annotateVCF(hc,variants,annotations_path,destination_path,'va.cadd = vds.info.CADD13_PHRED')
+
+def annotatedbSNP(hc, variants, annotations_path, destination_path):
+    annotateVCF(hc,variants,annotations_path,destination_path,'va.rs = vds.rsid')
 
 def importDBvcf(hc,sourcePath,destinationPath,number_partitions):
     print("cadd source Path is "+sourcePath)
@@ -23,11 +28,11 @@ def importDBvcf(hc,sourcePath,destinationPath,number_partitions):
     #select(['C3', 'C1', 'C2']) select which column we are interested or drop
     #dbnsfpTable.rename({'1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','ESP6500_EA_AF ':'ESP6500_EA_AF','GERP++_RS':'GERP_RS'}).write(destinationPath,overwrite=True)
     
-def annotateVCF(hc,variants,annotationPath,destinationPath,annotations):
-    cadd = hc.read(annotationPath).split_multi()
-    variants.annotate_variants_vds(cadd,expr=annotations).write(destinationPath,overwrite=True)
+def annotateVCF(hc,variants,annotations_path,destination_path,annotations):
+    annotations_vds = hc.read(annotations_path).split_multi()
+    variants.annotate_variants_vds(annotations_vds,expr=annotations).write(destination_path,overwrite=True)
 
-def annotateClinvar(hc,variants,annotationPath,destinationPath):
+def annotateClinvar(hc,variants,clinvar_annotations,destination_path):
     """ Adds Clinvar annotations to variants.
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -80,10 +85,10 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     expr += "va.clinvar_clnsig = " + annotation_expr + ".mkString('|'), "
     annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig_filter, mapping_expr_for_clnsig_filter)
     expr += "va.clinvar_filter = " + annotation_expr
-    expr += ", va.clinvar_clnsigconf = vds.info.CLNSIGCONF.mkString(',')" 
-    annotateVCF(hc,variants,annotationPath,destinationPath,expr)
+    expr += ", va.clinvar_clnsigconf = vds.info.CLNSIGCONF.mkString(',')"
+    annotateVCF(hc,variants,clinvar_annotations,destination_path,expr)
 
-def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations):
+def annotateVCFMulti(hc,variants,annotations_path,destinationPath,annotations):
     """ Adds annotations to variants that have multiallelic INFO fields.
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -91,8 +96,8 @@ def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations):
          :param string destinationPath: Path were the new annotated dataset can be found
          :param string annotations: Array of annotations to add to the dataset
     """
-    annotations_vds = hc.read(annotationPath)
     # Getting number of multiallelics
+    annotations_vds = hc.read(annotations_path)
     n_multiallelics = annotations_vds.summarize().multiallelics
     annotations_vds = annotations_vds.split_multi()
     index = '0'
@@ -106,7 +111,7 @@ def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations):
         annotations_expr += "," + annotation % index
     variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)
     
-def annotateExAC(hc,variants,annotationPath,destinationPath):
+def annotateExAC(hc,variants,annotations_vds,destinationPath):
     """ Adds ExAC annotations to a dataset. 
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -117,9 +122,9 @@ def annotateExAC(hc,variants,annotationPath,destinationPath):
     # 'annotateVCFMulti' function, since INFO fields based on alleles don't get split in
     # multiallelic cases.
     annotations = ['va.exac = vds.info.ExAC_AF[%s]']
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
+    annotateVCFMulti(hc,variants,annotations_vds,destinationPath,annotations)
 
-def annotateGnomADWG(hc,variants,annotationPath,destinationPath):
+def annotateGnomADWG(hc,variants,annotations_vds,destinationPath):
     """ Adds gnomAD WG annotations to a dataset. 
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -128,9 +133,9 @@ def annotateGnomADWG(hc,variants,annotationPath,destinationPath):
     """
     annotations = ["va.gnomAD_WG_AF = vds.info.gnomAD_WG_AF[%s]",
                    "va.gnomAD_WG_AC = vds.info.gnomAD_WG_AC[%s]"]
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
+    annotateVCFMulti(hc,variants,annotations_vds,destinationPath,annotations)
 
-def annotateGnomADEx(hc,variants,annotationPath,destinationPath):
+def annotateGnomADEx(hc,variants,annotations_vds,destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -139,4 +144,18 @@ def annotateGnomADEx(hc,variants,annotationPath,destinationPath):
     """
     annotations = ["va.gnomAD_Ex_AF = vds.info.gnomAD_Ex_AF[%s]",
                    "va.gnomAD_Ex_AC = vds.info.gnomAD_Ex_AC[%s]"]
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
+    annotateVCFMulti(hc,variants,annotations_vds,destinationPath,annotations)
+
+
+def union(hc,original,other):
+    original_variants = original.annotate_variants_expr('va = {}')
+    other_variants = other.annotate_variants_expr('va = {}') 
+    variants = original_variants.union(other_variants).deduplicate()
+    return variants
+
+
+def merge_annotations(hc, annotations_path, new_annotations_path):
+    annotations_all = hc.read(annotations_path)
+    annotations_new = hc.read(new_annotations_path).split_multi()
+    variants = union(hc,annotations_all,annotations_new)
+    return variants.annotate_variants_vds(annotations_all,"va = vds")
