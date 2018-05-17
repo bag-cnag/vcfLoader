@@ -127,12 +127,12 @@ def main(hc,sqlContext):
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
             variants = hc.read(str(destination+"/annotatedVEP/"+fileName))
-            variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
+            variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/annotatedSamples/"+fileName,overwrite=True)
 
         if (configuration["steps"]["transform"]):
             print ("step transform")
             # add filter ad>0 before gt collect maybe?
-            grouped= hc.read(destination+"/grouped/"+fileName)
+            grouped= hc.read(destination+"/annotatedSamples/"+fileName)
             grouped.variants_table().to_dataframe().printSchema()
             transform.transform(grouped,destination,chrom)
             
