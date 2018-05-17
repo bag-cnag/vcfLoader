@@ -41,4 +41,4 @@ def transform(dataset,destination,chrom):
                                                         rs : orElse(va.rs,'.')
                                                         }]''']
                         ).annotate_variants_expr(['va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand)',])\
-        .variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/chrom="+chrom)
+        .variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants_merged/chrom="+chrom)
