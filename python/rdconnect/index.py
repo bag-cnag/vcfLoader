@@ -12,6 +12,7 @@ def create_index(host,port,index_name,version):
             ,"ref":{"type":"keyword","index":"false"}
             ,"alt":{"type":"keyword","index":"false"}
             ,"indel":{"type":"keyword"}
+            ,"freqInt":{"type":"keyword"}
             ,"effs":{"type":"nested","properties":{
             "codon_change":{"type":"keyword","index":"false"}
             ,"amino_acid_change":{"type":"keyword","index":"false"}
@@ -40,13 +41,10 @@ def create_index(host,port,index_name,version):
             ,"clinvar":{"type":"keyword","index":"false"}
             ,"clinvar_filter":{"type":"keyword"}
             ,"clnacc":{"type":"keyword","index":"false"},
-            "rs":{"type":"keyword"},
-            "cosmic_id":{"type": "keyword"},
-            "cosmic_cnt":{"type":"keyword"}
+            "rs":{"type":"keyword"}
             }},
             "populations":{"type":"nested",
             "properties":{"gp1_afr_af":{"type":"float","index":"false"}
-            ,"af_internal":{"type":"keyword","index":"false"}
             ,"gp1_asn_af":{"type":"float","index":"false"}
             ,"gp1_eur_af":{"type":"float","index":"false"}
             ,"gp1_af":{"type":"float","null_value":0.0}
