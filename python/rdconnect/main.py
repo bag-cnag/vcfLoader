@@ -116,13 +116,12 @@ def main(hc,sqlContext):
 
         if(configuration["steps"]["annotateVCF"]):
             variants = hc.read(source_path)
-            annotations_vds = hc.read(utils.buildFileName(annotations_path,chrom))
+            annotations_vds = hc.read(annotations_path)
             variants.annotate_variants_vds(annotations_vds,"va=vds").write(destination+"/annotated/"+fileName,overwrite=True)
             annotations_path = destination+"/annotated/"+fileName
             
         if (configuration["steps"]["annotationVEP"]):
             print ("step annotate VEP")
-            annotations_path = utils.buildFileName(annotations_path,chrom)
             print ("source file is " + annotations_path)
             annotations.annotationsVEP(hc,annotations_path,str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
 
