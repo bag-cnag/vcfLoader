@@ -122,8 +122,8 @@ def main(hc,sqlContext):
             
         if (configuration["steps"]["annotationVEP"]):
             print ("step annotate VEP")
-            print ("source file is " + annotations_path)
             annotations_path = utils.buildFileName(annotations_path,chrom)
+            print ("source file is " + annotations_path)
             annotations.annotationsVEP(hc,annotations_path,str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
 
         if (configuration["steps"]["groupByGenotype"]):
