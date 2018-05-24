@@ -1,8 +1,22 @@
 {
-    "sampleVcfPath" : "resources/data/HapMapTrioForPlayground.WGS.genotyped.reduced.vcf",
-    "sampleVdsPath" : "resources/data/variants.vds",
+    "sampleVcfPath" : "resources/data/sample.vcf",
+    "sampleVdsPath" : "tmp/variants.vds",
     "clinvarVcfPath" : "resources/annotations/clinvar.reduced.vcf",
-    "clinvarVdsPath" : "resources/annotations/clinvar.reduced.vds",
+    "clinvarVdsPath" : "tmp/clinvar.reduced.vds",
+    "clinvarTable" : "resources/results/clinvar_results.tsv",
+    "dbSNPVcfPath" : "resources/annotations/dbSNP.reduced.vcf",
+    "dbSNPVdsPath" : "tmp/dbSNP.reduced.vds",
+    "dbSNPTable" : "resources/results/dbSNP_results.tsv",
+    "gnomadExVcfPath": "resources/annotations/gnomad_ex.reduced.vcf",
+    "gnomadExVdsPath" : "tmp/gnomad_ex.reduced.vds",
+    "gnomadExTable" : "resources/results/gnomad_ex_results.tsv",
+    "gnomadWGVcfPath": "resources/annotations/gnomad_wg.reduced.vcf",
+    "gnomadWGVdsPath" : "tmp/gnomad_wg.reduced.vds",
+    "gnomadWGTable" : "resources/results/gnomad_wg_results.tsv",
+    "ExACVcfPath": "resources/annotations/ExAC.reduced.vcf",
+    "ExACVdsPath" : "tmp/ExAC.reduced.vds",
+    "ExACTable" : "resources/results/ExAC_results.tsv",
     "hailJarPath" : "resources/hail-all-spark.jar",
     "tmpDir" : "tmp"
 }
+
