@@ -50,14 +50,14 @@ def create_index(host,port,index_name,version):
             ,"gp1_afr_af":{"type":"float","index":"no"}
             ,"gp1_af":{"type":"float","null_value":0.0}
             ,"exac":{"type":"float","null_value":0.0}
-            ,"gmaf":{"type":"float","index":"no"}
-            ,"rd_freq":{"type":"float","index":"no"}}}
-            ,"gnomad_af":{"type":"float","null_value":0.0}
+            ,"gnomad_af":{"type":"float"}
             ,"gnomad_ac":{"type":"integer","index":"no"}
             ,"gnomad_an":{"type":"integer","index":"no"}
-            ,"gnomad_af_popmax":{"type":"float","index":"not_analyzed"}
+            ,"gnomad_af_popmax":{"type":"float"}
             ,"gnomad_ac_popmax":{"type":"integer","index":"no"}
             ,"gnomad_an_popmax":{"type":"integer","index":"no"}
+            ,"gmaf":{"type":"float","index":"no"}
+            ,"rd_freq":{"type":"float","index":"no"}}}
             ,"samples":{"type":"nested",
             "properties":{"dp":{"type":"float"}
             ,"gq":{"type":"float"}
