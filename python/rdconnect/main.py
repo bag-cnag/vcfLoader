@@ -112,7 +112,7 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["createIndex"]):
             print ("step to create index")
-            index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+            index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["elasticsearch"]["num_shards"],configuration["version"])
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
