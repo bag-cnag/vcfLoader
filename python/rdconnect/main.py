@@ -22,6 +22,15 @@ def main(hc,sqlContext):
     #hc._jvm.core.vcfToSample.hello()
     configuration = config.readConfig("config.json")
     destination =  configuration["destination"] + "/" + configuration["version"]
+
+    if (configuration["steps"]["deleteIndex"]):
+        print ("step to delete index")
+        index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+
+    if (configuration["steps"]["createIndex"]):
+        print ("step to create index")
+        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["elasticsearch"]["num_shards"],configuration["version"])
+            
     for chrom in configuration["chromosome"]:
         sourceFileName=utils.buildFileName(configuration["source_path"],chrom)
         print("sourcefilename is "+sourceFileName)
@@ -105,14 +114,6 @@ def main(hc,sqlContext):
             grouped= hc.read(destination+"/grouped/"+fileName)
             grouped.variants_table().to_dataframe().printSchema()
             transform.transform(grouped,destination,chrom)
-            
-        if (configuration["steps"]["deleteIndex"]):
-            print ("step to delete index")
-            index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
-
-        if (configuration["steps"]["createIndex"]):
-            print ("step to create index")
-            index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["elasticsearch"]["num_shards"],configuration["version"])
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
