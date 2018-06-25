@@ -84,10 +84,6 @@ def main(argv,hc,sqlContext):
         print ("step load exomes gnomad")
         annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],chrom),utils.buildFileName(configuration["exomesGnomad_path"],chrom),number_partitions)
 
-    if ("loadWGGnomad" in step):
-        print ("step load WG gnomad")
-        annotations.importDBvcf(hc,utils.buildFileName(configuration["genomesGnomad_Raw"],chrom),utils.buildFileName(configuration["genomesGnomad_path"],chrom),number_partitions)
-
     if ("loaddbSNP" in step):
         print ("step load dbSNP")
         annotations.importDBvcf(hc,utils.buildFileName(configuration["dbSNP_Raw"],chrom),utils.buildFileName(configuration["dbSNP_path"],chrom),number_partitions)
