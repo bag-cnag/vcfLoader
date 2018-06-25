@@ -74,7 +74,7 @@ def create_index(host,port,index_name,num_shards,version):
     url="http://"+host+":"+port+"/"+index_name
     header={"Content-Type": "application/json"}
     response = urllib2.urlopen(url, data)
-    #print("response code"+ response.content)
+    print("response code"+ str(response.info()))
     
 def delete_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name
