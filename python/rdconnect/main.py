@@ -14,7 +14,7 @@ APP_NAME = "My Spark Application"
 
 # Usage function
 def usage():
-    print 'main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step>'
+    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step>")
 
 # Command line arguments parser. It extracts the chromosome and the pipeline step to run
 def optionParser(argv):
