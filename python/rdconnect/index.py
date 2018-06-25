@@ -72,6 +72,7 @@ def create_index(host,port,index_name,num_shards,version):
             ,"gnomad_filter": {"type": "string", "index": "not_analyzed"}}}}}
           """
     url="http://"+host+":"+port+"/"+index_name
+    print(url)
     header={"Content-Type": "application/json"}
     response = urllib2.urlopen(url, data)
     print("response code"+ str(response.info()))
