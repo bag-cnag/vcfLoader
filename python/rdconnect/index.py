@@ -2,9 +2,9 @@ import json
 
 import urllib2
 
-def create_index(host,port,index_name,version):
+def create_index(host,port,index_name,num_shards,version):
     data="""
-          {"settings":{"index":{"number_of_shards":8,"number_of_replicas":0,"refresh_interval":"1000.ms"}}
+          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":0,"refresh_interval":"1000.ms"}}
             ,"mappings":{"""+"\""+version+"\""+"""
             :{"_all":{"enabled":false},
             "properties":{"chrom":{"type":"integer","index":"not_analyzed"},
@@ -39,6 +39,7 @@ def create_index(host,port,index_name,version):
             ,"siphy_29way_pi":{"type":"string","index":"no"}
             ,"UMD":{"type":"string","index":"not_analyzed"}
             ,"clinvar_clnsig":{"type":"string","index":"no"}
+            ,"clinvar_clnsigconf":{"type":"string","index":"no"}
             ,"clinvar_id":{"type":"integer","index":"no"}
             ,"rs":{"type":"string","index":"not_analyzed"}
             }},
@@ -46,10 +47,15 @@ def create_index(host,port,index_name,version):
             "properties":{"gp1_afr_af":{"type":"float","index":"no"}
             ,"gp1_asn_af":{"type":"float","index":"no"}
             ,"gp1_eur_af":{"type":"float","index":"no"}
+            ,"gp1_afr_af":{"type":"float","index":"no"}
             ,"gp1_af":{"type":"float","null_value":0.0}
-            ,"esp6500_aa":{"type":"float","null_value":0.0}
-            ,"esp6500_ea":{"type":"float","null_value":0.0}
             ,"exac":{"type":"float","null_value":0.0}
+            ,"gnomad_af":{"type":"float"}
+            ,"gnomad_ac":{"type":"integer","index":"no"}
+            ,"gnomad_an":{"type":"integer","index":"no"}
+            ,"gnomad_af_popmax":{"type":"float"}
+            ,"gnomad_ac_popmax":{"type":"integer","index":"no"}
+            ,"gnomad_an_popmax":{"type":"integer","index":"no"}
             ,"gmaf":{"type":"float","index":"no"}
             ,"rd_freq":{"type":"float","index":"no"}}}
             ,"samples":{"type":"nested",
@@ -62,12 +68,14 @@ def create_index(host,port,index_name,version):
             ,"multi":{"type":"string","index":"no"},
             "diploid":{"type":"string","index":"no"}}}
             ,"clinvar_filter":{"type":"nested",
-            "properties": {"clnsig":{"type":"string","index":"not_analyzed"}}}}}}}
+            "properties": {"clnsig":{"type":"string","index":"not_analyzed"}}}
+            ,"gnomad_filter": {"type": "string", "index": "not_analyzed"}}}}}
           """
     url="http://"+host+":"+port+"/"+index_name
+    print(url)
     header={"Content-Type": "application/json"}
     response = urllib2.urlopen(url, data)
-    #print("response code"+ response.content)
+    print("response code"+ str(response.info()))
     
 def delete_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name
