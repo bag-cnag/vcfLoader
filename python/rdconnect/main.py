@@ -3,6 +3,8 @@
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
 from rdconnect import config, loadVCF , annotations , index , transform
+from pyspark.sql.functions import lit, concat, col
+from pyspark.sql.types import StringType
 from pyspark.sql.functions import lit
 import sys, getopt
 import hail
@@ -14,14 +16,15 @@ APP_NAME = "My Spark Application"
 
 # Usage function
 def usage():
-    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step>")
+    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-n | --nchroms) <number_chromosomes_uploaded>")
 
 # Command line arguments parser. It extracts the chromosome and the pipeline step to run
 def optionParser(argv):
     chrom = ""
     step = ""
+    nchroms = ""
     try:
-        opts, args = getopt.getopt(argv,"c:s:",["chrom=","step="])
+        opts, args = getopt.getopt(argv,"c:s:n:",["chrom=","step=","nchroms="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -30,14 +33,16 @@ def optionParser(argv):
             chrom = arg
         elif opt in ("-s", "--step"):
             step = arg
-    return chrom, step
+        elif opt in ("-n", "--nchroms"):
+            nchroms = arg
+    return chrom, nchroms, step
 
 # Main functionality. It runs the pipeline steps
 def main(argv,hc,sqlContext):
     call(["ls", "-l"])
 
     # Command line options parsing
-    chrom, step = optionParser(argv)
+    chrom, nchroms, step = optionParser(argv)
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)
@@ -135,6 +140,9 @@ def main(argv,hc,sqlContext):
 
     if ("toElastic" in step):
         print ("step to elastic")
+        es_conf = {
+            "es.mapping.id": "id"
+        }
         variants = sqlContext.read.load(destination+"/variants/chrom="+chrom).select("`va.freqInt`","`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.gnomad_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.samples`","`va.effs`")
         variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
                            .withColumnRenamed("va.populations","populations") \
@@ -148,8 +156,20 @@ def main(argv,hc,sqlContext):
                            .withColumnRenamed("va.clinvar_filter","clinvar_filter") \
                            .withColumnRenamed("va.gnomad_filter","gnomad_filter") \
                            .withColumn("chrom",lit(chrom))
+        id_column = concat(col("chrom").cast(StringType()), lit("-"), col("pos").cast(StringType()), lit("-"), col("ref"), lit("-"), col("alt"))
+        variantsRN = variantsRN.withColumn("id",id_column) 
         variantsRN.printSchema()
-        variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
+        variantsRN.write.format("org.elasticsearch.spark.sql").options(**es_conf).option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
+
+    if("count" in step):
+        if (nchroms == ""):
+            usage()
+            sys.exit(2)
+        count = 0
+        for chrom in range(1,int(nchroms) + 1):
+            variants = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
+            count += variants.count()
+        print("\nTotal number of variants: " + str(count) + "\n")
 
 if __name__ == "__main__":
     # Configure OPTIONS
