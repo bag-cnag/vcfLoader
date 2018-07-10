@@ -14,14 +14,15 @@ APP_NAME = "My Spark Application"
 
 # Usage function
 def usage():
-    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step>")
+    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-n | --nchroms) <number_chromosomes_uploaded>")
 
 # Command line arguments parser. It extracts the chromosome and the pipeline step to run
 def optionParser(argv):
     chrom = ""
     step = ""
+    nchroms = ""
     try:
-        opts, args = getopt.getopt(argv,"c:s:",["chrom=","step="])
+        opts, args = getopt.getopt(argv,"c:s:n:",["chrom=","step=","nchroms="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -30,14 +31,16 @@ def optionParser(argv):
             chrom = arg
         elif opt in ("-s", "--step"):
             step = arg
-    return chrom, step
+        elif opt in ("-n", "--nchroms"):
+            nchroms = arg
+    return chrom, nchroms, step
 
 # Main functionality. It runs the pipeline steps
 def main(argv,hc,sqlContext):
     call(["ls", "-l"])
 
     # Command line options parsing
-    chrom, step = optionParser(argv)
+    chrom, nchroms, step = optionParser(argv)
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)
@@ -150,6 +153,16 @@ def main(argv,hc,sqlContext):
                            .withColumn("chrom",lit(chrom))
         variantsRN.printSchema()
         variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
+
+    if("count" in step):
+        if (nchroms == ""):
+            usage()
+            sys.exit(2)
+        count = 0
+        for chrom in range(1,int(nchroms) + 1):
+            variants = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
+            count += variants.count()
+        print("\nTotal number of variants: " + str(count) + "\n")
 
 if __name__ == "__main__":
     # Configure OPTIONS
