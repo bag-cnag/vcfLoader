@@ -11,8 +11,7 @@ def importVCF(hc, sourcePath, destinationPath, nPartitions):
         print ("reading vcf from "+ sourcePath)
         vcf = hc.import_vcf(str(sourcePath),force_bgz=True).split_multi()
         print ("writing vds to" + destinationPath)
-        vcf.repartition(nPartitions) \
-           .annotate_variants_expr(expr.annotationsVariants()) \
+        vcf.annotate_variants_expr(expr.annotationsVariants()) \
            .annotate_variants_expr(expr.annotationsFreqInt()) \
            .write(destinationPath,overwrite=True)
         return True
@@ -37,7 +36,7 @@ def importDbNSFPTable(hc, sourcePath, destinationPath, nPartitions):
         '1000Gp1_ASN_AF':'Gp1_ASN_AF1000',
         '1000Gp1_AFR_AF':'Gp1_AFR_AF1000',
         'ESP6500_EA_AF ':'ESP6500_EA_AF',
-        'GERP++_RS':'GERP_RS'}).repartition(nPartitions).write(destinationPath,overwrite=True) 
+        'GERP++_RS':'GERP_RS'}).write(destinationPath,overwrite=True) 
     
 def importDBVcf(hc, sourcePath, destinationPath, nPartitions):
     """ Imports annotations vcfs
@@ -47,7 +46,7 @@ def importDBVcf(hc, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions
     """
     print("Annotation vcf source path is " + sourcePath)
-    hc.import_vcf(sourcePath).repartition(nPartitions).write(destinationPath,overwrite=True)
+    hc.import_vcf(sourcePath).write(destinationPath,overwrite=True)
 
 def annotateVCF(hc,variants,annotationPath,destinationPath,annotations):
     """ Adds annotations to variants based on an input vds
@@ -97,8 +96,7 @@ def annotateVEP(hc, variants, destinationPath, vepPath, nPartitions):
     print("running vep")
     varAnnotated = variants.vep(vepPath)
     print("destination is "+destinationPath)
-    varAnnotated.repartition(nPartitions) \
-                .split_multi() \
+    varAnnotated.split_multi() \
                 .annotate_variants_expr(expr.annotationsVEP()) \
                 .write(destinationPath,overwrite=True)
 
