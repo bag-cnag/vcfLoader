@@ -3,7 +3,8 @@
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
 from rdconnect import config, annotations, index, transform, utils
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import lit, concat, col
+from pyspark.sql.types import StringType
 from subprocess import call
 import sys, getopt
 import hail
@@ -126,14 +127,22 @@ def main(argv,hc,sqlContext):
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):
         print ("step to elastic")
+        update_params = "new_samples: samples"
+        update_script = "ctx._source.samples += new_samples"
         es_conf = {
             "es.net.http.auth.user": configuration["elasticsearch"]["user"],
             "es.net.http.auth.pass": configuration["elasticsearch"]["pwd"],
-            "es.port": configuration["elasticsearch"]["port"]
+            "es.port": configuration["elasticsearch"]["port"],
+            "es.mapping.id": "id",
+            "es.write.operation": "upsert",
+            "es.update.script.params": update_params,
+            "es.update.script.inline": update_script
         }
         # Getting annotated variants and adding the chromosome column
         variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
                                   .withColumn("chrom",lit(chrom))
+        id_column = concat(col("chrom").cast(StringType()), lit("-"), col("pos").cast(StringType()), lit("-"), col("ref"), lit("-"), col("alt"))
+        variants = variants.withColumn("id",id_column) 
         variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
 
