@@ -1,7 +1,7 @@
 ## Imports
 
 from pyspark import SparkConf, SparkContext
-from pyspark.sql import SQLContext
+from pyspark.sql import SQLContext, SparkSession
 from rdconnect import config, loadVCF , annotations , index , transform
 from pyspark.sql.functions import lit
 import sys, getopt
@@ -36,7 +36,7 @@ def optionParser(argv):
     return chrom, nchroms, step
 
 # Main functionality. It runs the pipeline steps
-def main(argv,hc,sqlContext):
+def main(argv,hc,sqlContext,configuration):
     call(["ls", "-l"])
 
     # Command line options parsing
@@ -45,7 +45,6 @@ def main(argv,hc,sqlContext):
         usage()
         sys.exit(2)
         
-    configuration = config.readConfig("config.json")
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
     fileName = "variantsRaw"+chrom+".vds"
@@ -66,7 +65,7 @@ def main(argv,hc,sqlContext):
         print ("step loadVCF")
         loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
 
-    if ("annotationVEP" in step):
+    if ("annotateVEP" in step):
         print ("step annotate VEP")
         print ("source file is "+destination+"/loaded/"+fileName)
         annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
@@ -165,10 +164,12 @@ def main(argv,hc,sqlContext):
         print("\nTotal number of variants: " + str(count) + "\n")
 
 if __name__ == "__main__":
-    # Configure OPTIONS
-    conf = SparkConf().setAppName(APP_NAME)
-    #in cluster this will be like
-    hc = hail.HailContext()
+    spark_conf = SparkConf().setAppName(APP_NAME)
+    main_conf = config.readConfig("config.json")
+    spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])
+    hc = hail.HailContext(spark.sparkContext)
     sqlContext = SQLContext(hc.sc)
     # Execute Main functionality
-    main(sys.argv[1:],hc,sqlContext)
+    main(sys.argv[1:],hc,sqlContext,main_conf)
