@@ -10,7 +10,10 @@ def annotationsVEP(hc,source, destinationPath, vepPath,number_partitions):
 def importDBTable(hc,sourcePath,destinationPath,number_partitions):
     print("source Path is "+sourcePath)
     dbnsfpTable = hc.import_table(sourcePath).annotate('variant= Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)').key_by('variant')
-    dbnsfpTable.rename({'1000Gp1_AF':'Gp1_AF1000','1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','GERP++_RS':'GERP_RS'}).select(['Gp1_AF1000','Gp1_EUR_AF1000','Gp1_ASN_AF1000','Gp1_AFR_AF1000','GERP_RS','MutationTaster_score','MutationTaster_pred','phyloP46way_placental','Polyphen2_HDIV_pred','Polyphen2_HVAR_score','SIFT_pred','SIFT_score']).repartition(number_partitions).write(destinationPath,overwrite=True) 
+    dbnsfpTable.rename({'1000Gp1_AF':'Gp1_AF1000','1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','GERP++_RS':'GERP_RS'}) \
+               .select(['variant','Gp1_AF1000','Gp1_EUR_AF1000','Gp1_ASN_AF1000','Gp1_AFR_AF1000','GERP_RS','MutationTaster_score','MutationTaster_pred','phyloP46way_placental','Polyphen2_HDIV_pred','Polyphen2_HVAR_score','SIFT_pred','SIFT_score']) \
+               .repartition(number_partitions) \
+               .write(destinationPath,overwrite=True) 
 
 def annotatedbnsfp(hc,variants, dbsfp_path,destinationPath):
     dbnsfp = hc.read_table(dbsfp_path)
