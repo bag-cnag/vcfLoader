@@ -164,7 +164,7 @@ def main(argv,hc,sqlContext,configuration):
         print("\nTotal number of variants: " + str(count) + "\n")
 
 if __name__ == "__main__":
-    spark_conf = SparkConf().setAppName(APP_NAME)
+    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',main_conf["executor_cores"])
     main_conf = config.readConfig("config.json")
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
     spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
