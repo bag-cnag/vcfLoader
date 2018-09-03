@@ -21,8 +21,9 @@ def optionParser(argv):
     chrom = ""
     step = ""
     nchroms = ""
+    cores = "4"
     try:
-        opts, args = getopt.getopt(argv,"c:s:n:",["chrom=","step=","nchroms="])
+        opts, args = getopt.getopt(argv,"c:s:n:co:",["chrom=","step=","nchroms=","cores="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -33,14 +34,14 @@ def optionParser(argv):
             step = arg
         elif opt in ("-n", "--nchroms"):
             nchroms = arg
-    return chrom, nchroms, step
+        elif opt in ("-co", "--cores"):
+            cores = arg
+    return chrom, nchroms, step, cores
 
 # Main functionality. It runs the pipeline steps
-def main(argv,hc,sqlContext,configuration):
+def main(hc, sqlContext, configuration, chrom, nchroms, step):
     call(["ls", "-l"])
 
-    # Command line options parsing
-    chrom, nchroms, step = optionParser(argv)
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)
@@ -164,12 +165,14 @@ def main(argv,hc,sqlContext,configuration):
         print("\nTotal number of variants: " + str(count) + "\n")
 
 if __name__ == "__main__":
+    # Command line options parsing
+    chrom, nchroms, step, cores = optionParser(sys.argv[1:])
     main_conf = config.readConfig("config.json")
-    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',main_conf["executor_cores"])
+    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
     spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
     spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])
     hc = hail.HailContext(spark.sparkContext)
     sqlContext = SQLContext(hc.sc)
     # Execute Main functionality
-    main(sys.argv[1:],hc,sqlContext,main_conf)
+    main(hc,sqlContext,main_conf,chrom,nchroms,step)
