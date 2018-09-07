@@ -10,7 +10,7 @@ def transform(dataset,destination,chrom):
         'va.ref= v.ref',
         'va.alt =  v.altAlleles.map(x=> x.alt)[0]',
         'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.alt)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.alt)[0].length !=1))  true else false'
-    ]).annotate_variants_expr('va.freqInt = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
+    ]).annotate_variants_expr('va.freqInt = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 7).map(x=> 2).sum()'
                               ).annotate_variants_expr([
                                   'va.effs = orElse(va.transcripts,va.intergenetics)',
                                               '''va.populations = [{

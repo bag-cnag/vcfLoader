@@ -1,7 +1,7 @@
 ## Imports
 
 from pyspark import SparkConf, SparkContext
-from pyspark.sql import SQLContext
+from pyspark.sql import SQLContext, SparkSession
 from rdconnect import config, loadVCF , annotations , index , transform
 from pyspark.sql.functions import lit
 import sys, getopt
@@ -21,8 +21,9 @@ def optionParser(argv):
     chrom = ""
     step = ""
     nchroms = ""
+    cores = "4"
     try:
-        opts, args = getopt.getopt(argv,"c:s:n:",["chrom=","step=","nchroms="])
+        opts, args = getopt.getopt(argv,"c:s:n:co:",["chrom=","step=","nchroms=","cores="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -33,19 +34,18 @@ def optionParser(argv):
             step = arg
         elif opt in ("-n", "--nchroms"):
             nchroms = arg
-    return chrom, nchroms, step
+        elif opt in ("-co", "--cores"):
+            cores = arg
+    return chrom, nchroms, step, cores
 
 # Main functionality. It runs the pipeline steps
-def main(argv,hc,sqlContext):
+def main(hc, sqlContext, configuration, chrom, nchroms, step):
     call(["ls", "-l"])
 
-    # Command line options parsing
-    chrom, nchroms, step = optionParser(argv)
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)
         
-    configuration = config.readConfig("config.json")
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
     fileName = "variantsRaw"+chrom+".vds"
@@ -66,7 +66,7 @@ def main(argv,hc,sqlContext):
         print ("step loadVCF")
         loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
 
-    if ("annotationVEP" in step):
+    if ("annotateVEP" in step):
         print ("step annotate VEP")
         print ("source file is "+destination+"/loaded/"+fileName)
         annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
@@ -165,10 +165,14 @@ def main(argv,hc,sqlContext):
         print("\nTotal number of variants: " + str(count) + "\n")
 
 if __name__ == "__main__":
-    # Configure OPTIONS
-    conf = SparkConf().setAppName(APP_NAME)
-    #in cluster this will be like
-    hc = hail.HailContext()
+    # Command line options parsing
+    chrom, nchroms, step, cores = optionParser(sys.argv[1:])
+    main_conf = config.readConfig("config.json")
+    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
+    spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])
+    hc = hail.HailContext(spark.sparkContext)
     sqlContext = SQLContext(hc.sc)
     # Execute Main functionality
-    main(sys.argv[1:],hc,sqlContext)
+    main(hc,sqlContext,main_conf,chrom,nchroms,step)
