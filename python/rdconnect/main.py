@@ -50,6 +50,7 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
     fileName = "variantsRaw" + chrom + ".vds"
     number_partitions = configuration["number_of_partitions"]
+    annotations_path = configuration["annotations_path"]
 
     print("sourcefilename is "+sourceFileName)
 
@@ -60,7 +61,7 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
         
     if ("loadVCF" in step):
         print ("step loadVCF")
-        annotations.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
+        rdconnect.annotations.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
 
     if ("loaddbNSFP" in step):
         print ("step loaddbNSFP")
@@ -81,47 +82,67 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
     if ("loadExAC" in step):
         print ("step load ExAC")
         annotations.importDBVcf(hc,utils.buildFileName(configuration["ExAC_Raw"],chrom),utils.buildFileName(configuration["ExAC_path"],chrom),number_partitions)
-
-    if ("annotateVEP" in step):
-        print ("step annotate VEP")
-        print ("source file is "+destination+"/loaded/"+fileName)
-        variants = hc.read(destination+"/loaded/"+fileName)
-        annotations.annotateVEP(hc,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
             
     if ("annotatedbNSFP" in step):
         print("step annotate dbNSFP")
-        variants = hc.read(destination+"/annotatedVEP/"+fileName)
-        annotations.annotateDbNSFP(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
+        annotations_all = hc.read(annotations_path)
+        annotations_dbnsfp_table = hc.read_table(utils.buildFileName(configuration["dnNSFP_path"],chrom))
+        annotations_dbnsfp = hail.VariantDataset.from_table(annotations_dbnsfp_table).split_multi()
+        variants = annotations.union(hc,annotations_all,annotations_dbnsfp)
+        variants = variants.annotate_variants_vds(annotations_all,"va = vds")
+        annotations_path = destination+"/annotateddbNSFP/"+fileName
+        annotations.annotateDbNSFP(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),annotations_path)
 
     if ("annotatecadd" in step):
         print("step annotate dbcadd")
-        variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
-        annotations.annotateCADD(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+        cadd_path = utils.buildFileName(configuration["cadd_path"],chrom)
+        variants = annotations.merge_annotations(hc,annotations_path,cadd_path)
+        annotations_path = destination+"/annotatedCadd/"+fileName
+        annotations.annotateCADD(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),annotations_path)
 
     if ("annotateclinvar" in step):
         print("step annotate clinvar")
-        variants = hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        annotations.annotateClinvar(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+        clinvar_path = utils.buildFileName(configuration["clinvar_path"],"")
+        variants = annotations.merge_annotations(hc,annotations_path,clinvar_path)
+        annotations_path = destination+"/annotatedClinvar/"+fileName
+        annotations.annotateClinvar(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),annotations_path)
 
     if ("annotateExomesGnomad" in step):
         print("step annotate exomes gnomad")
-        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        annotations.annotateGnomADEx(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+        gnomad_ex_path = utils.buildFileName(configuration["exomesGnomad_path"],chrom)
+        variants = annotations.merge_annotations(hc,annotations_path,gnomad_ex_path)
+        annotations_path = destination+"/annotatedExGnomAD/"+fileName
+        annotations.annotateGnomADEx(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),annotations_path)
 
     if ("annotatedbSNP" in step):
         print("step annotate dbSNP")
-        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        annotations.annotateDbSNP(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
+        dbsnp_path = utils.buildFileName(configuration["dbSNP_path"],chrom)
+        variants = annotations.merge_annotations(hc,annotations_path,dbsnp_path)
+        annotations_path = destination+"/annotateddbSNP/"+fileName
+        annotations.annotateDbSNP(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),annotations_path)
         
     if ("annotateExAC" in step):
         print("step annotate ExAC")
-        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
-        annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
+        exac_path = utils.buildFileName(configuration["ExAC_path"],chrom)
+        variants = annotations.merge_annotations(hc,annotations_path,exac_path)
+        annotations_path = destination+"/annotatedExAC/"+fileName
+        annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),annotations_path)
+
+    if ("annotateVEP" in step):
+        print ("step annotate VEP")
+        variants = hc.read(annotations_path)
+        annotations.annotateVEP(hc,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
+
+    if ("annotateVariants" in step):
+        print ("step annotate variants")
+        variants = hc.read(destination+"/loaded/"+fileName)
+        annotations = hc.read(destination+"/annotatedVEP/"+fileName)
+        variants.annotate_variants_vds(annotations,expr="va=vds").write(destination+"/annotatedVariants/"+fileName)
 
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
-        annotated = hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
+        annotated = hc.read(destination+"/annotatedVariants/"+fileName)
         transform.transform(annotated,destination,chrom)
 
     # Uploading step. It uploads all annotated variants to ElasticSearch

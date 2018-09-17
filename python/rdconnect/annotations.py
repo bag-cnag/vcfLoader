@@ -160,3 +160,15 @@ def annotateExAC(hc, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     annotateVCFMulti(hc,variants,annotationPath,destinationPath,expr.annotationsExACMulti(),[])
+
+def union(hc,original,other):
+    original_variants = original.annotate_variants_expr('va = {}')
+    other_variants = other.annotate_variants_expr('va = {}') 
+    variants = original_variants.union(other_variants).deduplicate()
+    return variants
+
+def merge_annotations(hc, annotations_path, new_annotations_path):
+    annotations_all = hc.read(annotations_path)
+    annotations_new = hc.read(new_annotations_path).split_multi()
+    variants = union(hc,annotations_all,annotations_new)
+    return variants.annotate_variants_vds(annotations_all,"va = vds")
