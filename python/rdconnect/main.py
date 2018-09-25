@@ -56,7 +56,11 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
     # Pipeline steps
     if ("createIndex" in step):
         print ("step to create index")
-        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+        index.create_index_variants(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+
+    if ("createIndexCNV" in step):
+        print ("step to create index")
+        index.create_index_cnv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
     if ("loadVCF" in step):
         print ("step loadVCF")
