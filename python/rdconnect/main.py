@@ -48,23 +48,31 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
     configuration = config.readConfig("config.json")
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
+    sourceFileNameCNV = configuration["source_path_cnv"]
     fileName = "variantsRaw" + chrom + ".vds"
     number_partitions = configuration["number_of_partitions"]
-
+    context = "variants"
+    
     print("sourcefilename is "+sourceFileName)
 
     # Pipeline steps
+
+    if ("CNVIndex" in step):
+        print ("step to create index CNV")
+        index.create_index_cnv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+        
     if ("createIndex" in step):
         print ("step to create index")
         index.create_index_variants(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
-
-    if ("createIndexCNV" in step):
-        print ("step to create index")
-        index.create_index_cnv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
     if ("loadVCF" in step):
         print ("step loadVCF")
         annotations.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
+        
+    if ("loadCNV" in step):
+        print ("step loadCNV")
+        annotations.importCNV(hc,sourceFileNameCNV,destination+"/cnv/chrom="+chrom,number_partitions)
+        context = "cnv"
 
     if ("loaddbNSFP" in step):
         print ("step loaddbNSFP")
@@ -137,7 +145,9 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
             "es.port": configuration["elasticsearch"]["port"]
         }
         # Getting annotated variants and adding the chromosome column
-        variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
+        #variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
+        #                          .withColumn("chrom",lit(chrom))
+        variants = sqlContext.read.load(destination + "/" + context + "/chrom="+chrom)\
                                   .withColumn("chrom",lit(chrom))
         variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')

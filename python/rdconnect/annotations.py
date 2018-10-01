@@ -18,6 +18,27 @@ def importVCF(hc, sourcePath, destinationPath, nPartitions):
     except ValueError:
         print (ValueError)
         return "Error in importing vcf"
+
+def importCNV(hc, sourcePath, destinationPath, nPartitions):
+    try:
+        print ("reading CNV table from "+ sourcePath)
+        table = hc.import_table(str(sourcePath),min_partitions=nPartitions)
+        print ("writing table to" + destinationPath)
+        table.annotate("genes = genes.split(';')") \
+             .to_dataframe() \
+             .rdd \
+             .map(lambda row: ((row[1],row[2],row[3],row[4]),([row[0]],row[5],row[6],row[7]))) \
+             .reduceByKey(lambda x,y: (x[0] + y[0],x[1],x[2],x[3])) \
+             .map(lambda row: row[0] + row[1]) \
+             .toDF(["chrom","start","end","state","samples","genes","count","tool"]) \
+             .select(["chrom","start","end","state","samples","genes","count","tool"]) \
+             .write \
+             .mode('overwrite') \
+             .save(destinationPath)
+        return True
+    except ValueError:
+        print (ValueError)
+        return "Error in importing vcf"
     
 def importDbNSFPTable(hc, sourcePath, destinationPath, nPartitions):
     """ Imports the dbNSFP annotation table
