@@ -145,8 +145,6 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
             "es.port": configuration["elasticsearch"]["port"]
         }
         # Getting annotated variants and adding the chromosome column
-        #variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
-        #                          .withColumn("chrom",lit(chrom))
         variants = sqlContext.read.load(destination + "/" + context + "/chrom="+chrom)\
                                   .withColumn("chrom",lit(chrom))
         variants.printSchema()

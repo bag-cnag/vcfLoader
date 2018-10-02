@@ -92,6 +92,6 @@ def create_index_cnv(host,port,index_name,version,num_shards,user,pwd):
                 ,"count":{"type":"integer","index":"true"}  
                 ,"tool":{"type":"keyword","index":"true"}  
                 ,"genes":{"type":"keyword","index":"true"}
-                ,"samples":{"type": "keyword"}}}}}
+                ,"sample":{"type": "keyword"}}}}}
     """
     create_index(host,port,index_name,version,num_shards,data,user,pwd)

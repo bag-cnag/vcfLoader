@@ -24,14 +24,15 @@ def importCNV(hc, sourcePath, destinationPath, nPartitions):
         print ("reading CNV table from "+ sourcePath)
         table = hc.import_table(str(sourcePath),min_partitions=nPartitions)
         print ("writing table to" + destinationPath)
+#             .rdd \
+#             .map(lambda row: ((row[1],row[2],row[3],row[4]),([row[0]],row[5],row[6],row[7]))) \
+#             .reduceByKey(lambda x,y: (x[0] + y[0],x[1],x[2],x[3])) \
+#             .map(lambda row: row[0] + row[1]) \
+#             .toDF(["chrom","start","end","state","samples","genes","count","tool"]) \
+#
         table.annotate("genes = genes.split(';')") \
              .to_dataframe() \
-             .rdd \
-             .map(lambda row: ((row[1],row[2],row[3],row[4]),([row[0]],row[5],row[6],row[7]))) \
-             .reduceByKey(lambda x,y: (x[0] + y[0],x[1],x[2],x[3])) \
-             .map(lambda row: row[0] + row[1]) \
-             .toDF(["chrom","start","end","state","samples","genes","count","tool"]) \
-             .select(["chrom","start","end","state","samples","genes","count","tool"]) \
+             .select(["chrom","start","end","state","sample","genes","count","tool"]) \
              .write \
              .mode('overwrite') \
              .save(destinationPath)
