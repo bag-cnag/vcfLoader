@@ -6,7 +6,7 @@ from rdconnect import config, annotations, index, transform, utils
 from pyspark.sql.functions import lit
 from subprocess import call
 import sys, getopt
-import hail
+import hail as hl
 
 APP_NAME = "vcfLoader"
 # Usage function
@@ -38,7 +38,7 @@ def optionParser(argv):
     return chrom, nchroms, step, cores
 
 # Main functionality. It runs the pipeline steps
-def main(hc, sqlContext, configuration, chrom, nchroms, step):
+def main(hl, sqlContext, configuration, chrom, nchroms, step):
     call(["ls", "-l"])
 
     if (chrom == "" or step == ""):
@@ -48,115 +48,32 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
     configuration = config.readConfig("config.json")
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
-    fileName = "variantsRaw" + chrom + ".vds"
+    fileName = "variantsRaw" + chrom + ".ht"
     number_partitions = configuration["number_of_partitions"]
 
     print("sourcefilename is "+sourceFileName)
 
-    # Pipeline steps
-    if ("createIndex" in step):
-        print ("step to create index")
-        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
-        
-    if ("loadVCF" in step):
-        print ("step loadVCF")
-        annotations.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
+    if ("loadSomatic" in step):
+        print ("step loadSomatics")
+        # Read somatic vcf file
+        somatic_paths = config.readFilesList(configuration["somatic_paths"])
+        loaded_path = destination+"/loadedSomatic/"+fileName
+        # Import and merge somatic files
+        annotations.importSomatic(hl,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
 
     if ("loaddbNSFP" in step):
         print ("step loaddbNSFP")
-        annotations.importDbNSFPTable(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom),number_partitions)
-
-    if ("loadcadd" in step):
-        print ("step loadCADD")
-        annotations.importDBVcf(hc,utils.buildFileName(configuration["cadd_Raw"],chrom),utils.buildFileName(configuration["cadd_path"],chrom),number_partitions)
-
-    if ("loadclinvar" in step):
-        print ("step loadclinvar")
-        annotations.importDBVcf(hc,utils.buildFileName(configuration["clinvar_Raw"],""),utils.buildFileName(configuration["clinvar_path"],""),number_partitions)
-
-    if ("loadExomesGnomad" in step):
-        print ("step load exomes gnomad")
-        annotations.importDBVcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],chrom),utils.buildFileName(configuration["exomesGnomad_path"],chrom),number_partitions)
-
-    if ("loadExAC" in step):
-        print ("step load ExAC")
-        annotations.importDBVcf(hc,utils.buildFileName(configuration["ExAC_Raw"],chrom),utils.buildFileName(configuration["ExAC_path"],chrom),number_partitions)
-
-    if ("annotateVEP" in step):
-        print ("step annotate VEP")
-        print ("source file is "+destination+"/loaded/"+fileName)
-        variants = hc.read(destination+"/loaded/"+fileName)
-        annotations.annotateVEP(hc,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
-            
-    if ("annotatedbNSFP" in step):
-        print("step annotate dbNSFP")
-        variants = hc.read(destination+"/annotatedVEP/"+fileName)
-        annotations.annotateDbNSFP(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
-
-    if ("annotatecadd" in step):
-        print("step annotate dbcadd")
-        variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
-        annotations.annotateCADD(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-
-    if ("annotateclinvar" in step):
-        print("step annotate clinvar")
-        variants = hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        annotations.annotateClinvar(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-
-    if ("annotateExomesGnomad" in step):
-        print("step annotate exomes gnomad")
-        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        annotations.annotateGnomADEx(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-
-    if ("annotatedbSNP" in step):
-        print("step annotate dbSNP")
-        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        annotations.annotateDbSNP(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
+        annotations.importDbNSFPTable(hl,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom),number_partitions)
         
-    if ("annotateExAC" in step):
-        print("step annotate ExAC")
-        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
-        annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
+    if ("annotateVEP" in step):
+        print("Step annotate VEP")
+        variants = hl.read_table(destination+"/loadedSomatic/"+fileName)
+        annotations.annotateVEP(hl,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
 
-    # Transforming step. It sets all fields to the corresponding ElasticSearch format
-    if ("transform" in step):
-        print ("step transform")
-        annotated = hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
-        transform.transform(annotated,destination,chrom)
-
-    # Uploading step. It uploads all annotated variants to ElasticSearch
-    if ("toElastic" in step):
-        print ("step to elastic")
-        es_conf = {
-            "es.net.http.auth.user": configuration["elasticsearch"]["user"],
-            "es.net.http.auth.pass": configuration["elasticsearch"]["pwd"],
-            "es.port": configuration["elasticsearch"]["port"]
-        }
-        # Getting annotated variants and adding the chromosome column
-        variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
-                                  .withColumn("chrom",lit(chrom))
-        variants.printSchema()
-        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
-
-    # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
-    # have been uploaded to ElasticSearch
-    if ("count" in step):
-        if (nchroms == ""):
-            usage()
-            sys.exit(2)
-        count = 0
-        for chrom in range(1,int(nchroms) + 1):
-            variants = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
-            count += variants.count()
-        print("\nTotal number of variants: " + str(count) + "\n")
-
-    if ("compare" in step):
-        if (previous == ""):
-            usage()
-            sys.exit(2)
-        previous = sqlContext.read.load(previous+"/variants/chrom=" + str(chrom))
-        current = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
-        diff = current.subtract(previous)
+    if ("annotatedbNSFP" in step):
+        print("Step annotate dbNSFP")
+        variants = hc.read(destination+"/annotatedVEP/"+fileName)
+        annotations.annotateDbNSFP(hl,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
 if __name__ == "__main__":
     # Command line options parsing
@@ -166,7 +83,7 @@ if __name__ == "__main__":
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
     spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
     spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])
-    hc = hail.HailContext(spark.sparkContext)
-    sqlContext = SQLContext(hc.sc)
+    hl.init(spark.sparkContext)
+    sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main(hc,sqlContext,main_conf,chrom,nchroms,step)
+    main(hl,sqlContext,main_conf,chrom,nchroms,step)

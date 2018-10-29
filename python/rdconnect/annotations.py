@@ -18,8 +18,34 @@ def importVCF(hc, sourcePath, destinationPath, nPartitions):
     except ValueError:
         print (ValueError)
         return "Error in importing vcf"
+
+def importSomatic(hl, file_paths, destination_path, num_partitions):
+    nFiles = len(file_paths)
+    if(nFiles > 0) :
+        try:
+            merged = hl.split_multi(hl.import_vcf(file_paths[0],force_bgz=True,min_partitions=num_partitions))
+            merged = annotateSomatic(hl,merged)
+            for file_path in file_paths[1:]:
+                print("File path -> " + file_path)
+                dataset = hl.split_multi(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
+                dataset = annotateSomatic(hl,dataset)
+                merged = mergeSomatic(merged,dataset)
+            merged.write(destination_path,overwrite=True)
+        except ValueError:
+            print("Error in loading vcf")
+    else:
+        print("Empty file list")
+
+def mergeSomatic(dataset, other):
+    tdataset = dataset.rows()
+    tdataset.show()
+    tother = other.rows()
+    tother.show()
+    joined = tdataset.join(tother,"outer")
+    return joined.transmute(samples=joined.samples.union(joined.samples_1))
     
-def importDbNSFPTable(hc, sourcePath, destinationPath, nPartitions):
+    
+def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
     """ Imports the dbNSFP annotation table
           :param HailContext hc: The Hail context
           :param String sourcePath: Annotation table path
@@ -27,7 +53,9 @@ def importDbNSFPTable(hc, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions
     """
     print("Annotation dbNSFP table path is " + sourcePath)
-    table = hc.import_table(sourcePath,min_partitions=nPartitions).annotate('variant = Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)').key_by('variant')
+    #Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)
+    table = hl.import_table(sourcePath,min_partitions=nPartitions)
+    table = table.annotate(variant = hl.struct(chrom=table["#chr"],pos=table["pos(1-coor)"],ref=table["ref"],alt=table["alt"])).key_by('variant')
     # Fields renaming. Columns starting with numbers can't be selected
     table.rename({
         '1000Gp1_AF':'Gp1_AF1000',
@@ -100,7 +128,7 @@ def annotateVCFMulti(hc, variants, annotationPath, destinationPath, annotationsM
         annotationsExpr += "," + annotation
     variants.annotate_variants_vds(annotationsVds,expr=annotationsExpr).write(destinationPath,overwrite=True)
     
-def annotateVEP(hc, variants, destinationPath, vepPath, nPartitions):
+def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     """ Adds VEP annotations to variants.
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate 
@@ -108,12 +136,25 @@ def annotateVEP(hc, variants, destinationPath, vepPath, nPartitions):
          :param String vepPath: VEP configuration path
          :param Int nPartitions: Number of partitions 
     """
-    print("running vep")
-    varAnnotated = variants.vep(vepPath)
+    print("Running vep")
     print("destination is "+destinationPath)
-    varAnnotated.split_multi() \
-                .annotate_variants_expr(expr.annotationsVEP()) \
-                .write(destinationPath,overwrite=True)
+    varAnnotated = hl.vep(variants,vepPath)
+    #hl.split_multi(varAnnotated) \
+    varAnnotated = varAnnotated.annotate(effs=hl.map(lambda x: 
+                                                     hl.struct(
+                                                         gene_name=x.gene_symbol,
+                                                         effect_impact=x.impact,
+                                                         transcript_id=x.transcript_id,
+                                                         effect=hl.str(x.consequence_terms),
+                                                         gene_id=x.gene_id,
+                                                         functional_class='transcript',
+                                                         amino_acid_length='',
+                                                         codon_change='x.hgvsc.replace(".*:","")',
+                                                         amino_acid_change='x.hgvsp.replace(".*:","")',
+                                                         exon_rank='x.exon',
+                                                         transcript_biotype='x.biotype',
+                                                         gene_coding='str(x.cds_start)'),varAnnotated.vep.transcript_consequences)) \
+      .write(destinationPath,overwrite=True)
 
 def annotateDbNSFP(hc, variants, dbnsfpPath, destinationPath):
     """ Adds dbNSFP annotations to variants.
@@ -173,3 +214,8 @@ def annotateExAC(hc, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     annotateVCFMulti(hc,variants,annotationPath,destinationPath,expr.annotationsExACMulti(),[])
+
+def annotateSomatic(hl,dataset):
+    annotated = dataset.transmute_entries(sample=hl.set([hl.struct(sample=dataset.s,ad=dataset.AD,dp=dataset.DP,dpstd=dataset.DPstd,gt=dataset.GT,nprogs=dataset.info.NPROGS,progs=dataset.info.PROGS)])) \
+                       .drop('rsid','qual','filters','info','VAF','old_locus','old_alleles')
+    return annotated.annotate_rows(samples=hl.agg.collect_as_set(annotated.sample))
