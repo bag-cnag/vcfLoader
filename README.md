@@ -95,7 +95,7 @@ and adapt them to your computer paths.
 ```
 spark-submit --master local --conf='spark.sql.files.openCostInBytes=53687091200'
 --conf='spark.sql.files.maxPartitionBytes=53687091200' 
---jars /home/cluengo/hail/build/libs/hail-all-spark.jar 
+--jars <path_to_hail>/hail/build/libs/hail-all-spark.jar 
 --executor-memory 8G 
 --py-files python/dist/vcfLoader-0.1-py2.7.egg python/rdconnect/main.py 
 --chrom <chromosome> --step <pipeline_steps>
