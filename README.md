@@ -57,9 +57,9 @@ in your command line. The configuration parameters set are the ones needed by Ha
 import hail 
 ```
     
-to check whether the installation was done correctly.
+to check whether the installation was done correctly. If no errors are reported, Hail has been correctly installed.
 
-3. Install ElasticSearch 2.4.2. You can download the zipped distribution, unzip it and run 
+3. Install ElasticSearch 6.4.3 You can download the zipped distribution, unzip it and run 
     
 ```
 cd elasticsearch
@@ -80,17 +80,17 @@ cd ensembl-vep
 perl INSTALL.pl
 ```  
 
-When asked for the downloading of cache files, choose the id corresponding to *homo_sapiens hg37*.
+When asked for the download of cache files, choose the id corresponding to *homo_sapiens hg37*.
 
 5. Copy the configuration files *config.json* and *vep.properties* available in *Gitea*
 
-https://172.16.10.100/gitea/platform
+https://172.16.10.100/gitea/platform/spark_config/
 
 and adapt them to your computer paths. 
 
 6. The configuration file specifies the paths where the annotations can be found, and *ElasticSearch* index information. 
 
-7. In order to run the pipeline locally, download the necessary annotations and type the following command:
+7. In order to run the pipeline locally, download the necessary annotation tables and type the following command:
 
 ```
 spark-submit --master local --conf='spark.sql.files.openCostInBytes=53687091200'
@@ -104,7 +104,7 @@ spark-submit --master local --conf='spark.sql.files.openCostInBytes=53687091200'
 Where *chromosome* is the chromosome number (MT=23, X=24 and Y=25), and *pipeline_steps* the steps to run. The latter can be specified as a single comma-separated string with the names of the steps to run. The different options are:
 
 ```
-deleteIndex, createIndex, loadVCF, loaddbNSFP, loadcadd, loadclinvar, loadExomesGnomad, 
+createIndex, loadVCF, loaddbNSFP, loadcadd, loadclinvar, loadExomesGnomad, 
 loaddbSNP, loadExAC, annotationVEP, annotateExomesGnomad, annotatedbNSFP, annotatecadd, 
 annotateclinvar, annotatedbSNP, annotateExAC,groupByGenotype,transform,toElastic
 ```
