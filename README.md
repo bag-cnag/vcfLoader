@@ -7,7 +7,7 @@ The annotations used and their corresponding versions are:
 * VEP (v88)
 * dbNSP (2.9.3) 
 * CADD (1.3)
-* Clinvar (20180429)
+* Clinvar (20180930)
 * gnomAD exome (2.0.1)
 * dbSNP (build 150)
 * ExAC (0.3)
