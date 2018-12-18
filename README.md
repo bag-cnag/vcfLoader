@@ -105,7 +105,7 @@ Where *chromosome* is the chromosome number (MT=23, X=24 and Y=25), and *pipelin
 
 ```
 createIndex, loadVCF, loaddbNSFP, loadcadd, loadclinvar, loadExomesGnomad, 
-loaddbSNP, loadExAC, annotationVEP, annotateExomesGnomad, annotatedbNSFP, annotatecadd, 
+loaddbSNP, loadExAC, annotateVEP, annotateExomesGnomad, annotatedbNSFP, annotatecadd, 
 annotateclinvar, annotatedbSNP, annotateExAC,groupByGenotype,transform,toElastic
 ```
 
