@@ -48,7 +48,7 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
         usage()
         sys.exit(2)
         
-    destination =  configuration["destination"] + "/" + configuration["version"]
+    destination =  configuration["destination"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
     fileName = "variantsRaw" + chrom + ".vds"
     number_partitions = configuration["number_of_partitions"]
