@@ -73,5 +73,5 @@ def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
     """
     url = "http://" + host + ":" + port + "/" + index_name
     headers = {'Content-Type': 'application/json'}
-    response = requests.put(url,data=data,headers=headers,auth=(user,pwd))    es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
+    response = requests.put(url,data=data,headers=headers,auth=(user,pwd)) 
     print(response)
