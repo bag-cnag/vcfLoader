@@ -182,7 +182,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
             variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
                                       .withColumn("chrom",lit(chrom))
             variants.printSchema()
-        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["version"], mode='append')
+        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/6.0.3", mode='append')
         
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
