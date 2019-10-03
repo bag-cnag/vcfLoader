@@ -20,7 +20,7 @@ import steps.Parser.{ Variant,Sample,Populations,Predictions,FunctionalEffect, g
 
 class ParserData extends FlatSpec with Matchers {
 
-  val ID:Any="RS=rs10267;G5;dbSNPBuildID=52;GMAF=0.158;SAO=0;esp5400_all=0.787972;esp5400_ea=0.920513;esp5400_aa=0.539058;ExAC_AF=0.899;mt=1.0"
+  /*val ID:Any="RS=rs10267;G5;dbSNPBuildID=52;GMAF=0.158;SAO=0;esp5400_all=0.787972;esp5400_ea=0.920513;esp5400_aa=0.539058;ExAC_AF=0.899;mt=1.0"
   val ID2:Any="RS=rs10267;G5;dbSNPBuildID=52;GMAF=0.158;SAO=0;esp5400_all=0.787972;esp5400_ea=0.920513;esp5400_aa=0.539058;ExAC_AF=0.899;mt=1.0;ExAC_AF=0.899"
   val format:Any="GT:AD:DP:GQ:PL:SB"
   val sampleline:Any="0/1:298,219,0:517:99:5648,0,7236,6540,7892,14433:162,136,114,105"
@@ -43,9 +43,9 @@ class ParserData extends FlatSpec with Matchers {
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
   val sampleID:Any="NA12878"
   val anno=annotation_parser(ID.toString,gt)
-  val anno2=annotation_parser(ID.toString,"1/1")
+  val anno2=annotation_parser(ID.toString,"1/1")*/
 
-  "getter" should  "get the RS from a string" in {
+ /* "getter" should  "get the RS from a string" in {
     getter(ID.toString,"RS") should be (List("rs10267"))
 
   }
@@ -89,8 +89,38 @@ class ParserData extends FlatSpec with Matchers {
       altSplitted(0)._1 should be ("C")
       altSplitted(0)._2 should be ("0/1")
       altSplitted(0)._3 should be ("1")
+      altSplitted(0)._4 should be (false)
+
       //0/1,1
     }
+  "multilleli altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T", "0/2") //returns
+    altSplitted(0)._1 should be ("T")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("2")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
+
+  "multilleli 1/2 altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T", "1/2") //returns
+    altSplitted(0)._1 should be ("C")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("1")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
+  "multilleli 2/3 altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T,A", "2/3") //returns
+    altSplitted(0)._1 should be ("T")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("2")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
 
   "annotationParser" should "get populations and predictors" in {
 
@@ -112,6 +142,13 @@ class ParserData extends FlatSpec with Matchers {
     val anno=annotation_parser(ID.toString,"0/1")
     val anno2=annotation_parser(ID.toString,"1/1")
     anno(1)._1.mt should be (anno2(1)._1.mt)
+
+  }
+
+  "sample Parser diploid" should "multi give the same effects/predictions/populations for 0/1 and 1/1" in {
+
+    val with01=sampleParser( 1,"RS=rs2306737;G5;G5A;dbSNPBuildID=100;GMAF=0.494274;SAO=0", "A","G,C,<NON_REF>","DP=8;MLEAC=1,0;MLEAF=1.00,0.00;MQ=60.00;MQ0=0;EFF=INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|1),INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|2),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|1),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|2),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|1),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|2),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|1),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|2)", "GT:AD:DP:GQ:PL:SB",  "0/1:0,8,0:8:99:224,0,224:0,0,7,1","sampleID","24")
+    with01(0).populations.exac should be (0.899)
 
   }
 
@@ -151,5 +188,5 @@ class ParserData extends FlatSpec with Matchers {
 
     val gt = "0/1"
     getDiploid(gt)._2 should be(true)
-  }
+  }*/
 }

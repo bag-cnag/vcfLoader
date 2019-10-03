@@ -52,21 +52,28 @@ object gzToParquet {
            chromList : List[String],
            files:List[String],
            destination : String,
-           checkPointDir:String)= {
+           numPartitions:Int=4,
+            checkPointDIr:String = "/tmp")= {
 
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
-    sc.setCheckpointDir(checkPointDir)
+    sc.setCheckpointDir(checkPointDIr)
+
     for (chrom <- chromList) yield {
       var RDD1: org.apache.spark.rdd.RDD[steps.gzToParquet.rawTable] = null;
       for ((file, index) <- files.zipWithIndex) yield {
         println("index  is "+index)
         if (index == 0) {
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file)
+
+          RDD1 = file_to_parquet(sc, path + chrom + "/" + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file)
+          if (index == files.length - 1) RDD1.toDF.write.mode(SaveMode.Append).save(destination+"/chrom="+chromStrToInt(chrom))
+
         }
+
         else if (index == files.length - 1) {
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD1)
-          RDD1.toDF.write.mode(SaveMode.Append).save(destination+"/chrom="+chromStrToInt(chrom))
+          RDD1 = file_to_parquet(sc, path + chrom + "/" + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)
+          RDD1.toDS.write.mode(SaveMode.Append).save(destination+"/chrom="+chromStrToInt(chrom))
+
         }
 
         else
@@ -76,7 +83,8 @@ object gzToParquet {
             RDD1.checkpoint()
           }
 
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD1)}
+          RDD1 = file_to_parquet(sc, path + chrom + "/" + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)}
+
       }
       RDD1
     }
