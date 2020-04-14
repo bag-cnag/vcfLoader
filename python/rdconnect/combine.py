@@ -308,7 +308,6 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
 
             chunks = divide_batches_by_family( experiments_and_families_batch )
             first = True
-            dm = denseMatrix_path
             dense_by_family = []
             for idx2_chunk, fam in enumerate( chunks ):
                     lgr.debug( 'Processing family "{0}/{1}"'.format( idx2_chunk, idx2_chunk[0] ) )
