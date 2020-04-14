@@ -306,7 +306,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
 
 
 
-            chunks = divide_batches_by_family( experiments_and_families_batch, size = size )
+            chunks = divide_batches_by_family( experiments_and_families_batch )
             first = True
             dm = denseMatrix_path
             dense_by_family = []
@@ -452,7 +452,7 @@ def divideChunks( collection, size ):
     for ii in range( 0, len( collection ), size ):  
         yield collection[ ii:(ii + size) ] 
 
-def divide_batches_by_family( experiments, size = 1000 ):
+def divide_batches_by_family( experiments ):
     rst = []
     # ii = 0
     while len( experiments ) > 0:
