@@ -398,7 +398,7 @@ def divide_batches_by_family( experiments ):
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
             # print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
             cnt += len( exp_fam )
-            rst.append( (fam,exp_fam) )
+            rst.append( (fam,exp_fam[0]) )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
             # jj += 1
         
