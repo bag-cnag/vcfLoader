@@ -285,6 +285,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
             small_matrix_sparse = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
             
             #write slice of sparse matrix (try also without writing and reading)
+            path = '{0}/temp/chrm-{1}'.format( dm, chrom )
             small_matrix_sparse.write( path, overwrite = True )
             small_matrix=hl.read_matrix_table(path)
             experiments_and_families = getExperimentsByFamily( [ x[ 0 ] for x in batch ], url_project, gpap_id, gpap_token )
