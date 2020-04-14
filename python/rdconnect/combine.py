@@ -281,51 +281,44 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
     try:
         for idx, batch in enumerate( batches ):
             lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
-            sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
+            experiments_in_batch= [ x[ 0 ] for x in batch ]
+            sam = hl.literal( experiments_in_batch, 'array<str>' )
             small_matrix_sparse = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
             
             #write slice of sparse matrix (try also without writing and reading)
             path = '{0}/temp/chrm-{1}'.format( dm, chrom )
             small_matrix_sparse.write( path, overwrite = True )
             small_matrix=hl.read_matrix_table(path)
-            experiments_in_chunk_matrix=[ x[ 0 ] for x in batch ]
-            full_ids_in_partial_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_chunk_matrix ]
+            
+            full_ids_in_partial_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_batch ]
             
             experiments_and_families_batch = getExperimentsByFamily( full_ids_in_partial_matrix, url_project, gpap_id, gpap_token )
 
-            experiments_by_family = {}
-            for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families_batch ] ) ):
-                experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families_batch if x[ 'Family' ] == fam ]
-            lgr.debug( 'Total of {0} families'.format( len( experiments_by_family.keys() ) ) )
-
-            x = len( experiments_by_family.keys() )
-            none_fam = None in experiments_by_family.keys()
-            if none_fam:
-                z = '; '.join( experiments_by_family[ None ] )
-                for ind in experiments_by_family[ None ]:
-                    if type( ind ) == "list":
-                        experiments_by_family[ ind ] = ind
-                    else:
-                        experiments_by_family[ ind ] = [ ind ]
-                y = len( experiments_by_family.keys() )
-                warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
+            none_detected = False
+            x = len( list( set( [ x[ 2 ] for x in experiments_and_families_batch ] ) ) )
+            for ii in range( len( experiments_and_families_batch ) ):
+                if experiments_and_families_batch[ ii ][ 2 ] == '---':
+                    none_detected = True
+                    experiments_and_families_batch[ ii ][ 2 ] = experiments_and_families_batch[ ii ][ 0 ]
+            y = len( list( set( [ x[ 2 ] for x in experiments_and_families_batch ] ) ) )
+            if none_detected:
+                warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
 
-            chunks = divideChunksFamily( experiments_by_family, size = size )
+
+            chunks = divide_batches_by_family( experiments_and_families_batch, size = size )
             first = True
             dm = denseMatrix_path
-            for idx_chunk, chunk in enumerate( chunks ):
-                lgr.info( 'Filtering sparse matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-                dense_by_family = []
-                for idx2_chunk, fam in enumerate( chunk ):
-                    lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
-                    sam = hl.literal( experiments_by_family[ fam ], 'array<str>' ) # hl.literal( experiments_in_matrix[ 0:500 ], 'array<str>' )
+            dense_by_family = []
+                for idx2_chunk, fam in enumerate( chunks ):
+                    lgr.debug( 'Processing family "{0}/{1}"'.format( idx2_chunk, idx2_chunk[0] ) )
+                    sam = hl.literal( idx2_chunk[1], 'array<str>' ) # hl.literal( experiments_in_matrix[ 0:500 ], 'array<str>' )
                     familyMatrix = small_matrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
                     familyMatrix = hl.experimental.densify( familyMatrix )
                     familyMatrix = familyMatrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
                     dense_by_family.append( familyMatrix )
 
-                    lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
+                    lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx_chunk, len( chunk ) ) )
                     mts_ = dense_by_family[:]
                     ii = 0
                     while len( mts_ ) > 1:
@@ -459,6 +452,24 @@ def divideChunks( collection, size ):
     for ii in range( 0, len( collection ), size ):  
         yield collection[ ii:(ii + size) ] 
 
+def divide_batches_by_family( experiments, size = 1000 ):
+    rst = []
+    # ii = 0
+    while len( experiments ) > 0:
+        batch = []
+        cnt = 0
+        # jj = 0
+        while cnt <= size and len( experiments ) > 0:
+            fam = experiments[ 0 ][ 2 ]
+            exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
+            # print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
+            batch += (fam,exp_fam)
+            cnt += len( exp_fam )
+            experiments = [ x for x in experiments if x[ 2 ] != fam ]
+            # jj += 1
+        rst.append( batch )
+        # ii += 1
+    return rst
 
 def divideChunksFamily( collection, size = 1000 ):
     # for all families, make packs of families with size of experiments
