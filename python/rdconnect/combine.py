@@ -282,19 +282,60 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
         for idx, batch in enumerate( batches ):
             lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
-            small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
-            small_matrix = hl.experimental.densify( small_matrix )
-            small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
-            if first:
-                first = False
-            else:
-                dm = utils.update_version( dm )
-            path = '{0}/chrm-{1}'.format( dm, chrom )
-            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
-            small_matrix.write( path, overwrite = True )
-            lgr.debug( "Ending writing dense matrix" )
-            for ff in batch:
-                log_files.append( ( ff[ 0 ], chrom, path ) )
+            small_matrix_sparse = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
+            
+            #write slice of sparse matrix (try also without writing and reading)
+            small_matrix_sparse.write( path, overwrite = True )
+            small_matrix=hl.read_matrix_table(path)
+            experiments_and_families = getExperimentsByFamily( [ x[ 0 ] for x in batch ], url_project, gpap_id, gpap_token )
+            chunks = divideChunksFamily( experiments_by_family, size = size )
+            first = True
+            dm = denseMatrix_path
+            for idx_chunk, chunk in enumerate( chunks ):
+                lgr.info( 'Filtering sparse matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
+                dense_by_family = []
+                for idx2_chunk, fam in enumerate( chunk ):
+                    lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
+                    sam = hl.literal( experiments_by_family[ fam ], 'array<str>' ) # hl.literal( experiments_in_matrix[ 0:500 ], 'array<str>' )
+                    familyMatrix = small_matrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
+                    familyMatrix = hl.experimental.densify( familyMatrix )
+                    familyMatrix = familyMatrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+                    dense_by_family.append( familyMatrix )
+
+                    lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
+                    mts_ = dense_by_family[:]
+                    ii = 0
+                    while len( mts_ ) > 1:
+                        ii += 1
+                        lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
+                        tmp = []
+                        for jj in range( 0, len(mts_), 2 ):
+                            if jj+1 < len(mts_):
+                                tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
+                            else:
+                                tmp.append( mts_[ jj ] )
+                        mts_ = tmp[:]
+                    [dense_matrix] = mts_
+
+                    if first:
+                        first = False
+                    else:
+                        dm = utils.update_version( dm )
+                    lgr.info( 'Writing dense matrix to disk ({0})'.format( dm ) )
+                    dense_matrix.write( '{0}/chrm-{1}'.format( dm, chrom ), overwrite = True )
+            # #finish
+            # small_matrix = hl.experimental.densify( small_matrix )
+            # small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+            # if first:
+            #     first = False
+            # else:
+            #     dm = utils.update_version( dm )
+            # path = '{0}/chrm-{1}'.format( dm, chrom )
+            # lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
+            # small_matrix.write( path, overwrite = True )
+            # lgr.debug( "Ending writing dense matrix" )
+            # for ff in batch:
+            #     log_files.append( ( ff[ 0 ], chrom, path ) )
     except Exception as ex:
         save_table_log( sc, sq, log_files, log_path )
         raise ex
