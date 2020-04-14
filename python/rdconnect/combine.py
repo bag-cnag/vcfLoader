@@ -459,7 +459,7 @@ def divide_batches_by_family( experiments ):
         batch = []
         cnt = 0
         # jj = 0
-        while cnt <= size and len( experiments ) > 0:
+        while  len( experiments ) > 0:
             fam = experiments[ 0 ][ 2 ]
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
             # print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
