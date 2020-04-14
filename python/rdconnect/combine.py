@@ -441,19 +441,19 @@ def divideChunks( collection, size ):
         yield collection[ ii:(ii + size) ] 
 
 
-# def divideChunksFamily( collection, size = 1000 ):
-#     # for all families, make packs of families with size of experiments
-#     fam = list( collection.keys() )
-#     ttl = []
-#     while len( fam ) > 0:
-#         acc = 0
-#         rst = []
-#         while acc < size and len( fam ) > 0:
-#             itm = fam.pop( 0 )
-#             acc += len( collection[ itm ] )
-#             rst.append( itm )
-#         ttl.append( rst )
-#     return ttl
+def divideChunksFamily( collection, size = 1000 ):
+    # for all families, make packs of families with size of experiments
+    fam = list( collection.keys() )
+    ttl = []
+    while len( fam ) > 0:
+        acc = 0
+        rst = []
+        while acc < size and len( fam ) > 0:
+            itm = fam.pop( 0 )
+            acc += len( collection[ itm ] )
+            rst.append( itm )
+        ttl.append( rst )
+    return ttl
 
 
 def get_samples(url_sample):
