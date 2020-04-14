@@ -277,7 +277,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
     first = True
     dm = dense_matrix_path
     log_files = []
-    log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
+    log_path = 'temp/{0}/log-chrm-{1}'.format( dm, chrom )
     try:
         for idx, batch in enumerate( batches ):
             lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
