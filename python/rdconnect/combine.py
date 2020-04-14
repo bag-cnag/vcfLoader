@@ -314,7 +314,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
                     sam = hl.literal( fam[1], 'array<str>' ) # hl.literal( experiments_in_matrix[ 0:500 ], 'array<str>' )
                     familyMatrix = small_matrix.filter_cols( sam.contains( small_matrix['s'] ) )
                     familyMatrix = hl.experimental.densify( familyMatrix )
-                    familyMatrix = familyMatrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+                    familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
                     dense_by_family.append( familyMatrix )
 
                     lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx_chunk, len( chunk ) ) )
