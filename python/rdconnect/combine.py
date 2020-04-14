@@ -317,7 +317,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
                     familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
                     dense_by_family.append( familyMatrix )
 
-                    lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx_chunk, len( chunk ) ) )
+                    lgr.info( 'Flatting dense matrix no')#. {0} with {1} families'.format( str(idx2_chunk), len( chunk ) ) )
                     mts_ = dense_by_family[:]
                     ii = 0
                     while len( mts_ ) > 1:
