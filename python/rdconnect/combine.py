@@ -288,7 +288,10 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
             path = '{0}/temp/chrm-{1}'.format( dm, chrom )
             small_matrix_sparse.write( path, overwrite = True )
             small_matrix=hl.read_matrix_table(path)
-            experiments_and_families = getExperimentsByFamily( [ x[ 0 ] for x in batch ], url_project, gpap_id, gpap_token )
+            experiments_in_chunk_matrix=[ x[ 0 ] for x in batch ]
+            full_ids_in_partial_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_chunk_matrix ]
+            
+            experiments_and_families = getExperimentsByFamily( full_ids_in_partial_matrix, url_project, gpap_id, gpap_token )
             chunks = divideChunksFamily( experiments_by_family, size = size )
             first = True
             dm = denseMatrix_path
