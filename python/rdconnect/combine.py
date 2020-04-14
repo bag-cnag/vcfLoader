@@ -291,7 +291,26 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
             experiments_in_chunk_matrix=[ x[ 0 ] for x in batch ]
             full_ids_in_partial_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_chunk_matrix ]
             
-            experiments_and_families = getExperimentsByFamily( full_ids_in_partial_matrix, url_project, gpap_id, gpap_token )
+            experiments_and_families_batch = getExperimentsByFamily( full_ids_in_partial_matrix, url_project, gpap_id, gpap_token )
+
+            experiments_by_family = {}
+            for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families_batch ] ) ):
+                experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families_batch if x[ 'Family' ] == fam ]
+            lgr.debug( 'Total of {0} families'.format( len( experiments_by_family.keys() ) ) )
+
+            x = len( experiments_by_family.keys() )
+            none_fam = None in experiments_by_family.keys()
+            if none_fam:
+                z = '; '.join( experiments_by_family[ None ] )
+                for ind in experiments_by_family[ None ]:
+                    if type( ind ) == "list":
+                        experiments_by_family[ ind ] = ind
+                    else:
+                        experiments_by_family[ ind ] = [ ind ]
+                y = len( experiments_by_family.keys() )
+                warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
+
+
             chunks = divideChunksFamily( experiments_by_family, size = size )
             first = True
             dm = denseMatrix_path
