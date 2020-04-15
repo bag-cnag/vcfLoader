@@ -369,14 +369,22 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
     """Function to get the IDs from phenotips, from experiments, and from family."""
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
     url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+    data=[]
     headers = { 'Content-Type': 'application/json' }
-    body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
-    resp = requests.post( url, headers = headers, json = body, verify = False )
-    data = resp.json()
-    
+    for i in range(0,(len(pids)//1000)+1) :
+        body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
+        resp = requests.post( url, headers = headers, json = body, verify = False )
+        
+        data = data + resp.json()
+
     parsed = {}
+    #import pdb;pdb.set_trace()
     for elm in data:
+
         pid = list( elm.keys() )[ 0 ]
+        if pid=='P0003238':
+            continue
+        print(elm)
         fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
         parsed[ pid ] = fam
 
