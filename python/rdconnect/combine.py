@@ -68,7 +68,7 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
 def create_files_list(experiments,chrom,elastic_dataset):
     prefix="hdfs://rdhdfs1:27000/test/rdconnect/gVCF"
     elastic_dataset="rdcon_1488_670"
-    return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments_in_group if x[ 'elastic_dataset' ] == elastic_dataset ]
+    return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
     
 
 def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
