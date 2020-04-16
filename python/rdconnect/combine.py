@@ -395,7 +395,7 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
     if sort_output:
         return sorted( rst, key = lambda x: x[ 2 ] )
     else:
-        return rst
+        return rst[1600:9000]
 
 def divideChunks( collection, size ): 
     # looping till length l 
