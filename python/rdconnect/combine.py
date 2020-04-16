@@ -137,6 +137,8 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         path_to_exps = [ x[ 3 ] for x in batch ]
+        for path in path_to_exps:
+            print(path)
         loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
 
