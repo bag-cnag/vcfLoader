@@ -120,8 +120,10 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
 
     bse_old = gvcf_store_path
     bse_new = new_gvcf_store_path
-    
+    to_be_merged=[]
     for index, batch in enumerate( batches ):
+        
+
         if index == 0 and bse_old is None:
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
@@ -136,10 +138,27 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             bse_new = utils.update_version( bse_new )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+        if index % 15 == 0 and index !=0:
+            to_be_merged.append(new_gvcf_store_path)
+            gvcf_store_path = None
+            bse_new = utils.update_version( bse_new )
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+
         path_to_exps = [ x[ 3 ] for x in batch ]
         for path in path_to_exps:
             print(path)
         loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+    # if len(to_be_merged) > 0:
+    #     gvcf_store = hl.read_matrix_table( gvcfStorePath )
+    #     comb = combine_gvcfs( [ gvcf_store ] + vcfs )
+    #     bse_new = utils.update_version( bse_new )
+    #     new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )       
+    #     lgr.debug( 'Combined gVCF files' )
+    #     lgr.debug( 'Saving sparse matrix to "{}"'.format( destinationPath ) )
+    #     comb.write( destinationPath, overwrite = True )        
+    #     lgr.debug('merge ')
 
 
 
