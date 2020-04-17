@@ -96,7 +96,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             gvcf_store_1 = hl.read_matrix_table('hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-test-ddp/0.15/chrom-1')
             gvcf_store_2 = hl.read_matrix_table('hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-test-ddp/0.31/chrom-1')
 
-            comb = combine_gvcfs( [ gvcf_store_1 ] + gvcf_store_2 )
+            comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
             comb.write('hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-test-ddp/merged_0.15_0.31/chrom-1', overwrite = True )
             lgr.debug( 'Ended saving sparse matrix' )
 
