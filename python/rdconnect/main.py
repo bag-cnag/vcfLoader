@@ -92,7 +92,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     #(hl,files,chrom,destinationPath,gvcf_store_path)
     if ("mergeSparseMatrix" in step):
 
-
+            from hail.experimental.vcf_combiner import combine_gvcfs
             gvcf_store_1 = hl.read_matrix_table('hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-test-ddp/0.15/chrom-1')
             gvcf_store_2 = hl.read_matrix_table('hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-test-ddp/0.31/chrom-1')
 
