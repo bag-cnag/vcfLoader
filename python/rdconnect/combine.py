@@ -45,7 +45,7 @@ def getExperimentStatus( url_project, token ):
     return data
 
 
-def getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch):
+def getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom):
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'http://{0}'.format( url_project )
     url = "{0}/datamanagement/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False&elastic_index=True".format( url_project, group )
@@ -75,7 +75,7 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
     lgr = create_logger( 'createSparseMatrix', '' )
 
     # Get all the experiments that have to processed from data-management
-    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom )
     experiment_status = getExperimentStatus( url_project, token )
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = True )
     # files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
@@ -115,7 +115,7 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
         experiments_and_families[ ii ].append( buildPath( files_to_be_loaded, experiments_and_families[ ii ][ 0 ] ) )
 
     # Create batches of 'size' experiments ordered by family
-    batches = list( divideChunks( experiments_and_families, 100 ) )
+    batches = list( divideChunks( experiments_and_families, max_items_batch ) )
     lgr.debug( 'Created {} batches from {} files'.format( len( batches ), len( experiments_and_families ) ) )
 
     bse_old = gvcf_store_path
@@ -262,7 +262,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
     experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
-    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
 
