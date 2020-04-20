@@ -71,6 +71,7 @@ def create_files_list(experiments,chrom,elastic_dataset):
     return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
 
 def combine_two_dataset(gvcf_store_1_path_chrom,gvcf_store_2_path_chrom, destination_path):
+            print("merging "+gvcf_store_1_path_chrom+" with "+gvcf_store_2_path_chrom)
             from hail.experimental.vcf_combiner import combine_gvcfs
             gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
             gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
