@@ -75,8 +75,7 @@ def combine_two_dataset(gvcf_store_1_path_chrom,gvcf_store_2_path_chrom, destina
             gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
             gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
             comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
-            bse_new = utils.update_version( gvcf_store_2_path )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            
             comb.write(destination_path, overwrite = True )   
 
 def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
