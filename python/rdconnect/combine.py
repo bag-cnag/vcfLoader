@@ -69,7 +69,17 @@ def create_files_list(experiments,chrom,elastic_dataset):
     prefix="hdfs://rdhdfs1:27000/test/rdconnect/gVCF"
     elastic_dataset="rdcon_1488_670"
     return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
-    
+
+def combine_two_dataset(gvcf_store_1_path,gvcf_store_2_path,chrom):
+            from hail.experimental.vcf_combiner import combine_gvcfs
+            gvcf_store_1_path_chrom='{0}/chrom-{1}'.format( gvcf_store_1_path, chrom )
+            gvcf_store_2_path_chrom='{0}/chrom-{1}'.format( gvcf_store_2_path, chrom )
+            gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
+            gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
+            comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
+            bse_new = utils.update_version( gvcf_store_2 )
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            comb.write(new_gvcf_store_path, overwrite = True )   
 
 def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
     lgr = create_logger( 'createSparseMatrix', '' )
@@ -139,6 +149,10 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         if index % 15 == 0 and index !=0:
+            if len(to_be_merged) > 0:
+                    bse_new = utils.update_version( bse_new )
+                    new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+                    combine_two_dataset(to_be_merged.pop(),new_gvcf_store_path,chrom)
             to_be_merged.append(new_gvcf_store_path)
             gvcf_store_path = None
             bse_new = utils.update_version( bse_new )
@@ -150,7 +164,20 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
         for path in path_to_exps:
             print(path)
         loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
-    # if len(to_be_merged) > 0:
+    #  15 31 
+        if len(to_be_merged) > 0:
+            combine_two_dataset(to_be_merged.pop(),new_gvcf_store_path,chrom)
+
+            # from hail.experimental.vcf_combiner import combine_gvcfs
+            # gvcf_store_1 = hl.read_matrix_table(to_be_merged[0])
+            # gvcf_store_2 = hl.read_matrix_table(new_gvcf_store_path)
+            # comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
+            # bse_new = utils.update_version( new_gvcf_store_path )
+            # new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            # comb.write(new_gvcf_store_path, overwrite = True )
+
+
+
     #     gvcf_store = hl.read_matrix_table( gvcfStorePath )
     #     comb = combine_gvcfs( [ gvcf_store ] + vcfs )
     #     bse_new = utils.update_version( bse_new )
