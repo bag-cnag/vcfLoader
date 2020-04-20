@@ -146,7 +146,7 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             bse_new = utils.update_version( bse_new )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        if index % 15 == 0 and index !=0:
+        if index % 2 == 0 and index !=0:
             if len(to_be_merged) > 0:
                     bse_new = utils.update_version( bse_new )
                     new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
