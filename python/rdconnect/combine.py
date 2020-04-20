@@ -70,15 +70,14 @@ def create_files_list(experiments,chrom,elastic_dataset):
     elastic_dataset="rdcon_1488_670"
     return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
 
-def combine_two_dataset(gvcf_store_1_path_chrom,gvcf_store_2_path,chrom):
+def combine_two_dataset(gvcf_store_1_path_chrom,gvcf_store_2_path_chrom, destination_path):
             from hail.experimental.vcf_combiner import combine_gvcfs
-            gvcf_store_2_path_chrom='{0}/chrom-{1}'.format( gvcf_store_2_path, chrom )
             gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
             gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
             comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
             bse_new = utils.update_version( gvcf_store_2_path )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            comb.write(new_gvcf_store_path, overwrite = True )   
+            comb.write(destination_path, overwrite = True )   
 
 def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
     lgr = create_logger( 'createSparseMatrix', '' )
@@ -147,17 +146,19 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             bse_new = utils.update_version( bse_new )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        if index % 15 == 0 and index !=0:
+        if index % 3 == 0 and index !=0:
             if len(to_be_merged) > 0:
                     bse_new = utils.update_version( bse_new )
                     new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-                    combine_two_dataset(to_be_merged.pop(),bse_new,chrom)
-            to_be_merged.append(new_gvcf_store_path)
+                    combine_two_dataset(to_be_merged.pop(),gvcf_store_path,new_gvcf_store_path)
+                    new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+                    lgr.debug( 'AFter mergin Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+            to_be_merged.append(gvcf_store_path)
             gvcf_store_path = None
-            bse_new = utils.update_version( bse_new )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            #bse_new = utils.update_version( bse_new )
+            #new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
 
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+            #lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
 
         path_to_exps = [ x[ 3 ] for x in batch ]
         for path in path_to_exps:
