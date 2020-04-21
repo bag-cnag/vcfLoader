@@ -296,7 +296,7 @@ def create_batches_by_family( experiments, size = 1000 ):
             # jj += 1
         rst.append( batch )
         # ii += 1
-    return rst[4600:10000]
+    return rst
 
 
 def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
@@ -445,7 +445,7 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
     if sort_output:
         return sorted( rst, key = lambda x: x[ 2 ] )
     else:
-        return rst
+        return rst[4600:10000]
 
 def divideChunks( collection, size ): 
     # looping till length l 
