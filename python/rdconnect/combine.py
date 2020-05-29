@@ -142,9 +142,14 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     print('files_to_be_loaded', len( files_to_be_loaded.keys() ))
     print('\t', list( files_to_be_loaded.keys() )[ : 2 ])
-
-    print('experiments_in_group (2)', len( experiments_in_group ))
-    print('\t', experiments_in_group[ : 2 ])
+    inputs=[]
+    for key, value in files_to_be_loaded.items():
+        inputs.append(value)
+    tmp_path="hdfs://rdhdfs1:27000/test/tmp"
+    output_file='{}/chrom-{}'.format( new_gvcf_store_path, chrom )
+    hl.experimental.run_combiner(inputs, out_file=output_file, tmp_path=temp_bucket, reference_genome='GRCh37')
+    #print('experiments_in_group (2)', len( experiments_in_group ))
+    #print('\t', experiments_in_group[ : 2 ])
     
 
 
@@ -152,29 +157,29 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # The argument "new_gvcf_store_path" contains the path to the new sm that will be created from the blocks of 100 experiments and saved as 1k5
     # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
 
-    list_of_batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
+    # list_of_batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
 
-    print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
+    # print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
 
 
-    for idx, batch in enumerate( list_of_batches ):
-        print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
-        # load each of the small batches of 100 experiments
-        accum = None
-        for idx, pack in enumerate( batch[ 'batches' ] ):
-            print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
-            uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
-            loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
-            accum = uri
+    # for idx, batch in enumerate( list_of_batches ):
+    #     print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
+    #     # load each of the small batches of 100 experiments
+    #     accum = None
+    #     for idx, pack in enumerate( batch[ 'batches' ] ):
+    #         print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
+    #         uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
+    #         loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
+    #         accum = uri
 
-    uris = [ b[ 'uri' ] for b in list_of_batches ]
-    if not( gvcf_store_path is None or gvcf_store_path == '' ):
-        uris = [ gvcf_store_path ] + uris
+    # uris = [ b[ 'uri' ] for b in list_of_batches ]
+    # if not( gvcf_store_path is None or gvcf_store_path == '' ):
+    #     uris = [ gvcf_store_path ] + uris
 
-    print('RUNNING STEP2 - MERGING OF CUMMULATIVE MATRICES' )
-    superbatches = create_superbatches_sparse( uris )
-    for idx, pack in enumerate( superbatches ):
-        combine_sparse_martix( '{}/chrom-{}'.format( pack[ 'in_1' ], chrom ), '{}/chrom-{}'.format( pack[ 'in_2' ], chrom ), '{}/chrom-{}'.format( pack[ 'out' ], chrom ) )
+    # print('RUNNING STEP2 - MERGING OF CUMMULATIVE MATRICES' )
+    # superbatches = create_superbatches_sparse( uris )
+    # for idx, pack in enumerate( superbatches ):
+    #     combine_sparse_martix( '{}/chrom-{}'.format( pack[ 'in_1' ], chrom ), '{}/chrom-{}'.format( pack[ 'in_2' ], chrom ), '{}/chrom-{}'.format( pack[ 'out' ], chrom ) )
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     cnt = 0
