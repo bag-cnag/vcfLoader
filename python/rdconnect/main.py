@@ -124,9 +124,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             print( "gpap_token:", gpap_token )
             is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
             print( "is_playground:", is_playground )
-            sz_small_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
+            sz_small_batch = 1000
             print( "sz_small_batch:", sz_small_batch )
-            sz_large_batch = configuration[ 'combine' ][ 'sz_large_batch' ]
+            sz_large_batch = 1001
             print( "sz_large_batch:", sz_large_batch )
             combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, sz_large_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
 
