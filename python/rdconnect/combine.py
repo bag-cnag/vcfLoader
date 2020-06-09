@@ -146,7 +146,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         inputs.append(value)
     tmp_path="hdfs://rdhdfs1:27000/test/tmp"
     output_file='{}/chrom-{}'.format( new_gvcf_store_path, chrom )
-    hl.experimental.run_combiner(inputs, out_file=output_file, tmp_path=temp_bucket, reference_genome='GRCh37')
+    hl.experimental.run_combiner(inputs, out_file=output_file, tmp_path=tmp_path, reference_genome='GRCh37')
     #print('experiments_in_group (2)', len( experiments_in_group ))
     #print('\t', experiments_in_group[ : 2 ])
     
