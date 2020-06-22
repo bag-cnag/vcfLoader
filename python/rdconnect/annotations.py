@@ -423,7 +423,7 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("origin is ", variants, vepPath)
     print("destination is", destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
-    varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
+    varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
                                          rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated.drop("vep") \
                 .write(destinationPath,overwrite=True)
@@ -489,7 +489,7 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     dbnsfp = hl.read_table(dbnsfpPath)
-    variants.annotate(
+    variants.annotate_rows(
         gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
         gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
         gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
@@ -515,7 +515,7 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
     cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .rows() \
              .key_by("locus","alleles")
-    variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
+    variants.annotate_rows(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
 
 def clinvar_filtering(hl, annotation, is_filter_field):
@@ -592,7 +592,7 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
     clinvar = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
                 .rows() \
                 .key_by("locus","alleles")
-    variants.annotate(
+    variants.annotate_rows(
         clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
         clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
         clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False),"|"), hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False),"|")),
@@ -610,7 +610,7 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
     gnomad = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
                .rows() \
                .key_by("locus","alleles")
-    variants.annotate(
+    variants.annotate_rows(
         gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_an=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
@@ -631,7 +631,7 @@ def annotateExAC(hl, variants, annotationPath, destinationPath):
     exac = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .rows() \
              .key_by("locus","alleles")
-    variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
+    variants.annotate_rows(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
             .write(destinationPath,overwrite=True)
 
 def CGIFilter(hl, filter_field):
