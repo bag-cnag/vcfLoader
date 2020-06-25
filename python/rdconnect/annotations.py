@@ -66,7 +66,7 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
     lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
     lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
     try:
-        vcf = hl.split_multi_hts(hl.read_matrix_table( sourcePath ))#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
+        vcf = hl.split_multi_hts(hl.read_matrix_table( sourcePath ).key_rows_by( vcf.locus, vcf.alleles ))#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
         x = [y.get('s') for y in vcf.col.collect()]
         lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
         lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
