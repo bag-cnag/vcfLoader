@@ -11,6 +11,17 @@ import hail as hl
 import datetime
 import os,json,requests
 
+#---
+import logging
+import warnings
+from hail.experimental.vcf_combiner import *
+from hail.experimental import full_outer_join_mt
+from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
+from hail.experimental.vcf_combiner.vcf_combiner import transform_gvcf
+from subprocess import PIPE, Popen
+from pyspark.sql import Row
+#---
+
 APP_NAME = "vcfLoader"
 # Usage function
 def usage():
@@ -67,6 +78,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     fileNameCnv = "variants.ht"
     number_partitions = configuration["number_of_partitions"]
     current_dir = utils.buildFileName(configuration["origin_path"], chrom)
+    annotStep = False
 
     print('-' * 20)
     print('[INFO] destination: {}'.format(destination))
@@ -95,8 +107,6 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print ("step createSparseMatrix")
         if 'partitions_chromosome' in configuration[ 'combine' ]:
             partitions_chromosome = configuration[ 'combine'][ 'partitions_chromosome' ]
-        if 'max_items_batch' in configuration[ 'combine' ]:
-            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
 
         if 'new_gvcf_store_path' in configuration[ 'combine' ].keys():
             new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
@@ -111,52 +121,87 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             raise Expcetion( 'Old store and new store paths are the same.' )
         else:
             token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+            print( "token:", token )
             host_project = configuration[ 'datamanagement' ][ 'host' ]
+            print( "host_project:", host_project )
             url_project = configuration[ 'datamanagement' ][ 'ip' ]
+            print( "url_project:", url_project )
             group = configuration[ 'combine' ][ 'group' ]
+            print( "group:", group )
             prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+            print( "prefix_hdfs:", prefix_hdfs )
             gpap_id = configuration[ 'gpap' ][ 'id' ]
+            print( "gpap_id:", gpap_id )
             gpap_token = configuration[ 'gpap' ][ 'token' ]
+            print( "gpap_token:", gpap_token )
             is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
-            combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
+            print( "is_playground:", is_playground )
+            sz_small_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
+            print( "sz_small_batch:", sz_small_batch )
+            sz_large_batch = configuration[ 'combine' ][ 'sz_large_batch' ]
+            print( "sz_large_batch:", sz_large_batch )
+            combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, sz_large_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
 
+    if "createFamilyGroups" in step:
+        print ("step createFamilyGroups")
+        group = configuration[ 'combine' ][ 'group' ]
+        print( "group:", group )
+        url_project = configuration[ 'datamanagement' ][ 'ip' ]
+        print( "url_project:", url_project )
+        host_project = configuration[ 'datamanagement' ][ 'host' ]
+        print( "host_project:", host_project )
+        token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+        print( "token:", token )
+        gpap_id = configuration[ 'gpap' ][ 'id' ]
+        print( "gpap_id:", gpap_id )
+        gpap_token = configuration[ 'gpap' ][ 'token' ]
+        print( "gpap_token:", gpap_token )
+        prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+        print( "prefix_hdfs:", prefix_hdfs )
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
+        is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
+        print( "is_playground:", is_playground )
+        if 'gvcf_store_path' in configuration[ 'combine' ].keys():
+            sparse_matrix_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
+        else:
+            sparse_matrix_path = None
+        print( "max_items_batch:", max_items_batch )
+        dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        print( "dense_matrix_path:", dense_matrix_path )
+
+        combine.create_family_groups(sc, sqlContext, chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, dense_matrix_path, is_playground)
+        
 
     if ("createDenseMatrix" in step):
         print ("step createDenseMatrix")
         token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+        print( "token:", token )
         denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        print( "denseMatrix_path:", denseMatrix_path )
         group = configuration[ 'combine' ][ 'group' ]
+        print( "group:", group )
         host_project = configuration[ 'datamanagement' ][ 'host' ]
+        print( "host_project:", host_project )
         url_project = configuration[ 'datamanagement' ][ 'ip' ]
+        print( "url_project:", url_project )
         gpap_id = configuration[ 'gpap' ][ 'id' ]
+        print( "gpap_id:", gpap_id )
         gpap_token = configuration[ 'gpap' ][ 'token' ]
+        print( "gpap_token:", gpap_token )
         prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+        print( "prefix_hdfs:", prefix_hdfs )
+        is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
+        print( "is_playground:", is_playground )
         if 'max_items_batch' in configuration[ 'combine' ]:
-            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
+            max_items_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
         if 'gvcf_store_path' in configuration[ 'combine' ].keys():
             gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
         else:
             gvcf_store_path = None
-        combine.createDenseMatrix( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
-    
-    # if ("createDenseMatrixAlternative" in step):
-    #     print ("step createDenseMatrixAlternative")
-    #     token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
-    #     denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
-    #     group = configuration[ 'combine' ][ 'group' ]
-    #     host_project = configuration[ 'datamanagement' ][ 'host' ]
-    #     url_project = configuration[ 'datamanagement' ][ 'ip' ]
-    #     gpap_id = configuration[ 'gpap' ][ 'id' ]
-    #     gpap_token = configuration[ 'gpap' ][ 'token' ]
-    #     prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
-    #     if 'max_items_batch' in configuration[ 'combine' ]:
-    #         max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
-    #     if 'gvcf_store_path' in configuration[ 'combine' ].keys():
-    #         gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
-    #     else:
-    #         gvcf_store_path = None
-    #     combine.createDenseMatrixAlternative( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
-   
+        print( "max_items_batch:", max_items_batch )
+        print( "gvcf_store_path:", gvcf_store_path )
+        combine.createDenseMatrix( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, is_playground )
 
 
     if ("createIndex" in step):
@@ -173,8 +218,26 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
     if "loadDenseMatrix" in step:
         print ( "step loadDenseMatrix" )
-        annotations.loadDenseMatrix( hl, current_dir, sourceFileName, destination + "/loaded/" + fileName, number_partitions )
-        current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
+        print ("source file is " + sourceFileName)
+        try:
+            nmatrix = configuration[ "combine" ][ "nmatrix" ]
+            dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        except:
+            raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
+        
+        if nmatrix == "all":
+            mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
+            nmatrix = [ ii for ii in range(0, len(mapping)) ]
+
+        for ii in nmatrix:
+            in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
+            out_file = "{0}/loaded/variants-chrom-{1}-mtx-{2}.ht".format(destination, str(chrom), str(ii))
+            print("        - ", ii)
+            print("                - ", in_file)
+            print("                - ", out_file)
+            annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
+        
+        current_dir = "{0}/loaded/".format(destination)
 
     if ("loadGermline" in step):
         print ("step loadGermline")
@@ -221,11 +284,13 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
     if ("annotateInternalFreq" in step):
         print ("step annotate Internal Allele Frequency")
-        print ("source file is " + current_dir)
         print ("current intFreq file is " + configuration["intFreq"] +"/" + fileName)
-        variants = hl.read_table(current_dir)
-        annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
-        current_dir = destination + "/annotateInternalFreq/" + fileName
+        input_file = utils.buildFileName(configuration["origin_path"], chrom)
+        output_file = destination + "/annotateInternalFreq/" + fileName
+        
+        variants = hl.methods.read_matrix_table(input_file)
+        annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] + "/" + fileName, output_file)
+        #current_dir = destination + "/annotateInternalFreq/" + fileName
 
     if ("annotateCGI" in step):
         print("step annotate CGI")
@@ -234,75 +299,243 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         variants= hl.read_table(current_dir)
         annotations.annotateCGI(hl,variants,utils.buildFileName(configuration["CGI_path"],chrom),destination+"/annotatedCGI/"+fileName)
         current_dir = destination + "/annotatedCGI/" + fileName
+    
+    if("annotateFullDenseMatrix" in step):
+        print ("step annotate Full")
+        print ("source file is " + sourceFileName)
+        print ("current_dir (1) is " + current_dir)
+        try:
+            nmatrix = configuration[ "combine" ][ "nmatrix" ]
+            dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        except:
+            raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
         
-    if ("annotateVEP" in step):
-        print ("step annotate VEP (output: {})".format(utils.buildDestinationVEP(destination, fileName, somaticFlag)))
-        print ("source file is " + current_dir)
-        variants = hl.read_table(current_dir)
-        annotations.annotateVEP(hl,variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
-        current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
+        if current_dir is "":
+            current_dir = "/".join(sourceFileName.split("/")[:-1])
+
+        print ("current_dir (2) is " + current_dir)
+        
+        if nmatrix == "all":
+            mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
+            nmatrix = [ ii for ii in range(0, len(mapping)) ]
+
+        if not isinstance(nmatrix, list):
+            nmatrix = [nmatrix]
+
+        print(nmatrix)
+        print(destination)
+
+        start_dir = current_dir
+        for ii in nmatrix:
+            in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(start_dir, str(chrom), str(ii))
+            fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
+
+            print (" internalFreq")
+            variants = hl.read_matrix_table(in_file)
+            variants = variants.key_rows_by(variants.locus, variants.alleles)
+            annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] + "/variants" + str(chrom) + ".ht", destination + "/annotateInternalFreq/" + fileName)
+            current_dir = destination + "/annotateInternalFreq/" + fileName
             
-    if ("annotatedbNSFP" in step):
-        print("step annotate dbNSFP (output: {})".format(utils.buildDestinationNSFP(destination, fileName, somaticFlag)))
-        if not current_dir.endswith(fileName):
-            current_dir = current_dir + "/" + fileName
-        print ("source file: {}".format(current_dir))
-        #variants = hl.read_table(destination+"/annotatedVEP/"+fileName)
-        variants = hl.read_table(current_dir)
+            print(" VEP")
+            variants = hl.methods.read_matrix_table(current_dir)
+            variants = variants.key_rows_by(variants.locus, variants.alleles)
+            annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
+            current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
+            
+            print(" dbNSFP")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
+            current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
+                
+            print(" dbCADD")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
+            current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
+
+            print(" ClinVar")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
+            current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
+
+            print(" gnomAD")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+            # current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
+
+
+
+
+
+    if ("annotateFull" in step):
+        print ("step annotate Full")
+        print ("source file is " + current_dir)
+        
+        variants = hl.methods.read_matrix_table(current_dir)
+        print(" VEP")
+        annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
+        current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
+
+        print(" dbNSFP")
+        variants = hl.read_matrix_table(current_dir)
         annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
-
-    if ("annotatecadd" in step):
-        print("step annotate dbcadd (output: {})".format(utils.buildDestinationCADD(destination, fileName, somaticFlag)))
-        if not current_dir.endswith(fileName):
-            current_dir = current_dir + "/" + fileName
-        print ("source file: {}".format(current_dir))
-        #variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
-        variants = hl.read_table(current_dir)
+            
+        print(" dbCADD")
+        variants = hl.read_matrix_table(current_dir)
         annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
 
-    if ("annotateclinvar" in step):
-        print("step annotate clinvar (output: {})".format(utils.buildDestinationClinvar(destination, fileName, somaticFlag)))
-        if not current_dir.endswith(fileName):
-            current_dir = current_dir + "/" + fileName
-        print ("source file: {}".format(current_dir))
-        #variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        variants = hl.read_table(current_dir)
+        print(" ClinVar")
+        variants = hl.read_matrix_table(current_dir)
         annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
 
-    if ("annotateExomesGnomad" in step):
-        print("step annotate exomes gnomad (output: {})".format(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)))
-        if not current_dir.endswith(fileName):
-            current_dir = current_dir + "/" + fileName
-        print ("source file: {}".format(current_dir))
-        #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        variants = hl.read_table(current_dir)
+        print(" gnomAD")
+        variants = hl.read_matrix_table(current_dir)
         annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
-        
-    if ("annotateExAC" in step):
-        print("step annotate ExAC (output: {})".format(utils.buildDestinationExAC(destination, fileName, somaticFlag)))
-        if not current_dir.endswith(fileName):
-            current_dir = current_dir + "/" + fileName
-        print ("source file: {}".format(current_dir))
-        #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        variants = hl.read_table(current_dir)
-        annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
-        #current_dir = utils.buildDestinationExAC(destination, fileName, somaticFlag)
-        
+
+
+    if ("annotateVEP" in step):
+        input_file = utils.buildFileName(configuration["origin_path"], chrom)
+        outpiut_file = utils.buildFileName(destination, chrom)
+        print ("step annotate VEP (input: {}; output: {})".format(input_file, outpiut_file))
+        if(annotStep):
+            raise Exception("You already run an annotation step and now trying to run VEP.")
+        annotStep = True
+        variants = hl.methods.read_matrix_table(input_file)
+        annotations.annotateVEP(hl, variants, outpiut_file, configuration["vep"], number_partitions)
+
+    if ("annotatedbNSFP" in step):
+        input_file = utils.buildFileName(configuration["origin_path"], chrom)
+        outpiut_file = utils.buildFileName(destination, chrom)
+        print("step annotate dbNSFP (input: {}; output: {})".format(input_file, outpiut_file))
+        if(annotStep):
+            raise Exception("You already run an annotation step and now trying to run dbNSFP.")
+        annotStep = True
+        variants = hl.read_matrix_table(input_file)
+        annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), outpiut_file)
+
+    if ("annotatecadd" in step):
+        input_file = utils.buildFileName(configuration["origin_path"], chrom)
+        outpiut_file = utils.buildFileName(destination, chrom)
+        print("step annotate dbcadd (input: {}; output: {})".format(input_file, outpiut_file))
+        if(annotStep):
+            raise Exception("You already run an annotation step and now trying to run dbCADD.")
+        annotStep = True
+        variants = hl.read_matrix_table(input_file)
+        annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), outpiut_file)
+
+    if ("annotateclinvar" in step):
+        input_file = utils.buildFileName(configuration["origin_path"], chrom)
+        outpiut_file = utils.buildFileName(destination, chrom)
+        print("step annotate clinvar (input: {}; output: {})".format(input_file, outpiut_file))
+        if(annotStep):
+            raise Exception("You already run an annotation step and now trying to run ClinVar.")
+        annotStep = True
+        variants = hl.read_matrix_table(input_file)
+        annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), outpiut_file)
+
+    if ("annotateExomesGnomad" in step):
+        input_file = utils.buildFileName(configuration["origin_path"], chrom)
+        outpiut_file = utils.buildFileName(destination, chrom)
+        print("step annotate exomes gnomad (output: {})".format(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)))
+        if(annotStep):
+            raise Exception("You already run an annotation step and now trying to run gnomeAD.")
+        annotStep = True
+        variants = hl.read_matrix_table(input_file)
+        annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), outpiut_file)
+
+
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform (output: {})".format(utils.buildDestinationTransform(destination, somaticFlag)))
-        print ("loading from " + utils.buildDestinationExAC(destination, fileName, somaticFlag))
-        annotated = hl.read_table(utils.buildDestinationExAC(destination, fileName, somaticFlag))
-        transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
+        print ("loading from " + utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+        annotated = hl.read_matrix_table(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+        transform.transform(hl, annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
 
-    if "readDenseLog" in step:
-        print ("step readDenseLog")
-        path = '{} /log-chrom-{}'.format( configuration[ 'combine' ][ 'denseMatrix_path' ], chrom )
-        z = combine.load_table_log( sqlContext, path )
+
+
+    if("transDenseMatrix" in step):
+        print ("step transform dense matrix")
+        print ("source file is " + sourceFileName)
+        print ("current_dir (1) is " + current_dir)
+        try:
+            nmatrix = configuration[ "combine" ][ "nmatrix" ]
+            dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        except:
+            raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
+        
+        if current_dir is "":
+            current_dir = "/".join(sourceFileName.split("/")[:-1])
+
+        print ("current_dir (loading from) (2) is " + current_dir)
+        
+        if nmatrix == "all":
+            mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
+            nmatrix = [ ii for ii in range(0, len(mapping)) ]
+
+        start_dir = current_dir
+        for ii in nmatrix:
+            in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(start_dir, str(chrom), str(ii))
+            fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
+
+            variants = hl.read_matrix_table(in_file)
+            transform.transformDenseMatrix(hl, variants, utils.buildDestinationTransform(destination, somaticFlag), ii, chrom)
+
+
+    if ("pushDenseMatrix" in step):
+        print ("step to elastic dense matrix")
+        es_conf = {
+            "es.net.http.auth.user": configuration["elasticsearch"]["user"],
+            "es.net.http.auth.pass": configuration["elasticsearch"]["pwd"],
+            "es.nodes": configuration["elasticsearch"]["host"],
+            "es.port": configuration["elasticsearch"]["port"]
+        }
+        #print(es_conf)
+
+        host = configuration["elasticsearch"]["host"]
+        port = configuration["elasticsearch"]["port"]
+        user = configuration["elasticsearch"]["user"]
+        psw = configuration["elasticsearch"]["pwd"]
+
+
+        try:
+            nmatrix = configuration[ "combine" ][ "nmatrix" ]
+            dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        except:
+            raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
+        
+        
+        if nmatrix == "all":
+            mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
+            nmatrix = [ ii for ii in range(0, len(mapping)) ]
+
+        print(nmatrix)
+        print(destination)
+
+
+        idx_name_base = configuration["elasticsearch"]["index_name"]
+        if "nmatrix" not in idx_name_base:
+            raise Exception("[ERROR]: Provided index with no 'nmatrix' substring")
+
+        start_dir = current_dir
+        for ii in nmatrix:
+            idx_name = idx_name_base.replace('nmatrix', str(ii))
+            if index.index_exists(host, port, idx_name, user, psw):
+                raise Exception('[ERROR]: Trying to perform a "pushDenseMatrix" to an existing index "{0}"'.replace(idx_name))
+
+            print("creating {0}".format(idx_name))
+            index.create_index_snv(host, port, idx_name, configuration["elasticsearch"]["type"], configuration["elasticsearch"]["num_shards"], configuration["elasticsearch"]["num_replicas"], user, psw)
+
+            print("pushing {0}".format(utils.buildOriginToElasticDenseMatrix(destination, ii, chrom, somaticFlag)))
+            variants = sqlContext.read.load(utils.buildOriginToElasticDenseMatrix(destination, ii, chrom, somaticFlag))\
+                                  .withColumn("chrom",lit(chrom))
+            variants.printSchema()
+            variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
+            print("END")
+
+
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):
@@ -349,23 +582,6 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
 
-        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
-        data_ip = configuration["datamanagement"]["ip"]
-        data_url = configuration["datamanagement"]["host"]
-        data_token = configuration["datamanagement"]["token"]
-        index_name = configuration["elasticsearch"]["index_name"]
-
-        tracking.update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token)
-        tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
-
-
-
-        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
-        data_ip = configuration["datamanagement"]["ip"]
-        data_url = configuration["datamanagement"]["host"]
-        data_token = configuration["datamanagement"]["token"]
-        index_name = configuration["elasticsearch"]["index_name"]
-        tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
 
     
     # [WORK IN PROGRESS] It till update a secondary index to maintain a revision of the last index per project
@@ -450,6 +666,13 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             variants = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
             count += variants.count()
         print("\nTotal number of variants: " + str(count) + "\n")
+
+    if 'listGenes' in step:
+        for chrm in range(1, 26):
+            dta = hl.read_table('hdfs://rdhdfs1:27000//test/rdconnect-ES6/1488/6.7.0/annotatedVEPdbnSFPCaddClinvar/variants{}.ht'.format(chrm))
+            print('hdfs://rdhdfs1:27000/test/tmp/rdconn_genes_chrm{}.tsv'.format(chrm))
+            dta['effs']['gene_name'].export('hdfs://rdhdfs1:27000/test/tmp/rdconn_genes_chrm{}.tsv'.format(chrm), delimiter='\t', missing='')
+
 
 if __name__ == "__main__":
     # Command line options parsing

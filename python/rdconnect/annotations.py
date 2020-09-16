@@ -34,15 +34,7 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
     print('[importInternalFreq] - originPath: {0}'.format(originPath))
     vcf = hl.import_vcf(originPath, force_bgz = True, array_elements_required = False, min_partitions = 2)
     vcf = hl.split_multi_hts(vcf)
-    vcf_2 = vcf.transmute_entries(sample = hl.struct(
-        sample = vcf.s,
-        ad = vcf.AD[1] / hl.sum(vcf.AD),
-        dp = vcf.DP,
-        gtInt = vcf.GT,
-        gt = hl.str(vcf.GT),
-        gq = vcf.GQ
-    ))
-    vcf_2 = vcf_2.annotate_rows(
+    vcf_2 = vcf.annotate_rows(
         samples_germline = hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf_2.sample))
     )
     vcf_2 = vcf_2.annotate_rows(
@@ -53,18 +45,15 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
         num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf_2.samples_germline)),
         dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline)))
     )
-    vcf_3 = vcf_2.drop('rsid','qual','filters','info', 'sample', 'samples_germline')\
-        .rows()
-    vcf_3.key_by(vcf_3.locus, vcf_3.alleles).distinct().write(destinationPath, overwrite = True)
+    vcf_2.write(destinationPath, overwrite = True)
     print('[importInternalFreq] - destinationPath: {0}'.format(destinationPath))
 
 
-def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
+def loadDenseMatrix( hl, sourcePath, destinationPath, nPartitions ):
     lgr = create_logger( 'loadDenseMatrix' )
-    lgr.debug( 'Argument "originPath" filled with "{}"'.format( originPath ) )
-    lgr.debug( 'Argument "sourcePath" filled with "{}"'.format( sourcePath ) )
-    lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
-    lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
+    #lgr.debug( 'Argument "sourcePath" filled with "{}"'.format( sourcePath ) )
+    #lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
+    #lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
     try:
         vcf = hl.read_matrix_table( sourcePath )#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
         x = [y.get('s') for y in vcf.col.collect()]
@@ -95,9 +84,10 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
         )
         lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
         lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
-        vcf = vcf.rows()
-        vcf = vcf.key_by( vcf.locus, vcf.alleles )
-        vcf = vcf.distinct().write( destinationPath, overwrite = True )
+        #vcf = vcf.rows()
+        #vcf = vcf.key_by( vcf.locus, vcf.alleles )
+        #vcf = vcf.distinct().write( destinationPath, overwrite = True )
+        vcf.write(destinationPath, overwrite=True)
     except Exception as ex:
         lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )
         lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )
@@ -133,14 +123,15 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
                           samples_germline=hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ),hl.agg.collect(vcf.sample))) 
         vcf = vcf.annotate_rows(freqIntGermline = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
                                             truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
-                 .drop("sample") \
-                 .rows() 
+                .drop("sample") # \
+        #         .rows() 
         if (originPath != ""):
             print ("[INFO]:   . Provided origin path '{}' to be loaded and merged.".format(originPath))
             somatic = hl.read_table(originPath)
             vcf = merge(hl,vcf,somatic)
         print ("[INFO]:   . Output VCF file will be saved to '{}'".format(destinationPath))
-        vcf.key_by(vcf.locus,vcf.alleles).distinct().write(destinationPath,overwrite=True)
+        #vcf.key_by(vcf.locus,vcf.alleles).distinct().write(destinationPath,overwrite=True)
+        vcf.write(destinationPath, overwrite=True)
         return True
     except ValueError:
         print (ValueError)
@@ -422,11 +413,13 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("Running vep")
     print("origin is ", variants, vepPath)
     print("destination is", destinationPath)
-    varAnnotated = hl.vep(variants,vepPath)
-    varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
+    varAnnotated = hl.vep(variants, vepPath)
+    # varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
+    #                                      rs = varAnnotated.vep.colocated_variants[0].id)
+    varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
                                          rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated.drop("vep") \
-                .write(destinationPath,overwrite=True)
+                .write(destinationPath, overwrite=True)
 
 def mt_pred_annotations(hl, annotations):
     """ Annotations for dbNSFP
@@ -489,7 +482,8 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     dbnsfp = hl.read_table(dbnsfpPath)
-    variants.annotate(
+    # variants.annotate(
+    variants.annotate_rows(
         gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
         gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
         gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
@@ -503,7 +497,7 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
         sift_pred=sift_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
         sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
         cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID) \
-            .write(destinationPath,overwrite=True)
+            .write(destinationPath, overwrite=True)
 
 def annotateCADD(hl, variants, annotationPath, destinationPath):
     """ Adds CADD annotations to variants.
@@ -515,7 +509,9 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
     cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .rows() \
              .key_by("locus","alleles")
-    variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
+    # variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
+    #        .write(destinationPath,overwrite=True)
+    variants.annotate_rows(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
 
 def clinvar_filtering(hl, annotation, is_filter_field):
@@ -574,14 +570,14 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
     #     .rows() \
     #     .key_by("locus","alleles")
     int_freq = hl.read_table(annotationPath).key_by("locus","alleles")
-    variants.annotate(
+    variants = variants.annotate_rows(
         internalFreq = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
         internalFreqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
         internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
     )
     variants.write(destinationPath, overwrite = True)
     print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
-
+    
 def annotateClinvar(hl, variants, annotationPath, destinationPath):
     """ Adds Clinvar annotations to variants.
          :param HailContext hl: The Hail context
@@ -592,13 +588,14 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
     clinvar = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
                 .rows() \
                 .key_by("locus","alleles")
-    variants.annotate(
+    # variants.annotate(
+    variants.annotate_rows(
         clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
         clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
         clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False),"|"), hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False),"|")),
         clinvar_filter=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,True))
     ) \
-            .write(destinationPath,overwrite=True)
+            .write(destinationPath, overwrite=True)
     
 def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 
@@ -610,7 +607,8 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
     gnomad = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
                .rows() \
                .key_by("locus","alleles")
-    variants.annotate(
+    #variants.annotate(
+    variants.annotate_rows(
         gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_an=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
@@ -618,21 +616,20 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
         gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_an_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_filter=hl.cond(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
-) \
-            .write(destinationPath,overwrite=True)
+    ).write(destinationPath, overwrite=True)
     
-def annotateExAC(hl, variants, annotationPath, destinationPath):
-    """ Adds ExAC annotations to a dataset. 
-         :param HailContext hl: The Hail context
-         :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the ExAC annotation vcf can be found
-         :param string destinationPath: Path were the new annotated dataset can be found
-    """
-    exac = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-             .rows() \
-             .key_by("locus","alleles")
-    variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
-            .write(destinationPath,overwrite=True)
+# def annotateExAC(hl, variants, annotationPath, destinationPath):
+#     """ Adds ExAC annotations to a dataset. 
+#          :param HailContext hl: The Hail context
+#          :param VariantDataset variants: The variants to annotate
+#          :param string annotationPath: Path were the ExAC annotation vcf can be found
+#          :param string destinationPath: Path were the new annotated dataset can be found
+#     """
+#     exac = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
+#              .rows() \
+#              .key_by("locus","alleles")
+#     variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
+#             .write(destinationPath,overwrite=True)
 
 def CGIFilter(hl, filter_field):
     return (hl.case()

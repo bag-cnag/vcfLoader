@@ -23,9 +23,28 @@ def update_version(url):
     ver, rev = str(old_version).split('.')
     new_version=ver + '.' + str(int(rev)+1)
     return url.replace(old_version,new_version)
+
+
+def version_bump( uri, increment = 'version' ):
+    pos = { 'version': 0, 'revision': 1, 'iteration': 2 }[ increment.lower() ]
+
+    splitted = uri.split('/')
+    old_version = splitted[ len( splitted ) - 1 ]
+    pack = str( old_version ).split( '.' )
+    pack[ pos ] = str( int( pack[ pos ] ) + 1 )
+
+    if increment.lower() == 'version':
+        pack[ 1 ] = "0"
+
+    if increment.lower() in ('version', 'revision'):
+        pack[ 2 ] = "0"
+
+    new_version = '.'.join( pack )
     
-def buildFileName(name,chrom):
-    return name.replace("chromosome",chrom)
+    return uri.replace( old_version, new_version )
+    
+def buildFileName(name, chrom):
+    return name.replace("chromosome", chrom)
 
 def buildDestinationVEP(destination, fileName, somatic = False):
     if not somatic:
@@ -74,3 +93,6 @@ def buildOriginToElastic(destination, chrom, somatic = False):
         return destination+"/variants/chrom="+chrom
     else:
         return destination+"/variants_somatic/chrom="+chrom
+
+def buildOriginToElasticDenseMatrix(destination, nmtx, chrom, somatic = False):
+    return destination+"/variants/chrom-" + chrom + "-mtx-" + str(nmtx)

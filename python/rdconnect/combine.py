@@ -5,6 +5,8 @@ import hail as hl
 import os,requests,json
 from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
+from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
+from hail.experimental.vcf_combiner.vcf_combiner import transform_gvcf
 from rdconnect import utils
 from rdconnect.annotations import truncateAt
 from datetime import datetime
@@ -33,22 +35,28 @@ def resource(filename):
     return os.path.join(filename)
 
 
-def getExperimentStatus( group, url_project, host_project, token ):
+def getExperimentStatus( group, url_project, host_project, token, is_playground ):
     """Get the status information for all experiments allowed to be used by the token."""
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'https://{0}'.format( url_project )
-    url = "{0}/datamanagement_service/api/statusbyexperiment/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    if is_playground:
+        url = "{0}/datamanagement_service/api/statusbyexperiment/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    else:
+        url = "{0}/datamanagement/api/statusbyexperiment/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentStatus: {0}'.format( url ) )
     resp = requests.get( url, headers = headers, verify = False )
     data = json.loads( resp.content )
     return data
 
-def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch ):
+def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground ):
     """Get all the experiments for a given group."""
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'https://{0}'.format( url_project )
-    url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    if is_playground:
+        url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False&elastic_index=True".format( url_project, group )
+    else:
+        url = "{0}/datamanagement/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False&elastic_index=True".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentByGroup: {0}'.format( url ) )
     resp = requests.get (url, headers = headers, verify = False )
@@ -81,203 +89,215 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     #return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
     return experiment_available
 
-def create_files_list(experiments,chrom,elastic_dataset):
-    prefix="hdfs://rdhdfs1:27000/test/rdconnect/gVCF"
-    elastic_dataset="rdcon_1488_670"
-    return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
+# def create_files_list(experiments,chrom,elastic_dataset):
+#     prefix="hdfs://rdhdfs1:27000/test/rdconnect/gVCF"
+#     elastic_dataset="rdcon_1488_670"
+#     return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
 
-def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):
+
+def create_files_list( experiments, chrom, elastic_dataset ):
+    """Creates a dictionary using RD-Connect Experiment ID as key and the its file as value."""
+    prefix = 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF'
+    rst = {}
+    for x in experiments:
+        if x[ 'RD_Connect_ID_Experiment' ] not in rst.keys() and x[ 'elastic_dataset' ] == elastic_dataset:
+            rst[ x[ 'RD_Connect_ID_Experiment' ] ] = prefix + '/' + x[ 'Owner' ] + "/" + x[ 'RD_Connect_ID_Experiment' ] + '/' + x[ 'RD_Connect_ID_Experiment' ] + '.' + chrom + '.g.vcf.bgz'
+    return rst
+
+def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, sz_large_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):
     """Iterates to create the sparse matrix."""
-    lgr = create_logger( 'createSparseMatrix', '' )
+    #lgr = create_logger( 'createSparseMatrix', '' )
+    if (new_gvcf_store_path is None or new_gvcf_store_path == '') and (gvcf_store_path is None or gvcf_store_path == ''):
+        raise Exception('To properly run "createSparseMatrix" you have to provide the arguments "gvcf_store_path" or "new_gvcf_store_path".')
+
 
     # Get all the experiments that have to processed from data-management
-    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
-    experiment_status = getExperimentStatus( group, url_project, host_project, token )
+    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, is_playground )
+    print('experiments_in_group', len( experiments_in_group ))
+    print('\t', experiments_in_group[ : 2 ])
+    experiment_status = getExperimentStatus( group, url_project, host_project, token, is_playground )
+    print('experiment_status', len( experiment_status ))
+    print('\t', experiment_status[ : 2 ])
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = False )
+    print('experiments_to_be_loaded', len( experiments_to_be_loaded ))
+    print('\t', experiments_to_be_loaded[ : 2 ])
 
     # if is_playground:
     #     files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
     # else:
     #     files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
    
-    files_to_be_loaded = create_files_list(experiments_in_group,str(chrom),"rdcon_1488_670")
-    experiments_to_be_loaded = [ x[ 'RD_Connect_ID_Experiment' ] for x in experiments_to_be_loaded ]
-    
-    
-    lgr.debug( 'Length "experiments_in_group": {}'.format( len( experiments_in_group ) ) )
-    if len( experiments_in_group ) > 0:
-        lgr.debug( '    {} -- {}'.format( experiments_in_group[ 0 ], experiments_in_group[ len( experiments_in_group ) - 1] ) )
-    lgr.debug( 'Length "experiment_status": {}'.format( len( experiment_status ) ) )
-    if len( experiment_status ) > 0:
-        lgr.debug( '    {} -- {}'.format( experiment_status[ 0 ], experiment_status[ len( experiment_status ) - 1] ) )
-    lgr.debug( 'Length "experiments_to_be_loaded": {}'.format( len( experiments_to_be_loaded ) ) )
-    if len( experiments_to_be_loaded ) > 0:
-        lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1] ) )
+    # Having the multiple IDs (RD-Connect ID and PhenoTIPS/PhenoStore ID) we can create the path to the gVCF
 
 
-    full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
-    lgr.debug( 'Length "full_ids_to_be_loaded": {}'.format( len( full_ids_to_be_loaded ) ) )
-    if len( full_ids_to_be_loaded ) > 0:
-        lgr.debug( '    {} -- {}'.format( full_ids_to_be_loaded[ 0 ], full_ids_to_be_loaded[ len( full_ids_to_be_loaded ) - 1] ) )
+    experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
+    files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
+
+
+    print('files_to_be_loaded', len( files_to_be_loaded.keys() ))
+    print('\t', list( files_to_be_loaded.keys() )[ : 2 ])
+
+    print('experiments_in_group (2)', len( experiments_in_group ))
+    print('\t', experiments_in_group[ : 2 ])
+    
+    # The argument "new_gvcf_store_path" contains the path to the new sm that will be created from the blocks of 100 experiments and saved as 1k5
+    # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
+
+    list_of_batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
+
+    print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
+    
+    for idx, batch in enumerate( list_of_batches ):
+        print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
+        # load each of the small batches of 100 experiments
+        accum = None
+        for idx, pack in enumerate( batch[ 'batches' ] ):
+            print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
+            for f in pack[ 'batch' ]:
+                print(f)
+            uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
+            loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
+            accum = uri
+
+    uris = [ b[ 'uri' ] for b in list_of_batches ]
+    if not( gvcf_store_path is None or gvcf_store_path == '' ):
+        uris = [ gvcf_store_path ] + uris
+
+    print('RUNNING STEP2 - MERGING OF CUMMULATIVE MATRICES' )
+    superbatches = create_superbatches_sparse( uris )
+    for idx, pack in enumerate( superbatches ):
+        combine_sparse_martix( '{}/chrom-{}'.format( pack[ 'in_1' ], chrom ), '{}/chrom-{}'.format( pack[ 'in_2' ], chrom ), '{}/chrom-{}'.format( pack[ 'out' ], chrom ) )
+
+def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
+    cnt = 0
+    rst = []
+
+    smallBatch = []
+    largeBatch = []
+    added = False
+    bumpRev = False
+
+    for idx, itm in enumerate( list_of_ids ):   
+        if len( smallBatch ) >= smallSize:
+            largeBatch.append( { 'uri': uri, 'batch': smallBatch } )
+            cnt += smallSize
+            smallBatch = []
+            added = True
+
+        if cnt >= largeSize:
+            rst.append( { 'uri': uri, 'batches': largeBatch } )
+            largeBatch = [ ]
+            cnt = 0
+
+        if added:
+            if cnt + smallSize >= largeSize:
+                uri = utils.version_bump( uri, 'revision' )
+                bumpRev = True
+            else:
+                uri = utils.version_bump( uri, 'iteration' )
+                bumpRev = False
+            added = False
+            
+        smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
+            'Phenotips_ID': itm[ 'Phenotips_ID' ],
+            'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
+        } )
+
+    if len( smallBatch ) != 0:
+        if not bumpRev:
+            uri = utils.version_bump( uri, 'revision' )
+        rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
+    return rst
+
+def create_superbatches_sparse( list_of_uris ):
+    rst = []
+    first_uri = list_of_uris.pop( 0 )
+    dst = utils.version_bump( first_uri, 'version' )
+    for uri in list_of_uris:
+        rst.append( { 'in_1': first_uri, 'in_2': uri, 'out': dst })
+        first_uri = dst
+        dst = utils.version_bump( dst, 'revision' )
+    return rst
+
+
+def combine_sparse_martix( uri_sm_1, uri_sm_2, destination_path ):
+    print( '[combine_sparse_martix]: merging "{}" and "{}" and saving it to "{}"'.format( uri_sm_1, uri_sm_2, destination_path ) )
+    sm_1 = hl.read_matrix_table( uri_sm_1 )
+    sm_2 = hl.read_matrix_table( uri_sm_2 )
+    comb = combine_gvcfs( [ sm_1 ] + [ sm_2 ] )
+    comb.write( destination_path, overwrite = True )
+
+
+def loadGvcf2( hl, experiments, destinationPath, gvcfStorePath, chrom, partitions ):
+    #print("[loadGvcf] {} --> {}".format( str( len( experiments ) ), destinationPath ) )
+    def transformFile( mt ):
+        return transform_gvcf(mt.annotate_rows(
+            info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
+        ))
+    def importFiles( files ):
+        x = hl.import_vcfs(
+            files,
+            partitions = interval[ 'interval' ], 
+            reference_genome = interval[ 'reference_genome' ], 
+            array_elements_required = interval[ 'array_elements_required' ]
+        )
+        return x
+
+    interval = getIntervalByChrom( chrom, partitions )
+    vcfs = [ transformFile( mt ) for mt in importFiles( [ x[ 'File' ] for x in experiments ] ) ]
+
+    if gvcfStorePath == None:
+        comb = combine_gvcfs( vcfs )
     else:
-        raise Exception( 'No experiment will be loaded and included in sparse matrix' )
-
-    # Format data
-    experiments_and_families = getExperimentsByFamily( full_ids_to_be_loaded, url_project, gpap_id, gpap_token, sort_output = False )
-
-    # Relocate experiments with no family
-    none_detected = False
-    x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    for ii in range( len( experiments_and_families ) ):
-        if experiments_and_families[ ii ][ 2 ] == '---':
-            none_detected = True
-            experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
-    y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    if none_detected:
-        warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
-
-    # Add the path to the file to be loaded
-    def buildPath2( full_list, rid, is_playground ):
-        for ff in full_list:
-            if is_playground:
-                if ff.split( '/' )[ 6 ].split( '.' )[ 0 ] == rid:
-                    return ff
-            else:
-                if ff.split( '/' )[ 7 ] == rid:
-                    return ff
-        return ''
-
-    print( "experiments_and_families", experiments_and_families )
-    for ii in range( len( experiments_and_families ) ):
-        experiments_and_families[ ii ].append( buildPath2( files_to_be_loaded, experiments_and_families[ ii ][ 0 ], is_playground ) )
-
-    # Create batches of 'size' experiments
-    batches = list( divideChunks( experiments_and_families, 100 ) )
-    lgr.debug( 'Created {} batches from {} files'.format( len( batches ), len( experiments_and_families ) ) )
-
-    bse_old = gvcf_store_path
-    bse_new = new_gvcf_store_path
+        gvcf_store = hl.read_matrix_table( gvcfStorePath )
+        comb = combine_gvcfs( [ gvcf_store ] + vcfs )
+    comb.write( destinationPath, overwrite = True )
     
-    for index, batch in enumerate( batches ):
-        if index == 0 and bse_old is None:
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-        elif index == 0 and not bse_old is None:
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
-            bse_new = utils.update_version( bse_old )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        else:
-            bse_old = bse_new
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            bse_new = utils.update_version( bse_new )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        path_to_exps = [ x[ 3 ] for x in batch ]
-        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
-
-
-
-    bse_old = gvcf_store_path
-    bse_new = new_gvcf_store_path
-    to_be_merged=[]
-    for index, batch in enumerate( batches ):
-        
-
-        if index == 0 and bse_old is None:
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-        elif index == 0 and not bse_old is None:
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
-            bse_new = utils.update_version( bse_old )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        else:
-            bse_old = bse_new
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            bse_new = utils.update_version( bse_new )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        if index % 15 == 0 and index !=0:
-            if len(to_be_merged) > 0:
-                bse_new = utils.update_version( bse_new )
-                new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-                combine_two_dataset(to_be_merged.pop(),gvcf_store_path,new_gvcf_store_path)
-                to_be_merged.append(new_gvcf_store_path)
-                bse_new = utils.update_version( bse_new )
-                new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-                lgr.debug( 'After merging Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-            else:
-                to_be_merged.append(gvcf_store_path)
-            gvcf_store_path = None
-            #bse_new = utils.update_version( bse_new )
-            #new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-
-            #lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-
-        path_to_exps = [ x[ 3 ] for x in batch ]
-        for path in path_to_exps:
-            print(path)
-        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
-    
-    if len(to_be_merged) > 0:
-            combine_two_dataset(to_be_merged.pop(),gvcf_store_path,chrom)
-
-def combine_two_dataset(gvcf_store_1_path_chrom,gvcf_store_2_path_chrom, destination_path):
-    print("merging "+gvcf_store_1_path_chrom+" with "+gvcf_store_2_path_chrom)
-    from hail.experimental.vcf_combiner import combine_gvcfs
-    gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
-    gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
-    comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
-    comb.write(destination_path, overwrite = True )
-
-def save_table_log( sc, sq, files, path ):
-    rdd = sc.parallelize( files )
-    experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
-    df = sq.createDataFrame( experiments )
-    df.repartition( 1 ).write.format( 'csv' ).mode( 'overwrite' ).save( path, header = 'true' )
-
-
-def load_table_log( sq, path ):
-    #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
-    sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
-    x = sparlse_log.select( 'RD_Connect_ID' ).collect()
-    y = sparlse_log.select( 'Dense_Path' ).collect()
-    print( 'load_table_log : {}'.format( path ) )
-    return list( zip( x, y ) )
-
 
 def create_batches_by_family( experiments, size = 1000 ):
     rst = []
+    mtx = 0
     while len( experiments ) > 0:
         batch = []
         cnt = 0
         while cnt <= size and len( experiments ) > 0:
             fam = experiments[ 0 ][ 2 ]
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
+            for x in exp_fam:
+                x.append('mtx' + str(mtx))
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
-        rst.append( batch )
+        batch.sort(key = lambda x: x[ 0 ])
+        rst += batch
+        mtx += 1
     return rst
 
 
-def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
-    lgr = create_logger( 'createDenseMatrix', '' )
+def create_family_groups(sc, sq, chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, dense_matrix_path, is_playground):
+    lgr = create_logger('create_family_groups', '')
+    chrom = "21"
+    lgr.debug('OVERWRITING chrom to chrom-21')
 
     if sparse_matrix_path is None:
         raise 'No information on "sparse_matrix_path" was provided.'
-    lgr.debug( 'Read from in {0}/chrom-{1}'.format( sparse_matrix_path, chrom ) )
     
     path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    lgr.debug( 'READING from in {0}'.format( path_matrix ) )
     sparse_matrix = hl.read_matrix_table( path_matrix )
     
-    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
-    lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
+    lgr.debug('Total of {0} experiments'.format( len( experiments_in_matrix ) ))
 
-    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
+    # Get all the experiments that have to processed from data-management
+    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
+    print('experiments_in_group', len( experiments_in_group ))
+    print('\t', experiments_in_group[ : 2 ])
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+    print('full_ids_in_matrix', len( full_ids_in_matrix ))
+    print('\t', full_ids_in_matrix[ : 2 ])
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+    print('experiments_and_families', len( experiments_and_families ))
 
     # Relocate experiments with no family
     none_detected = False
@@ -289,134 +309,77 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
+    experiments_and_families.sort(key=lambda x: x[ 0 ])
 
     batches = create_batches_by_family( experiments_and_families, 1000 )
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
+    #for ii, bat in enumerate(batches):
+    #    print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
+    for sam in batches:
+        print(sam[0], "\t", sam[1], "\t", sam[2], "\t", sam[3])
 
+    log_path = '{0}/mapping'.format(dense_matrix_path)
+    rdd = sc.parallelize(batches)
+    experiments = rdd.map(lambda x: Row( RD_Connect_ID = x[ 0 ], PhenoTips = x[ 1 ], Family = x[ 2 ], DMatrix = x[ 3 ]))
+    df = sq.createDataFrame(experiments)
+    df.repartition(1).write.format('csv').mode('overwrite').save(log_path, header = 'true')
+
+
+def load_table_log( sq, path ):
+    sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
+    table = [ (str(row.RD_Connect_ID), str(row.PhenoTips), str(row.Family), int(str(row.DMatrix).replace("mtx", ""))) for row in sparlse_log.collect() ]
+    mapping = []
+    for mtx in list(set([ x[3] for x in table ])):
+        y = [ x for x in table if x[3] == mtx ]
+        #print("\t{} / {} : {} --> {}".format(mtx, len(y), y[0], y[len(y)- 1]))
+        mapping.append(y)
+    #print('table rows: {}'.format(len(table)))
+    #print('mapping len: {}'.format(len(mapping)))
+    mapping.sort(key=lambda x: x[0][3])
+    return mapping
+
+
+
+def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
+    lgr = create_logger( 'createDenseMatrix', '' )
+
+    mapping = load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
+
+    if sparse_matrix_path is None:
+        raise 'No information on "sparse_matrix_path" was provided.'
     
-    first = True
-    dm = dense_matrix_path
-    log_files = []
-    log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
+    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    lgr.debug( 'READING from in {0}'.format( path_matrix ) )
+    sparse_matrix = hl.read_matrix_table( path_matrix )
+    
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
+    lgr.debug('Total of {0} experiments'.format( len( experiments_in_matrix ) ))
+
     try:
-        for idx, batch in enumerate( batches ):
-            lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
+        for idx, batch in enumerate( mapping ):
+            lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
+            print("1.", hl.len(sam), sam)
+            print("2.", sam.contains( sparse_matrix['s'] ))
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
+            print("after filter - cols")
             small_matrix = hl.experimental.densify( small_matrix )
+            print("after densify")
             small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
-            if first:
-                first = False
-            else:
-                dm = utils.update_version( dm )
-            path = '{0}/chrm-{1}'.format( dm, chrom )
-            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
+            print("after filter - rows")
+            path = '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, idx )
+            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
             small_matrix.write( path, overwrite = True )
             lgr.debug( "Ending writing dense matrix" )
-            for ff in batch:
-                log_files.append( ( ff[ 0 ], chrom, path ) )
     except Exception as ex:
-        save_table_log( sc, sq, log_files, log_path )
         raise ex
 
-    save_table_log( sc, sq, log_files, log_path )
-
-    # experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
-    # full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-    # experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
-
-    # experiments_by_family = {}
-    # for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
-    #     experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
-    # lgr.debug( 'Total of {0} families'.format( len( experiments_by_family.keys() ) ) )
-
-    # x = len( experiments_by_family.keys() )
-    # none_fam = None in experiments_by_family.keys()
-    # if none_fam:
-    #     z = '; '.join( experiments_by_family[ None ] )
-    #     for ind in experiments_by_family[ None ]:
-    #         if type( ind ) == "list":
-    #             experiments_by_family[ ind ] = ind
-    #         else:
-    #             experiments_by_family[ ind ] = [ ind ]
-    #     y = len( experiments_by_family.keys() )
-    #     warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
-
-    # size = 100
-    # chunks = divideChunksFamily( experiments_by_family, size = size )
-    # lgr.debug( 'Number of dense matrix to be created: {0} (max size of {1})'.format( len( chunks ), size ) )
-
-    # first = True
-    # dm = denseMatrix_path
-    # for idx, chunk in enumerate( chunks ):
-    #     lgr.info( 'Filtering sparse matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-    #     dense_by_family = []
-    #     for idx2, fam in enumerate( chunk ):
-    #         lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
-    #         sam = hl.literal( experiments_by_family[ fam ], 'array<str>' ) # hl.literal( experiments_in_matrix[ 0:500 ], 'array<str>' )
-    #         familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
-    #         familyMatrix = hl.experimental.densify( familyMatrix )
-    #         # familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
-    #         # familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
-    #         familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
-    #         familyMatrix.write( '{0}/chrm-{1}-family/{2}'.format( denseMatrix_path, chrom, fam ), overwrite = True )
-    #         dense_by_family.append( familyMatrix )
-
-    #     lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-    #     mts_ = dense_by_family[:]
-    #     ii = 0
-    #     while len( mts_ ) > 1:
-    #         ii += 1
-    #         lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
-    #         tmp = []
-    #         for jj in range( 0, len(mts_), 2 ):
-    #             if jj+1 < len(mts_):
-    #                 tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
-    #             else:
-    #                 tmp.append( mts_[ jj ] )
-    #         mts_ = tmp[:]
-    #     [dense_matrix] = mts_
-
-    #     if first:
-    #         first = False
-    #     else:
-    #         dm = utils.update_version( dm )
-    #     lgr.info( 'Writing dense matrix to disk ({0})'.format( dm ) )
-    #     dense_matrix.write( '{0}/chrm-{1}'.format( dm, chrom ), overwrite = True )
-    #     #familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
-
-    
-
-
-
-# def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):
-#     """Function to get the IDs from phenotips, from experiments, and from family."""
-#     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
-#     url = 'http://rdproto10:8082/phenotips/ExportMultiple'
-#     headers = { 'Content-Type': 'application/json' }
-#     body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
-#     resp = requests.post( url, headers = headers, json = body, verify = False )
-#     data = resp.json()
-    
-#     parsed = {}
-#     for elm in data:
-#         pid = list( elm.keys() )[ 0 ]
-#         if type( elm[ pid ] ) == str:
-#             fam = '---'
-#         else: 
-#             fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
-#         parsed[ pid ] = fam
-
-#     rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Phenotips_ID' ], parsed[ pak[ 'Phenotips_ID' ] ] ] for pak in pids ]
-#     if sort_output:
-#         return sorted( rst, key = lambda x: x[ 2 ] )
-#     else:
-#         return rst
 
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):
     """Function to get the IDs from phenotips, from experiments, and from family."""
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
-    url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+    #url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+    url = 'http://rdcompute3:8082/phenotips/ExportMultiple'
     data=[]
     headers = { 'Content-Type': 'application/json' }
     for i in range(0,(len(pids)//1000)+1) :
@@ -465,10 +428,19 @@ def getIntervals( chrom, max_pos, partitions ):
 
 
 def getIntervalByChrom( chrom, partitions ):
+    if chrom in ('23', 23):
+        chrom = 'MT'
+    if chrom in ('24', 24):
+        chrom = 'X'
+    if chrom in ('25', 25):
+        chrom = 'Y'
     intervals = { # information from https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh37
         "25": { "interval": getIntervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
+         "Y": { "interval": getIntervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
         "24": { "interval": getIntervals( chrom, 155270560, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
+         "X": { "interval": getIntervals( chrom, 155270560, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
         "23": { "interval": getIntervals( chrom,     16570, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
+        "MT": { "interval": getIntervals( chrom,     16570, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
         "22": { "interval": getIntervals( chrom,  51304566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
         "21": { "interval": getIntervals( chrom,  48129895, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
         "20": { "interval": getIntervals( chrom,  63025520, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },

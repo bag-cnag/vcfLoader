@@ -58,11 +58,34 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 	print('[INFO]:   . Provided update content: "{}"'.format(str(data)))
 	print('[INFO]:   . Created query URL for data-management: {}'.format(url))
 
+
+	accum = []
 	for sam in full_samples:
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			raise Exception('[ERROR]   . Information for sample "{}" could not be updated.'.format(sam))
+			uri = "/datamanagement/api/statusbyexperiment/?forceupdate=true&experiment="
+			q_url = "https://" + data_ip + uri
+			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
+			if response2.status_code != 200:
+				raise Exception('[ERROR]   . Information for sample "{}" could not be updated. Querying for second time with extended data-body'.format(sam))
+				accum.append((sam, response, response2))
+				# data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
+				# 	\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
+				# 	\"qc\": \"pass\",					\"coverage\": \"pass\", \
+				# 	\"cnv\": \"waiting\",				\"variantCalling\": \"pass\", \
+				# 	\"rohs\": \"pass\",					\"genomicsdb\": \"pass\", \
+				# 	\"multivcf\": \"pass\",				\"hdfs\": \"pass\", \
+				# 	\"es\": \"pass\",					\"in_platform\": \"pass\", \
+				# 	\"dataset\":\"" + index_name + "\" \
+				# }"
+				# response2 = requests.post(q_url, data = data, headers = headers, verify = False)
+				# if response2.status_code != 200:
+				# 	accum.append((sam, response, response2))
+
+	if len(accum) != 0:
+		for rst in accum:
+			print(rst[ 0 ], '\t', rst[ 1 ].json(), '\t', rst[ 1 ].json())
 
 
 def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
@@ -70,7 +93,7 @@ def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
 		raise Exception("[ERROR]: (update_dm + {}) Invalid field to be updated in data data-management.".format(field))
 
 	#url = "https://platform.rd-connect.eu/datamanagement/api/statusbyexperiment/?experiment="
-	uri = "/datamanagement/api/statusbyexperiment/?experiment="
+	uri = "/datamanagement/api/statusbyexperiment/?forceupdate=true&experiment="
 	url = "https://" + data_ip + uri
 	headers = { 'accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Token ' + data_token, "Host": data_url }
 	data = "{\"" + field + "\":\"pass\"}"
@@ -91,7 +114,11 @@ def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			raise Exception('[ERROR]   . Information for sample "{}" could not be updated using "{}".'.format(sam, q_url))
+			uri = "/datamanagement/api/statusbyexperiment/?forceupdate=true&experiment="
+			q_url = "https://" + data_ip + uri
+			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
+			if response2.status_code != 200:
+				raise Exception('[ERROR]   . Information for sample "{}" could not be updated. Querying for second time with extended data-body'.format(sam))
 
 def update_dm_densematrix(initial_vcf, index_name, data_ip, data_url, data_token, value):
 	#url = "https://platform.rd-connect.eu/datamanagement/api/statusbyexperiment/?experiment="
