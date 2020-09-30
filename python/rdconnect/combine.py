@@ -340,13 +340,13 @@ def load_table_log( sq, path ):
 
 
 
-def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
+def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
     mapping = load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
 
     if sparse_matrix_path is None:
-        raise 'No information on "sparse_matrix_path" was provided.'
+        raise Exception('No information on "sparse_matrix_path" was provided.')
     
     path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
     lgr.debug( 'READING from in {0}'.format( path_matrix ) )
@@ -359,14 +359,11 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
         for idx, batch in enumerate( mapping ):
             lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
-            print("1.", hl.len(sam), sam)
-            print("2.", sam.contains( sparse_matrix['s'] ))
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
-            print("after filter - cols")
+            small_matrix = small_matrix.key_rows_by(small_matrix.locus, small_matrix.alleles)
+            small_matrix = hl.experimental.sparse_split_multi( small_matrix, filter_changed_loci=True )
             small_matrix = hl.experimental.densify( small_matrix )
-            print("after densify")
-            small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
-            print("after filter - rows")
+            small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.GT.is_non_ref() ) )
             path = '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, idx )
             lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
             small_matrix.write( path, overwrite = True )
