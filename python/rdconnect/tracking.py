@@ -86,7 +86,7 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 
 	if len(accum) != 0:
 		for rst in accum:
-			print(rst[ 0 ], '\t', rst[ 1 ].json(), '\t', rst[ 1 ].json())
+			print(rst[ 0 ], '\t', rst[ 1 ])
 		raise Exception("New samples could not be created")
 
 
