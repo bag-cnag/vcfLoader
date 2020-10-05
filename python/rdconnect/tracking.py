@@ -64,10 +64,16 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
+			print("response ---->", q_url, data, headers)
+			print(response.status_code)
+			print(resoinse.reason)
 			uri = "/datamanagement/api/statusbyexperiment/?forceupdate=true&experiment="
 			q_url = "https://" + data_ip + uri
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
+				print("response2 ---->", q_url, data, headers)
+				print(response2.status_code)
+				print(response2.reason)
 				print('[ERROR]   . Information for sample "{}" could not be updated. Querying for second time with extended data-body'.format(sam))
 				accum.append((sam, response, response2))
 				data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
@@ -79,10 +85,14 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 					\"es\": \"pass\",					\"in_platform\": \"pass\", \
 					\"dataset\":\"" + index_name + "\" \
 				}"
-				response2 = requests.post(q_url, data = data, headers = headers, verify = False)
-				print("[ERROR - CNT]: ", response2.status_code)
-				if response2.status_code != 200:
+				response3 = requests.post(q_url, data = data, headers = headers, verify = False)
+				print("[ERROR - CNT]: ", response3.status_code)
+				if response3.status_code != 200:
+					print("response3 ---->", q_url, data, headers)
+					print(response3.status_code)
+					print(response3.reason)
 					accum.append(('error', sam))
+					raise Exception("New samples could not be created")
 
 	if len(accum) != 0:
 		for rst in accum:
