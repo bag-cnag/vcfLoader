@@ -66,7 +66,7 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 		if response.status_code != 200:
 			print("response ---->", q_url, data, headers)
 			print(response.status_code)
-			print(resoinse.reason)
+			print(response.reason)
 			uri = "/datamanagement/api/statusbyexperiment/?forceupdate=true&experiment="
 			q_url = "https://" + data_ip + uri
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
