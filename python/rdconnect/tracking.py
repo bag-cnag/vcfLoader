@@ -82,11 +82,12 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 				response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 				print("[ERROR - CNT]: ", response2.status_code)
 				if response2.status_code != 200:
-					accum.append((sam, response, response2))
+					accum.append(('error', sam))
 
 	if len(accum) != 0:
 		for rst in accum:
 			print(rst[ 0 ], '\t', rst[ 1 ].json(), '\t', rst[ 1 ].json())
+		raise Exception("New samples could not be created")
 
 
 def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
