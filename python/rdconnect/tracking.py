@@ -68,7 +68,7 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 			q_url = "https://" + data_ip + uri
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
-				raise Exception('[ERROR]   . Information for sample "{}" could not be updated. Querying for second time with extended data-body'.format(sam))
+				print('[ERROR]   . Information for sample "{}" could not be updated. Querying for second time with extended data-body'.format(sam))
 				accum.append((sam, response, response2))
 				data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
 					\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
@@ -80,6 +80,7 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 					\"dataset\":\"" + index_name + "\" \
 				}"
 				response2 = requests.post(q_url, data = data, headers = headers, verify = False)
+				print("[ERROR - CNT]: ", response2.status_code)
 				if response2.status_code != 200:
 					accum.append((sam, response, response2))
 
