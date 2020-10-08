@@ -86,7 +86,7 @@ def loadDenseMatrix( hl, sourcePath, destinationPath, nPartitions ):
         lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
         lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
         #vcf = vcf.rows()
-        vcf = vcf.key_by( vcf.locus, vcf.alleles )
+        vcf = vcf.key_rows_by( vcf.locus, vcf.alleles )
         vcf = vcf.distinct().write( destinationPath, overwrite = True )
         #vcf.write(destinationPath, overwrite=True)
     except Exception as ex:
