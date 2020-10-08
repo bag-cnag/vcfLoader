@@ -82,7 +82,7 @@ def loadDenseMatrix( hl, sourcePath, destinationPath, nPartitions ):
                 lambda x: ( x.dp > MIN_DP ) & ( x.gq > MIN_GQ ), hl.agg.collect( vcf.sample )
             )
         )
-        vcf = vcf.filter_rows( hl.agg.any( (small_matrix.sample.gtInt.is_non_ref()) & (small_matrix.sample.dp > 10) & (small_matrix.sample.gq > 20)) )
+        vcf = vcf.filter_rows( hl.agg.any( (vcf.sample.gtInt.is_non_ref()) & (vcf.sample.dp > 10) & (vcf.sample.gq > 20)) )
         lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
         lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
         #vcf = vcf.rows()
