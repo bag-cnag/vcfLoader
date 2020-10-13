@@ -528,8 +528,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         start_dir = current_dir
         for ii in nmatrix:
             idx_name = idx_name_base.replace('nmatrix', str(ii))
-            if index.index_exists(host, port, idx_name, user, psw):
-                raise Exception('[ERROR]: Trying to perform a "pushDenseMatrix" to an existing index "{0}"'.replace(idx_name))
+            #if index.index_exists(host, port, idx_name, user, psw):
+            #    raise Exception('[ERROR]: Trying to perform a "pushDenseMatrix" to an existing index "{0}"'.replace(idx_name))
 
             print("creating {0}".format(idx_name))
             index.create_index_snv(host, port, idx_name, configuration["elasticsearch"]["type"], configuration["elasticsearch"]["num_shards"], configuration["elasticsearch"]["num_replicas"], user, psw)
