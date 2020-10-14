@@ -9,12 +9,13 @@ def usage():
 
 def optionParser(argv):
     chrom = ""
+    nchroms = ""
     step = ""
     cores = "1"
     path = "config.json"
     somaticFlag = False
     try:
-        opts, args = getopt.getopt(argv, "c:p:s:n:co:d:", ["chrom=", "path=", "step=", "cores=", "somatic_data="])
+        opts, args = getopt.getopt(argv, "c:p:s:n:co:d:", ["chrom=", "path=", "step=", "nchroms=", "cores=", "somatic_data="])
         print('[INFO] args: {}'.format(' / '.join(args)))
     except getopt.GetoptError:
         usage()
@@ -28,6 +29,8 @@ def optionParser(argv):
             step = arg
         elif opt in ("-co", "--cores"):
             cores = arg
+        elif opt in ("n", "--nchroms"):
+            nchroms = arg
         elif opt in ("-d", "--somatic_data"):
             if arg.lower() == 'yes':
                 somaticFlag = True
@@ -88,4 +91,4 @@ if __name__ == "__main__":
     hl.init(spark.sparkContext,tmp_dir="hdfs://rdhdfs1:27000/test/tmp")
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main( sqlContext, spark.sparkContext, main_conf, chrom, step, somaticFlag )
+    main(sqlContext, spark.sparkContext, main_conf, chrom, step, somaticFlag)
