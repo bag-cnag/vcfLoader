@@ -2,10 +2,11 @@ import sys
 import getopt
 import logging
 
+import config
+
 # USAGE SECTION ---------------------------------------------------------------
 def usage():
     print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-p | --path) <config_path> (-d | --somatic_data)")
-
 
 def optionParser(argv):
     chrom = ""
