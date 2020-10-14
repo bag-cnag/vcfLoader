@@ -13,6 +13,6 @@ setup(
     license = "MIT",
     keywords = ["API", "VCF", "gVCF", "genome", "annotation"],
     url = "",
-    packages=['vcfLoader'],
+    packages=['rdconnect'],
     long_description=read('README')
 )
