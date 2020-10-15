@@ -93,13 +93,8 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		stop_pipeline(log, 'No pipeline was provided')
 
 	step = step.split(',')
-
-	print("------->", chrom)
-	print("------->", config['process/chrom'])
 	config = config.overwrite('process/chrom', chrom)
-	print("------->", config['process/chrom'])
 	config = config.overwrite('source_path', os.path.join(config['process/source_path'], config['process/source_file']))
-	print("------->", config['process/chrom'])
 
 	if 'move_gvcf' in step:
 		mv.gvcf(config, log)
@@ -111,17 +106,17 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		#var = load.dense_matrix(local_conf log, hl, config['process']['source_path'], destination_path)
 		pass
 
-	# if 'annotateVEP' in step:
-	# 	var = annotate.vep(None, config, hl, log)
+	if 'annotateVEP' in step:
+		var = annotate.vep(None, config, hl, log)
 
-	# if 'annotatedbNSFP' in step:
-	# 	var = annotate.dbnsfp(None, config, hl, log)
+	if 'annotatedbNSFP' in step:
+		var = annotate.dbnsfp(None, config, hl, log)
 
-	# if 'annotateFullDenseMatrix' in step:
-	# 	add_funcs_from_module(annotate)
-	# 	local = config.overwrite('process/autosave', False)
-	# 	var = annotate.vep(None, local, hl, log)\
-	# 			.annotate.dbnsfp(config, hl, log)
+	if 'annotateFullDenseMatrix' in step:
+		add_funcs_from_module(annotate)
+		local = config.overwrite('process/autosave', False)
+		var = annotate.vep(None, local, hl, log)\
+				.annotate.dbnsfp(config, hl, log)
 
 
 
