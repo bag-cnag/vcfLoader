@@ -28,10 +28,10 @@ def vep(self, config, hl, log = None):
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_path = os.path.join(source_path, source_file)
 	destination_path = config['process/destination_path']
 	vep_config = config['annotation/clean/vep_config']
 	autosave = config['process/autosave']
-	print('autosave', autosave)
 
 	if self is None and log is not None:
 		log.debug('> Argument "self" was not set')
@@ -155,6 +155,7 @@ def dbnsfp(self, config, hl, log = None):
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_path = os.path.join(source_path, source_file)
 	destination_path = config['process/destination_path']
 	dbnsfp_path = config['annotation/clean/dbNSFP']
 	autosave = config['process/autosave']
