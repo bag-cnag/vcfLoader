@@ -9,7 +9,7 @@ from traceback import format_exc
 
 from utils import chrom_str_to_int, create_chrom_filename
 
-def move_gvcf(log, chrom, gvcf_list, source_path, destination_path, cmd_1, cmd_2):
+def gvcf(conf, log):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
@@ -35,21 +35,21 @@ def move_gvcf(log, chrom, gvcf_list, source_path, destination_path, cmd_1, cmd_2
 
 	Parameters
 	----------
-	chrom: str, mandatory
-		The chromosome for which (g)VCF files will be transferred
-	gvcf_list: context, mandatory
-		HAIL context
-	source_path: str, mandatory
-		List of groups and files to be moved
-	source_path: str, mandatory
-		String used to save the dense matrix
-	destination_path: str, mandatory
-		String used to save the dense matrix
-	cmd_1: str, mandatory
-		String used to save the dense matrix
-	cmd_2: str, mandatory
-		String used to save the dense matrix
+	conf: ConfigFile, mandatory
+		Configuration for the job that must include the keys 'process/chrom',
+		'process/moving_gvcf_list', 'process/moving_from', 'process/moving_to',
+		'process/moving_s1', and 'process/moving_s2'.
+	log: logger, mandatory
+		Used to track the loading process
 	"""
+	chrom = main_conf['process/chrom']
+	chrom = chrom_str_to_int(chrom)
+	gvcf_list = main_conf['process/moving_gvcf_list'], 
+	source_path = main_conf['process/moving_from'], 
+	destination_path = main_conf['process/moving_to'], 
+	cmd_1 = main_conf['process/moving_s1'], 
+	cmd_2main_conf['process/moving_s2']
+
 	log.info('Entering step "move_gvcf"')
 	log.debug('- Argument "chrom" filled with "{}"'.format(chrom))
 	log.debug('- Argument "gvcf_list" filled with "{}"'.format(gvcf_list))
@@ -57,7 +57,7 @@ def move_gvcf(log, chrom, gvcf_list, source_path, destination_path, cmd_1, cmd_2
 	log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
 	log.debug('- Argument "cmd_1" filled with "{}"'.format(cmd_1))
 	log.debug('- Argument "cmd_2" filled with "{}"'.format(cmd_2))
-	chrom = chrom_str_to_int(chrom)
+	
 	with open(gvcf_list, 'r') as rd:
 		for idx, line in enumerate(rd):
 			log.debug('Processing line #{} with content "{}"'.format(str(idx), line.strip()))

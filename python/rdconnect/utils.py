@@ -48,6 +48,26 @@ def create_chrom_filename(filename, chrom):
 	return filename.replace('chromosome', str(chrom))
 
 
+def destination_dense_matrices(destination_path, filename, somatic = False):
+	"""This function returns the path to a file annotated with VEP.
+
+	Parameters
+	----------
+	destination_path: str, mandatory
+		Path where the file will be saved.
+	filename: str, mandatory
+		Template used to create the chromosome's iterative files.
+	somatic: bool, mandatory
+		Indicates if the saved wile contains somatic mutations (set it to True)
+		or germline (set it to False).
+
+	Returns
+	-------
+	A string with the path to save the annotated VEP file.
+	"""
+	return os.path.join(destination_path, 'dense_matrices{}'.format('_somatic' if somatic else ''), filename)
+
+
 def destination_vep(destination_path, filename, somatic = False):
 	"""This function returns the path to a file annotated with VEP.
 
@@ -58,7 +78,7 @@ def destination_vep(destination_path, filename, somatic = False):
 	filename: str, mandatory
 		Template used to create the chromosome's iterative files.
 	somatic: bool, mandatory
-		Indicates if teh saved wile contains somatic mutations (set it to True)
+		Indicates if the saved wile contains somatic mutations (set it to True)
 		or germline (set it to False).
 
 	Returns
@@ -77,7 +97,7 @@ def destination_dbnsfp(destination_path, filename, somatic = False):
 	filename: str, mandatory
 		Template used to create the chromosome's iterative files.
 	somatic: bool, mandatory
-		Indicates if teh saved wile contains somatic mutations (set it to True)
+		Indicates if the saved wile contains somatic mutations (set it to True)
 		or germline (set it to False).
 
 	Returns

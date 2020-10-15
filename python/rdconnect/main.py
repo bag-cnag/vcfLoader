@@ -3,7 +3,7 @@ import sys
 import getopt
 import logging
 
-import config
+from classConfig import ConfigFile
 import moveData as mv
 import loadGenetics as load
 import annotateGenetics as annotate
@@ -88,34 +88,25 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 		stop_pipeline(log, 'No pipeline was provided')
 
 	step = step.split(',')
+	main_conf.overwrite('process/chrom', chrom)
+	destination_path = main_conf['process/destination_path']
 
     
 	if 'move_gvcf' in step:
-		mv.move_gvcf(log, chrom, 
-			main_conf['process']['moving_gvcf_list'], 
-			main_conf['process']['moving_from'], 
-			main_conf['process']['moving_to'], 
-			main_conf['process']['moving_s1'], 
-			main_conf['process']['moving_s2']
-		)
+		mv.gvcf(main_conf, log)
 
 	if 'load_dense_matrix' in step:
-		# fileName = "variants-chrom-{0}-mtx-{1}.ht".format(str(chrom), str(ii))
-		destination_path = main_conf['process']['destination_path']
-		destination_path = None if destination_path == '' else os.path.join(destination_path, 'dense_matrices')
-		var = load.dense_matrix(log, hl, main_conf['process']['source_path'], destination_path)
+		#fileName = "variants-chrom-{0}-mtx-{1}.ht".format(str(chrom), str(ii))
+		#destination_path = None if destination_path == '' else os.path.join(destination_path, 'dense_matrices')
+		#main_conf.overwrite('process/filename', )
+		#var = load.dense_matrix(local_conf log, hl, main_conf['process']['source_path'], destination_path)
+		pass
 
     if 'VEP' in step:
-		destination_path = main_conf['process']['destination_path']
-		destination_path = None if destination_path == '' else destination_path
-		var = annotate.vep(log, hl, var, main_conf['process']['source_path'], destination_path, 
-			main_conf['annotation']['clean']['vep'], main_conf['process']['autosave'])
+		var = annotate.vep(None, config, log, hl)
 
 	if 'dbNSFP' in step:
-		destination_path = main_conf['process']['destination_path']
-		destination_path = None if destination_path == '' else destination_path
-		var = annotate.dbNSFP(log, hl, var, main_conf['process']['source_path'], destination_path, 
-			main_conf['annotation']['clean']['dbNSFP'], main_conf['process']['autosave'])
+		var = annotate.dbNSFP(None, config, log, hl)
 
 
 
@@ -123,11 +114,11 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 if __name__ == "__main__":
     # Command line options parsing
     chrom, path, step, cores, somaticFlag = optionParser(sys.argv[1:])
-    main_conf = config.readConfig(path)
+    config = ConfigFile(path)
     spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
     spark = SparkSession.builder.config(conf = spark_conf).getOrCreate()
-    spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size", main_conf["resources"]["dfs_block_size"])
-    spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size", main_conf["resources"]["dfs_block_size"])
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size", config["resources/dfs_block_size"])
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size", config["resources/dfs_block_size"])
     hl.init(spark.sparkContext, tmp_dir = "hdfs://rdhdfs1:27000/test/tmp")
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
