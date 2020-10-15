@@ -196,13 +196,13 @@ def dbnsfp(self, config, hl, log = None):
 	The function returns a 'GenomicData' object.
 	"""
 	if log is not None:
-		log.info('Entering annotation step "VEP"')
+		log.info('Entering annotation step "dbSNFP"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
 	destination_path = config['process/destination_path']
-	dbnsfp_path = config['annotation/clean/dbNSFP']
+	dbnsfp_path = utils.create_chrom_filename(config['annotation/clean/dbNSFP'], config['process/chrom'])
 	autosave = config['process/autosave']
 
 	if self is None and log is not None:
