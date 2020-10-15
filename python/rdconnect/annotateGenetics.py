@@ -164,7 +164,7 @@ def dbNSFP(self, config, hl, log = None):
 		
 	if autosave and log is not None:
 		log.debug('- Argument "autosave" was set')
-	it not autosave and log is not None:
+	if not autosave and log is not None:
 		log.debug('- Argument "autosave" was not set')
 
 	dbnsfp = hl.read_table(dbnsfp_path)
