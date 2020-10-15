@@ -1,4 +1,5 @@
 
+import os
 import rdconnect.utils as utils
 from rdconnect.classGenome import GenomicData
 
