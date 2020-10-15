@@ -80,6 +80,6 @@ class ConfigFile:
 		return self[key]
 
 	def overwrite(self, key, value):
-		new = copy.deepcopy(self)
+		new = deepcopy(self)
 		_set_nested(new.data, key.split('/'), value)
 		return new
