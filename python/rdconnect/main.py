@@ -93,8 +93,8 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		stop_pipeline(log, 'No pipeline was provided')
 
 	step = step.split(',')
-	config.overwrite('process/chrom', chrom)
-	config.overwrite('source_path', os.path.join(config['process/source_path'], config['process/source_file']))
+	config = config.overwrite('process/chrom', chrom)
+	config = config.overwrite('source_path', os.path.join(config['process/source_path'], config['process/source_file']))
 
 	if 'move_gvcf' in step:
 		mv.gvcf(config, log)
