@@ -91,7 +91,6 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 	main_conf.overwrite('process/chrom', chrom)
 	destination_path = main_conf['process/destination_path']
 
-    
 	if 'move_gvcf' in step:
 		mv.gvcf(main_conf, log)
 
@@ -103,10 +102,10 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 		pass
 
     if 'annotateVEP' in step:
-		var = annotate.vep(None, config, log, hl)
+		var = annotate.vep(None, config, hl, log)
 
 	if 'annotatedbNSFP' in step:
-		var = annotate.dbNSFP(None, config, log, hl)
+		var = annotate.dbNSFP(None, config, hl, log)
 
 
 

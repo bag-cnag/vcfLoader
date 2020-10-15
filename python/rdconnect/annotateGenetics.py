@@ -3,7 +3,7 @@ import utils
 from classGenome import GenomicData
 
 
-def VEP(self, config, log, hl):
+def VEP(self, config, hl, log = None):
 	"""Annotates given genetic dataset with VEP annotations.
 
 	Parameters
@@ -14,31 +14,33 @@ def VEP(self, config, log, hl):
 		the argument is ignored.
 	config: ConfigFile, mandatory
 		Configuration for this step of the pipeline.
-	log: logger, mandatory
-		A logger to have track of the steps used in the loading process.
 	hl: context, mandatory
 		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object.
 	"""
-	log.info('Entering annotation step "VEP"')
+	if log is not None: 
+		log.info('Entering annotation step "VEP"')
 	source_path = config['process/source_path']
 	destination_path = config['process/destination_path']
 	vep_config = config['annotation/clean/vep_config']
 	autosave = config['process/autosave']
 
-	if self is None:
+	if self is None and log is not None:
 		log.debug('- Argument "self" was not set')
-	else:
+	if self is not None and log is not None:
 		log.debug('- Argument "self" was set')
-	log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
-	log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
-	log.debug('- Argument "vep_config" filled with "{}"'.format(vep_config))
-	if autosave:
+	if log is not None: 
+		log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
+		log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
+		log.debug('- Argument "vep_config" filled with "{}"'.format(vep_config))
+	if autosave and log is not None:
 		log.debug('- Argument "autosave" was set')
-	else:
+	if not autosave and log is not None:
 		log.debug('- Argument "autosave" was not set')
 
 	if self is None:
@@ -65,6 +67,7 @@ def VEP(self, config, log, hl):
 		self.file = [destination_path] + self.file
 	return self
 
+
 def _mt_pred_annotations(hl, annotations):
 	""" Annotations for dbNSFP
 		:param Hailcontext hl: The Hail context
@@ -76,6 +79,7 @@ def _mt_pred_annotations(hl, annotations):
 		.when(arr.contains("D"),"D")
 		.when(arr.contains("N"),"N")
 		.default(""))
+
 
 def _polyphen_pred_annotations(hl, annotations):
 	""" Annotations for dbNSFP
@@ -89,7 +93,8 @@ def _polyphen_pred_annotations(hl, annotations):
 		.when(arr.contains("B"),"B")
 		.default("")
 	)
-    
+
+
 def _sift_pred_annotations(hl, annotations):
 	""" Annotations for dbNSFP
 		:param Hailcontext hl: The Hail context
@@ -102,6 +107,7 @@ def _sift_pred_annotations(hl, annotations):
 		.default("")
 	)
 
+
 def _truncateAt(hl, n, p):
 	""" Formats a input number to 'p' decimals
 		:param Hailcontext hl: The Hail context
@@ -109,7 +115,8 @@ def _truncateAt(hl, n, p):
 		:param String p: Decimal precision
 	"""
 	return hl.float(hl.int((10 ** hl.int(p) * n))) / (10 ** hl.int(p))
-    
+
+
 def _removeDot(hl, n, precision):
 	""" Formats an input number to 'p' decimals, or sets it to 0 if it's a dot annotation
 		:param HailContext h: The Hail context
@@ -119,7 +126,7 @@ def _removeDot(hl, n, precision):
 	return hl.cond(n.startswith('.'),0.0,_truncateAt(hl,hl.float(n),precision))
 
 
-def dbNSFP(self, config, log, hl):
+def dbNSFP(self, config, hl, log = None):
 	"""Annotates given genetic dataset with VEP annotations.
 
 	Parameters
@@ -130,32 +137,34 @@ def dbNSFP(self, config, log, hl):
 		the argument is ignored.
 	config: ConfigFile, mandatory
 		Configuration for this step of the pipeline.
-	log: logger, mandatory
-		A logger to have track of the steps used in the loading process.
 	hl: context, mandatory
 		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object.
 	"""
-	log.info('Entering annotation step "VEP"')
+	if log is not None:
+		log.info('Entering annotation step "VEP"')
 	source_path = config['process/source_path']
 	destination_path = config['process/destination_path']
 	dbnsfp_path = config['annotation/clean/dbNSFP']
 	autosave = config['process/autosave']
 
-	if self is None:
+	if self is None and log is not None:
 		log.debug('- Argument "self" was not set')
-	else:
+	if self is not None and log is not None:
 		log.debug('- Argument "self" was set')
-	log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
-	log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
-	log.debug('- Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
-	
-	if autosave:
+	if log is not None:
+		log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
+		log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
+		log.debug('- Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
+		
+	if autosave and log is not None:
 		log.debug('- Argument "autosave" was set')
-	else:
+	it not autosave and log is not None:
 		log.debug('- Argument "autosave" was not set')
 
 	dbnsfp = hl.read_table(dbnsfp_path)
@@ -184,5 +193,5 @@ def dbNSFP(self, config, log, hl):
 	if autosave and destination_path != '':
 		filename = utils.destination_dbnsfp(destination_path)
 		self.data.write(destination_path, overwrite = True)
-        self.file = [destination_path] + var.file
+		self.file = [destination_path] + var.file
 	return self
