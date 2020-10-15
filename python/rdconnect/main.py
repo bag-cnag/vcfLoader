@@ -116,7 +116,7 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		add_funcs_from_module(annotate)
 		local = config.overwrite('process/autosave', False)
 		var = annotate.vep(None, local, hl, log)\
-				.annotate.dbnsfp(config, hl, log)
+				.dbnsfp(config, hl, log)
 
 
 
