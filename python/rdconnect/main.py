@@ -79,7 +79,7 @@ def stop_pipeline(log, msg):
 	sys.exit(2)
 
 # MAIN METHOD SECTION ---------------------------------------------------------
-def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
+def main(sqlContext, sc, config, chrom, step, somaticFlag):
 	var = None
 	log = create_logger('vcfLoader')
 	now = datetime.now()
@@ -93,17 +93,17 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 		stop_pipeline(log, 'No pipeline was provided')
 
 	step = step.split(',')
-	main_conf.overwrite('process/chrom', chrom)
-	destination_path = main_conf['process/destination_path']
+	config.overwrite('process/chrom', chrom)
+	destination_path = config['process/destination_path']
 
 	if 'move_gvcf' in step:
-		mv.gvcf(main_conf, log)
+		mv.gvcf(config, log)
 
 	if 'load_dense_matrix' in step:
 		#fileName = "variants-chrom-{0}-mtx-{1}.ht".format(str(chrom), str(ii))
 		#destination_path = None if destination_path == '' else os.path.join(destination_path, 'dense_matrices')
-		#main_conf.overwrite('process/filename', )
-		#var = load.dense_matrix(local_conf log, hl, main_conf['process']['source_path'], destination_path)
+		#config.overwrite('process/filename', )
+		#var = load.dense_matrix(local_conf log, hl, config['process']['source_path'], destination_path)
 		pass
 
 	if 'annotateVEP' in step:
@@ -111,6 +111,12 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 
 	if 'annotatedbNSFP' in step:
 		var = annotate.dbNSFP(None, config, hl, log)
+
+	if 'annotateFullDenseMatrix' in step:
+		add_funcs_from_module(annotate)
+		local = config.overwrite('process/autosave', False)
+		var = annotate.vep(None, local, hl, log)\
+				.annotate.dbNSFP(config, hl, log)
 
 
 
