@@ -1,4 +1,4 @@
-"""Classes
+"""classGenome
 
 This module contains the abstract definition of class 'GenomicData' and the two 
 functions used in 'vcfLoader' to attach new methods to it.

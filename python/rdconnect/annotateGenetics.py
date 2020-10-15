@@ -1,6 +1,6 @@
 
-import utils
-from classGenome import GenomicData
+import rdconnect.utils as utils
+from rdconnect.classGenome import GenomicData
 
 
 def VEP(self, config, hl, log = None):

@@ -7,7 +7,8 @@ import os
 from subprocess import call
 from traceback import format_exc
 
-from utils import chrom_str_to_int, create_chrom_filename
+from rdconnect.utils import chrom_str_to_int, create_chrom_filename
+
 
 def gvcf(conf, log):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 

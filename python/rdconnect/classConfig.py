@@ -1,11 +1,32 @@
+"""classConfig
+
+This module contains the implementation of the class 'ConfigFile' and its
+auxiliary functions for its creation.
+
+This file should be imported as module to create new 'ConfigFile' object, 
+containing all the configuration for any step in the annotation pipeline.
+
+How to create a ConfigFile?
+
+	>>> x = ConfigFile('/path/to/config/json/config.json')
+
+How to get a configuration parameter?
+
+	>>> x['section/parameter']
+	>>> x['section/subsection/parameter']
+
+Do you need to overwrite a parameter to match the expected behaviour of the
+pipeline?
+
+	>>> x = x.overwrite('section/parameter', 'new_value')
+
+"""
+
 import json
 import operator
 from copy import deepcopy
 from functools import reduce
 
-# from classConfig import ConfigFile
-# x = ConfigFile('/Users/chernandez/Desktop/test_config.json')
-#
 
 def _get_from_dict(data, key_list):
 	return reduce(operator.getitem, key_list, data)
