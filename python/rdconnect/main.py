@@ -89,7 +89,7 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 
 	if chrom == '':
 		stop_pipeline(log, 'No chromosome was provided')
-	if syep == '':
+	if step == '':
 		stop_pipeline(log, 'No pipeline was provided')
 
 	step = step.split(',')
