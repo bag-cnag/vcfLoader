@@ -26,7 +26,7 @@ def vep(self, config, hl, log = None):
 	if log is not None: 
 		log.info('Entering annotation step "VEP"')
 
-	source_file = utils.create_chrom_filename(destination_path, config['process/source_file'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
 	destination_path = config['process/destination_path']
 	vep_config = config['annotation/clean/vep_config']
@@ -153,7 +153,7 @@ def dbnsfp(self, config, hl, log = None):
 	if log is not None:
 		log.info('Entering annotation step "VEP"')
 
-	source_file = utils.create_chrom_filename(destination_path, config['process/source_file'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
 	destination_path = config['process/destination_path']
 	dbnsfp_path = config['annotation/clean/dbNSFP']
