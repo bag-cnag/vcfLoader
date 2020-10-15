@@ -4,7 +4,7 @@ import getopt
 import logging
 
 import rdconnect.moveData as mv
-import rdconnect.loadGenetics as load
+#import rdconnect.importGenetics as cd
 import rdconnect.annotateGenetics as annotate
 from rdconnect.classConfig import ConfigFile
 from rdconnect.classGenome import add_funcs_from_module
