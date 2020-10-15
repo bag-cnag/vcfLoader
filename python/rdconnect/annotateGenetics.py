@@ -105,7 +105,7 @@ def vep(self, config, hl, log = None):
 			_transcript_annotations(hl,self.data.vep.transcript_consequences),
 			_intergenic_annotations(hl,self.data.vep.intergenic_consequences)
 		),
-		rs = self.data.vep.colocated_selfiants[0].id
+		rs = self.data.vep.colocated_variants[0].id
 	)
 	self.data = self.data.drop('vep')
 
