@@ -101,7 +101,7 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 		#var = load.dense_matrix(local_conf log, hl, main_conf['process']['source_path'], destination_path)
 		pass
 
-    if 'annotateVEP' in step:
+	if 'annotateVEP' in step:
 		var = annotate.vep(None, config, hl, log)
 
 	if 'annotatedbNSFP' in step:
@@ -111,14 +111,14 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 
 
 if __name__ == "__main__":
-    # Command line options parsing
-    chrom, path, step, cores, somaticFlag = optionParser(sys.argv[1:])
-    config = ConfigFile(path)
-    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
-    spark = SparkSession.builder.config(conf = spark_conf).getOrCreate()
-    spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size", config["resources/dfs_block_size"])
-    spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size", config["resources/dfs_block_size"])
-    hl.init(spark.sparkContext, tmp_dir = "hdfs://rdhdfs1:27000/test/tmp")
-    sqlContext = SQLContext(hl.spark_context())
-    # Execute Main functionality
-    main(sqlContext, spark.sparkContext, main_conf, chrom, step, somaticFlag)
+	# Command line options parsing
+	chrom, path, step, cores, somaticFlag = optionParser(sys.argv[1:])
+	config = ConfigFile(path)
+	spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
+	spark = SparkSession.builder.config(conf = spark_conf).getOrCreate()
+	spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size", config["resources/dfs_block_size"])
+	spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size", config["resources/dfs_block_size"])
+	hl.init(spark.sparkContext, tmp_dir = "hdfs://rdhdfs1:27000/test/tmp")
+	sqlContext = SQLContext(hl.spark_context())
+	# Execute Main functionality
+	main(sqlContext, spark.sparkContext, main_conf, chrom, step, somaticFlag)
