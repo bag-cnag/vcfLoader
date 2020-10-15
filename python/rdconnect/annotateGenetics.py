@@ -246,5 +246,5 @@ def dbnsfp(self, config, hl, log = None):
 	if autosave and destination_path != '':
 		filename = utils.destination_dbnsfp(destination_path, source_file)
 		self.data.write(destination_path, overwrite = True)
-		self.file = [destination_path] + var.file
+		self.file = [destination_path] + self.file
 	return self
