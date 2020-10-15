@@ -102,10 +102,10 @@ def main(sqlContext, sc, main_conf, chrom, step, somaticFlag):
 		#var = load.dense_matrix(local_conf log, hl, main_conf['process']['source_path'], destination_path)
 		pass
 
-    if 'VEP' in step:
+    if 'annotateVEP' in step:
 		var = annotate.vep(None, config, log, hl)
 
-	if 'dbNSFP' in step:
+	if 'annotatedbNSFP' in step:
 		var = annotate.dbNSFP(None, config, log, hl)
 
 
