@@ -66,7 +66,7 @@ def vep(self, config, hl, log = None):
 
 	Returns
 	-------
-	The function returns a 'GenomicData' object.
+	The function returns a 'GenomicData' object annotated with VEP.
 	"""
 	if log is not None: 
 		log.info('Entering annotation step "VEP"')
@@ -176,7 +176,7 @@ def _removeDot(hl, n, precision):
 
 
 def dbnsfp(self, config, hl, log = None):
-	"""Annotates given genetic dataset with VEP annotations.
+	"""Annotates given genetic dataset with dbSNFP annotations.
 
 	Parameters
 	----------
@@ -193,7 +193,7 @@ def dbnsfp(self, config, hl, log = None):
 
 	Returns
 	-------
-	The function returns a 'GenomicData' object.
+	The function returns a 'GenomicData' object annotated with dbSNFP.
 	"""
 	if log is not None:
 		log.info('Entering annotation step "dbSNFP"')
@@ -245,6 +245,71 @@ def dbnsfp(self, config, hl, log = None):
 	self.state = ['dbNSFP'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_dbnsfp(destination_path, source_file)
+		self.data.write(destination_path, overwrite = True)
+		self.file = [destination_path] + self.file
+	return self
+
+
+def cadd(self, config, hl, log = None):
+	"""Annotates given genetic dataset with CADD annotations.
+
+	Parameters
+	----------
+	self: GenomicData, mandatory
+		Set it to None to load the dataset from 'source_path'. If a GenomicData
+		is assigned to this argument, no set is loaded from 'source_path' and
+		the argument is ignored.
+	config: ConfigFile, mandatory
+		Configuration for this step of the pipeline.
+	hl: context, mandatory
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
+
+	Returns
+	-------
+	The function returns a 'GenomicData' object annotated with CADD.
+	"""
+	if log is not None:
+		log.info('Entering annotation step "CADD"')
+
+	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
+	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_path = os.path.join(source_path, source_file)
+	destination_path = config['process/destination_path']
+	cad_path = utils.create_chrom_filename(config['annotation/clean/cadd'], config['process/chrom'])
+	autosave = config['process/autosave']
+
+	if self is None and log is not None:
+		log.debug('> Argument "self" was not set')
+	if self is not None and log is not None:
+		log.debug('> Argument "self" was set')
+	if log is not None:
+		log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
+		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+		log.debug('> Argument "cad_path" filled with "{}"'.format(cad_path))
+		
+	if autosave and log is not None:
+		log.debug('> Argument "autosave" was set')
+	if not autosave and log is not None:
+		log.debug('> Argument "autosave" was not set')
+
+	cadd = hl.split_multi_hts(hl.read_matrix_table(cad_path)) \
+		.rows() \
+		.key_by("locus","alleles")
+
+	if self is None:
+		self = GenomicData()
+		self.data = hl.methods.read_matrix_table(source_path)
+		self.state = []
+		self.file = []
+
+	self.data = self.data.annotate_rows(cadd_phred=cadd[self.data.locus, self.data.alleles].info.CADD13_PHRED[cadd[self.data.locus, self.data.alleles].a_index-1])
+
+	self.state = ['CADD'] + self.state
+	if autosave and destination_path != '':
+		filename = utils.destination_cadd(destination_path, source_file)
 		self.data.write(destination_path, overwrite = True)
 		self.file = [destination_path] + self.file
 	return self

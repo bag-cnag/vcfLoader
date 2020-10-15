@@ -88,7 +88,7 @@ def destination_vep(destination_path, filename, somatic = False):
 	return os.path.join(destination_path, 'annotated_vep{}'.format('_somatic' if somatic else ''), filename)
 
 def destination_dbnsfp(destination_path, filename, somatic = False):
-	"""This function returns the path to a file annotated with VEP.
+	"""This function returns the path to a file annotated with dbSNFP.
 
 	Parameters
 	----------
@@ -102,6 +102,25 @@ def destination_dbnsfp(destination_path, filename, somatic = False):
 
 	Returns
 	-------
-	A string with the path to save the annotated VEP file.
+	A string with the path to save the annotated dbSNFP file.
 	"""
 	return os.path.join(destination_path, 'annotated_dbnsfp{}'.format('_somatic' if somatic else ''), filename)
+
+def destination_cadd(destination_path, filename, somatic = False):
+	"""This function returns the path to a file annotated with CADD.
+
+	Parameters
+	----------
+	destination_path: str, mandatory
+		Path where the file will be saved.
+	filename: str, mandatory
+		Template used to create the chromosome's iterative files.
+	somatic: bool, mandatory
+		Indicates if the saved wile contains somatic mutations (set it to True)
+		or germline (set it to False).
+
+	Returns
+	-------
+	A string with the path to save the annotated CADD file.
+	"""
+	return os.path.join(destination_path, 'annotated_cadd{}'.format('_somatic' if somatic else ''), filename)
