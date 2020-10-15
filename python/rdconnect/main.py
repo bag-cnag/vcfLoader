@@ -115,8 +115,9 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 	if 'annotateFullDenseMatrix' in step:
 		add_funcs_from_module(annotate)
 		local = config.overwrite('process/autosave', False)
+		final = config.overwrite('process/autosave', True)
 		var = annotate.vep(None, local, hl, log)\
-				.dbnsfp(config, hl, log)
+				.dbnsfp(final, hl, log)
 
 
 
