@@ -11,18 +11,20 @@ def _transcript_annotations(hl, annotations):
 	"""
 	return hl.map(lambda x: 
 		hl.struct(
-			gene_name=x.gene_symbol,
-			effect_impact=x.impact,
-			transcript_id=x.transcript_id,
-			effect=hl.delimit(x.consequence_terms,","),
-			gene_id=x.gene_id,
-			functional_class='transcript',
-			amino_acid_length='',
-			codon_change=x.hgvsc.replace(".*:",""),
-			amino_acid_change=x.hgvsp.replace(".*:",""),
-			exon_rank=x.exon,
-			transcript_biotype=x.biotype,
-			gene_coding=hl.str(x.cds_start)),annotations)
+			gene_name = x.gene_symbol,
+			effect_impact = x.impact,
+			transcript_id = x.transcript_id,
+			effect = hl.delimit(x.consequence_terms, ','),
+			gene_id = x.gene_id,
+			functional_class = 'transcript',
+			amino_acid_length = '',
+			codon_change = x.hgvsc.replace('.*:', ''),
+			amino_acid_change = x.hgvsp.replace('.*:', ''),
+			exon_rank = x.exon,
+			transcript_biotype = x.biotype,
+			gene_coding = hl.str(x.cds_start)
+		),
+	annotations)
 
 def _intergenic_annotations(hl, annotations):
 	""" Transcript level annotations for VEP 
@@ -31,18 +33,20 @@ def _intergenic_annotations(hl, annotations):
 	"""
 	return hl.map(lambda x: 
 		hl.struct(
-			gene_name='',
-			effect_impact=x.impact,
-			transcript_id='',
-			effect=hl.delimit(x.consequence_terms,","),
-			gene_id='',
-			functional_class='intergenic_region',
-			amino_acid_length='0',
-			codon_change='',
-			amino_acid_change='',
-			exon_rank='',
-			transcript_biotype='',
-			gene_coding=''),annotations)
+			gene_name = '',
+			effect_impact = x.impact,
+			transcript_id = '',
+			effect = hl.delimit(x.consequence_terms, ','),
+			gene_id = '',
+			functional_class = 'intergenic_region',
+			amino_acid_length = '0',
+			codon_change = '',
+			amino_acid_change = '',
+			exon_rank = '',
+			transcript_biotype = '',
+			gene_coding = ''
+		),
+	annotations)
 
 def vep(self, config, hl, log = None):
 	"""Annotates given genetic dataset with VEP annotations.
