@@ -3,11 +3,11 @@ import sys
 import getopt
 import logging
 
-from classConfig import ConfigFile
-import moveData as mv
-import loadGenetics as load
-import annotateGenetics as annotate
-from classGenome import add_funcs_from_module
+import rdconnect.moveData as mv
+import rdconnect.loadGenetics as load
+import rdconnect.annotateGenetics as annotate
+from rdconnect.classConfig import ConfigFile
+from rdconnect.classGenome import add_funcs_from_module
 
 
 # USAGE SECTION ---------------------------------------------------------------
