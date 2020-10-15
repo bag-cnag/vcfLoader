@@ -25,7 +25,9 @@ def vep(self, config, hl, log = None):
 	"""
 	if log is not None: 
 		log.info('Entering annotation step "VEP"')
-	source_path = utils.create_chrom_filename(config['process/source_path'])
+
+	source_file = utils.create_chrom_filename(destination_path, config['process/source_file'], config['process/chrom'])
+	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
 	destination_path = config['process/destination_path']
 	vep_config = config['annotation/clean/vep_config']
 	autosave = config['process/autosave']
@@ -36,6 +38,7 @@ def vep(self, config, hl, log = None):
 	if self is not None and log is not None:
 		log.debug('> Argument "self" was set')
 	if log is not None: 
+		log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
 		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 		log.debug('> Argument "vep_config" filled with "{}"'.format(vep_config))
@@ -63,7 +66,7 @@ def vep(self, config, hl, log = None):
 
 	self.state = ['VEP'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_vep(destination_path)
+		filename = utils.destination_vep(destination_path, source_file)
 		self.data.write(destination_path, overwrite = True)
 		self.file = [destination_path] + self.file
 	return self
@@ -149,7 +152,9 @@ def dbnsfp(self, config, hl, log = None):
 	"""
 	if log is not None:
 		log.info('Entering annotation step "VEP"')
-	source_path = utils.create_chrom_filename(config['process/source_path'])
+
+	source_file = utils.create_chrom_filename(destination_path, config['process/source_file'], config['process/chrom'])
+	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
 	destination_path = config['process/destination_path']
 	dbnsfp_path = config['annotation/clean/dbNSFP']
 	autosave = config['process/autosave']
@@ -159,6 +164,7 @@ def dbnsfp(self, config, hl, log = None):
 	if self is not None and log is not None:
 		log.debug('> Argument "self" was set')
 	if log is not None:
+		log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
 		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 		log.debug('> Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
@@ -192,7 +198,7 @@ def dbnsfp(self, config, hl, log = None):
 
 	self.state = ['dbNSFP'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_dbnsfp(destination_path)
+		filename = utils.destination_dbnsfp(destination_path, source_file)
 		self.data.write(destination_path, overwrite = True)
 		self.file = [destination_path] + var.file
 	return self

@@ -94,7 +94,7 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 
 	step = step.split(',')
 	config.overwrite('process/chrom', chrom)
-	destination_path = config['process/destination_path']
+	config.overwrite('source_path', os.path.join(config['process/source_path'], config['process/source_file']))
 
 	if 'move_gvcf' in step:
 		mv.gvcf(config, log)
