@@ -72,5 +72,5 @@ def add_funcs_from_module(module):
 	fun_list = [x for x in getmembers(module) if isfunction(x[1])]
 	pub_fun = [x for x in fun_list if not x[0].startswith('_')]
 	for nam, fun in pub_fun:
-		add_method(nam, fun)
+		add_method(fun, nam)
 
