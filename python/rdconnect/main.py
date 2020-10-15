@@ -2,9 +2,9 @@ import os
 import sys
 import getopt
 import logging
-import datetime
 import hail as hl
 
+from datetime import datetime
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext, SparkSession
 
