@@ -26,6 +26,7 @@ import json
 import operator
 from copy import deepcopy
 from functools import reduce
+from traceback import format_exc
 
 
 def _get_from_dict(data, key_list):
@@ -61,7 +62,10 @@ class ConfigFile:
 		self.data = {}
 		with open(config_path) as data_file:
 			self.data = json.load(data_file)
-		self.keys = _get_keys_dict(self.data)
+		try:
+			self.keys = _get_keys_dict(self.data)
+		except Exception as ex:
+			raise Exception('Invalid configuration file provided.\n{}\n{}'.format(str(ex), str(format_exc())))
 
 	def __getitem__(self, key):
 		if key in self.keys:
