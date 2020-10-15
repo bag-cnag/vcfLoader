@@ -2,6 +2,11 @@ import os
 import sys
 import getopt
 import logging
+import datetime
+import hail as hl
+
+from pyspark import SparkConf, SparkContext
+from pyspark.sql import SQLContext, SparkSession
 
 import rdconnect.moveData as mv
 #import rdconnect.importGenetics as cd
