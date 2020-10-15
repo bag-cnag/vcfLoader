@@ -25,23 +25,24 @@ def vep(self, config, hl, log = None):
 	"""
 	if log is not None: 
 		log.info('Entering annotation step "VEP"')
-	source_path = config['process/source_path']
+	source_path = utils.create_chrom_filename(config['process/source_path'])
 	destination_path = config['process/destination_path']
 	vep_config = config['annotation/clean/vep_config']
 	autosave = config['process/autosave']
+	print('autosave', autosave)
 
 	if self is None and log is not None:
-		log.debug('- Argument "self" was not set')
+		log.debug('> Argument "self" was not set')
 	if self is not None and log is not None:
-		log.debug('- Argument "self" was set')
+		log.debug('> Argument "self" was set')
 	if log is not None: 
-		log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
-		log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
-		log.debug('- Argument "vep_config" filled with "{}"'.format(vep_config))
+		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+		log.debug('> Argument "vep_config" filled with "{}"'.format(vep_config))
 	if autosave and log is not None:
-		log.debug('- Argument "autosave" was set')
+		log.debug('> Argument "autosave" was set')
 	if not autosave and log is not None:
-		log.debug('- Argument "autosave" was not set')
+		log.debug('> Argument "autosave" was not set')
 
 	if self is None:
 		self = GenomicData()
@@ -148,24 +149,24 @@ def dbnsfp(self, config, hl, log = None):
 	"""
 	if log is not None:
 		log.info('Entering annotation step "VEP"')
-	source_path = config['process/source_path']
+	source_path = utils.create_chrom_filename(config['process/source_path'])
 	destination_path = config['process/destination_path']
 	dbnsfp_path = config['annotation/clean/dbNSFP']
 	autosave = config['process/autosave']
 
 	if self is None and log is not None:
-		log.debug('- Argument "self" was not set')
+		log.debug('> Argument "self" was not set')
 	if self is not None and log is not None:
-		log.debug('- Argument "self" was set')
+		log.debug('> Argument "self" was set')
 	if log is not None:
-		log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
-		log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
-		log.debug('- Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
+		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+		log.debug('> Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
 		
 	if autosave and log is not None:
-		log.debug('- Argument "autosave" was set')
+		log.debug('> Argument "autosave" was set')
 	if not autosave and log is not None:
-		log.debug('- Argument "autosave" was not set')
+		log.debug('> Argument "autosave" was not set')
 
 	dbnsfp = hl.read_table(dbnsfp_path)
 	if self is None:
