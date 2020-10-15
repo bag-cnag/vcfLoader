@@ -112,7 +112,7 @@ def vep(self, config, hl, log = None):
 	self.state = ['VEP'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_vep(destination_path, source_file)
-		self.data.write(os.path.join(destination_path, filename), overwrite = True)
+		self.data.write(filename, overwrite = True)
 		self.file = [destination_path] + self.file
 	return self
 
@@ -245,7 +245,7 @@ def dbnsfp(self, config, hl, log = None):
 	self.state = ['dbNSFP'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_dbnsfp(destination_path, source_file)
-		self.data.write(os.path.join(destination_path, filename), overwrite = True)
+		self.data.write(filename, overwrite = True)
 		self.file = [destination_path] + self.file
 	return self
 
@@ -310,7 +310,7 @@ def cadd(self, config, hl, log = None):
 	self.state = ['CADD'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_cadd(destination_path, source_file)
-		self.data.write(os.path.join(destination_path, filename), overwrite = True)
+		self.data.write(filename, overwrite = True)
 		self.file = [destination_path] + self.file
 	return self
 
@@ -426,6 +426,6 @@ def clinvar(self, config, hl, log = None):
 	self.state = ['ClinVar'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_clinvar(destination_path, source_file)
-		self.data.write(os.path.join(destination_path, filename), overwrite = True)
+		self.data.write(filename, overwrite = True)
 		self.file = [destination_path] + self.file
 	return self
