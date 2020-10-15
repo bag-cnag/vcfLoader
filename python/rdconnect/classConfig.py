@@ -22,6 +22,9 @@ pipeline?
 
 """
 
+# from classConfig import ConfigFile
+# x = ConfigFile('/Users/chernandez/Desktop/test_config.json')
+
 import json
 import operator
 from copy import deepcopy
@@ -82,4 +85,5 @@ class ConfigFile:
 	def overwrite(self, key, value):
 		new = deepcopy(self)
 		_set_nested(new.data, key.split('/'), value)
+		new.keys = _get_keys_dict(new.data)
 		return new

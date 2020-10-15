@@ -111,17 +111,17 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		#var = load.dense_matrix(local_conf log, hl, config['process']['source_path'], destination_path)
 		pass
 
-	if 'annotateVEP' in step:
-		var = annotate.vep(None, config, hl, log)
+	# if 'annotateVEP' in step:
+	# 	var = annotate.vep(None, config, hl, log)
 
-	if 'annotatedbNSFP' in step:
-		var = annotate.dbnsfp(None, config, hl, log)
+	# if 'annotatedbNSFP' in step:
+	# 	var = annotate.dbnsfp(None, config, hl, log)
 
-	if 'annotateFullDenseMatrix' in step:
-		add_funcs_from_module(annotate)
-		local = config.overwrite('process/autosave', False)
-		var = annotate.vep(None, local, hl, log)\
-				.annotate.dbnsfp(config, hl, log)
+	# if 'annotateFullDenseMatrix' in step:
+	# 	add_funcs_from_module(annotate)
+	# 	local = config.overwrite('process/autosave', False)
+	# 	var = annotate.vep(None, local, hl, log)\
+	# 			.annotate.dbnsfp(config, hl, log)
 
 
 
