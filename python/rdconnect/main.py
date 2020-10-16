@@ -107,25 +107,25 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		pass
 
 	if 'annotateVEP' in step:
-		var = annotate.vep(None, config, hl, log)
+		var = annotate.vep(None, config)
 
 	if 'annotatedbNSFP' in step:
-		var = annotate.dbnsfp(None, config, hl, log)
+		var = annotate.dbnsfp(None, config)
 
 	if 'annotateCADD' in step:
-		var = annotate.cadd(None, config, hl, log)
+		var = annotate.cadd(None, config)
 
 	if 'annotateClinVar' in step:
-		var = annotate.clinvar(None, config, hl, log)
+		var = annotate.clinvar(None, config)
 
 	if 'annotateFullDenseMatrix' in step:
 		add_funcs_from_module(annotate)
 		local = config.overwrite('process/autosave', False)
 		final = config.overwrite('process/autosave', True)
-		var = annotate.vep(None, local, hl, log) \
-				.dbnsfp(local, hl, log) \
-				.cadd(local, hl, log) \
-				.clinvar(final, hl, log)
+		var = annotate.vep(None, local) \
+				.dbnsfp(local) \
+				.cadd(local) \
+				.clinvar(final)
 
 
 

@@ -51,6 +51,14 @@ def _intergenic_annotations(hl, annotations):
 def vep(self, config, hl, log = None):
 	"""Annotates given genetic dataset with VEP annotations.
 
+	This functions seeks for two global variables. One called `hl` which it is 
+	mandatory and it is the reference to the HAIL packages imported as:
+
+		>> import hail as hl
+
+	The second one is called 'log', it is optional and it is an object of class
+	logger, preferably created using 'create_logger' function in main.
+
 	Parameters
 	----------
 	self: GenomicData, mandatory
@@ -59,17 +67,26 @@ def vep(self, config, hl, log = None):
 		the argument is ignored.
 	config: ConfigFile, mandatory
 		Configuration for this step of the pipeline.
-	hl: context, mandatory
-		HAIL context.
-	log: logger, optional
-		A logger to have track of the steps used in the loading process.
+
+	Raises
+	------
+	The function raises a raw Exception if no 'hl' object is found in the 
+	global environment.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with VEP.
 	"""
-	if log is not None: 
+	try:
+		global log
 		log.info('Entering annotation step "VEP"')
+	except Exception:
+		log = None
+
+	try:
+		global hl
+	except Exception:
+		raise Exception('Unavailable to get HAIL reference as "hl"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -175,8 +192,21 @@ def _removeDot(hl, n, precision):
 	return hl.cond(n.startswith('.'),0.0,_truncateAt(hl,hl.float(n),precision))
 
 
-def dbnsfp(self, config, hl, log = None):
+def dbnsfp(self, config):
 	"""Annotates given genetic dataset with dbSNFP annotations.
+
+	This functions seeks for two global variables. One called `hl` which it is 
+	mandatory and it is the reference to the HAIL packages imported as:
+
+		>> import hail as hl
+
+	The second one is called 'log', it is optional and it is an object of class
+	logger, preferably created using 'create_logger' function in main.
+
+	Raises
+	------
+	The function raises a raw Exception if no 'hl' object is found in the 
+	global environment.
 
 	Parameters
 	----------
@@ -186,17 +216,21 @@ def dbnsfp(self, config, hl, log = None):
 		the argument is ignored.
 	config: ConfigFile, mandatory
 		Configuration for this step of the pipeline.
-	hl: context, mandatory
-		HAIL context.
-	log: logger, optional
-		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with dbSNFP.
 	"""
-	if log is not None:
+	try:
+		global log
 		log.info('Entering annotation step "dbSNFP"')
+	except Exception:
+		log = None
+
+	try:
+		global hl
+	except Exception:
+		raise Exception('Unavailable to get HAIL reference as "hl"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -250,8 +284,21 @@ def dbnsfp(self, config, hl, log = None):
 	return self
 
 
-def cadd(self, config, hl, log = None):
+def cadd(self, config):
 	"""Annotates given genetic dataset with CADD annotations.
+
+	This functions seeks for two global variables. One called `hl` which it is 
+	mandatory and it is the reference to the HAIL packages imported as:
+
+		>> import hail as hl
+
+	The second one is called 'log', it is optional and it is an object of class
+	logger, preferably created using 'create_logger' function in main.
+
+	Raises
+	------
+	The function raises a raw Exception if no 'hl' object is found in the 
+	global environment.
 
 	Parameters
 	----------
@@ -261,17 +308,21 @@ def cadd(self, config, hl, log = None):
 		the argument is ignored.
 	config: ConfigFile, mandatory
 		Configuration for this step of the pipeline.
-	hl: context, mandatory
-		HAIL context.
-	log: logger, optional
-		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with CADD.
 	"""
-	if log is not None:
+	try:
+		global log
 		log.info('Entering annotation step "CADD"')
+	except Exception:
+		log = None
+
+	try:
+		global hl
+	except Exception:
+		raise Exception('Unavailable to get HAIL reference as "hl"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -361,8 +412,21 @@ def _clinvar_preprocess(hl, annotation, is_filter_field):
 	return _clinvar_filtering(hl,preprocessed,is_filter_field)
 
 
-def clinvar(self, config, hl, log = None):
+def clinvar(self, config):
 	"""Annotates given genetic dataset with ClinVar annotations.
+
+	This functions seeks for two global variables. One called `hl` which it is 
+	mandatory and it is the reference to the HAIL packages imported as:
+
+		>> import hail as hl
+
+	The second one is called 'log', it is optional and it is an object of class
+	logger, preferably created using 'create_logger' function in main.
+
+	Raises
+	------
+	The function raises a raw Exception if no 'hl' object is found in the 
+	global environment.
 
 	Parameters
 	----------
@@ -372,17 +436,21 @@ def clinvar(self, config, hl, log = None):
 		the argument is ignored.
 	config: ConfigFile, mandatory
 		Configuration for this step of the pipeline.
-	hl: context, mandatory
-		HAIL context.
-	log: logger, optional
-		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with ClinVar.
 	"""
-	if log is not None:
+	try:
+		global log
 		log.info('Entering annotation step "ClinVar"')
+	except Exception:
+		log = None
+
+	try:
+		global hl
+	except Exception:
+		raise Exception('Unavailable to get HAIL reference as "hl"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
