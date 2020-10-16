@@ -48,7 +48,7 @@ def _intergenic_annotations(hl, annotations):
 		),
 	annotations)
 
-def vep(self, config, hl, log = None):
+def vep(self, config):
 	"""Annotates given genetic dataset with VEP annotations.
 
 	This functions seeks for two global variables. One called `hl` which it is 

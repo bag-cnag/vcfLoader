@@ -122,6 +122,7 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		add_funcs_from_module(annotate)
 		local = config.overwrite('process/autosave', False)
 		final = config.overwrite('process/autosave', True)
+		
 		var = annotate.vep(None, local) \
 				.dbnsfp(local) \
 				.cadd(local) \
