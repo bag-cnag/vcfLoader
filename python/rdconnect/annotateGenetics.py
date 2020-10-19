@@ -113,7 +113,7 @@ def vep(self = None, config = None, hl = None, log = None):
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if no isHl:
+	if not isHl:
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
