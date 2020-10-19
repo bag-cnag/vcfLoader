@@ -131,6 +131,7 @@ def vep(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
 		self.data = hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
@@ -267,7 +268,9 @@ def dbnsfp(self, config, hl = None, log = None):
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	dbnsfp = hl.read_table(dbnsfp_path)
-	if self is None:
+	print("------>", vars(self))
+	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
 		self.data = hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
@@ -354,6 +357,7 @@ def cadd(self, config = None, hl = None, log = None):
 		.key_by('locus', 'alleles')
 
 	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
 		self.data = hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
@@ -434,8 +438,20 @@ def clinvar(self, config = None, hl = None, log = None):
 	-------
 	The function returns a 'GenomicData' object annotated with ClinVar.
 	"""
-	if log is not None:
-		log.info('Entering annotation step "ClinVar"')
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self.log.info('Entering annotation step "ClinVar"')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if not isHl:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -444,26 +460,19 @@ def clinvar(self, config = None, hl = None, log = None):
 	clinvar_path = utils.create_chrom_filename(config['annotation/clean/clinvar'], config['process/chrom'])
 	autosave = config['process/autosave']
 
-	if self is None and log is not None:
-		log.debug('> Argument "self" was not set')
-	if self is not None and log is not None:
-		log.debug('> Argument "self" was set')
-	if log is not None:
-		log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
-		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
-		log.debug('> Argument "clinvar_path" filled with "{}"'.format(clinvar_path))
-		
-	if autosave and log is not None:
-		log.debug('> Argument "autosave" was set')
-	if not autosave and log is not None:
-		log.debug('> Argument "autosave" was not set')
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "clinvar_path" filled with "{}"'.format(clinvar_path))
+	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	clinvar = hl.split_multi_hts(hl.read_matrix_table(clinvar_path)) \
 		.rows() \
 		.key_by('locus', 'alleles')
 
 	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
 		self.data = hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
