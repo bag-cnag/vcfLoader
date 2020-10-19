@@ -305,18 +305,35 @@ def cadd(self, config = None, hl = None, log = None):
 		is assigned to this argument, no set is loaded from 'source_path' and
 		the argument is ignored.
 	config: ConfigFile, optional
-		Configuration for this step of the pipeline.
+		Configuration for this step of the pipeline. If not provided or set to
+		None the configuration is looked into the GenomicData in self.
 	hl: context, optional
-		HAIL context.
+		HAIL context. If not provided or set to None the reference to the 
+		module is looked into the GenomicData in self.
 	log: logger, optional
-		A logger to have track of the steps used in the loading process.
+		A logger to have track of the steps used in the loading process. If not
+		provided or set to None the logger is looked into the GenomicData in 
+		self. If no logger is in the provided nor in the GenomicData, then no
+		log is performed.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with CADD.
 	"""
-	if log is not None:
-		log.info('Entering annotation step "CADD"')
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self.log.info('Entering annotation step "CADD"')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if not isHl:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -325,27 +342,18 @@ def cadd(self, config = None, hl = None, log = None):
 	cad_path = utils.create_chrom_filename(config['annotation/clean/cadd'], config['process/chrom'])
 	autosave = config['process/autosave']
 
-	if self is None and log is not None:
-		log.debug('> Argument "self" was not set')
-	if self is not None and log is not None:
-		log.debug('> Argument "self" was set')
-	if log is not None:
-		log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
-		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
-		log.debug('> Argument "cad_path" filled with "{}"'.format(cad_path))
-		
-	if autosave and log is not None:
-		log.debug('> Argument "autosave" was set')
-	if not autosave and log is not None:
-		log.debug('> Argument "autosave" was not set')
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "cad_path" filled with "{}"'.format(cad_path))
+	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	cadd = hl.split_multi_hts(hl.read_matrix_table(cad_path)) \
 		.rows() \
 		.key_by('locus', 'alleles')
 
-	if self is None:
-		self = GenomicData()
+	if 'data' not in vars(self):
 		self.data = hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
@@ -455,8 +463,7 @@ def clinvar(self, config = None, hl = None, log = None):
 		.rows() \
 		.key_by('locus', 'alleles')
 
-	if self is None:
-		self = GenomicData()
+	if 'data' not in vars(self):
 		self.data = hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
