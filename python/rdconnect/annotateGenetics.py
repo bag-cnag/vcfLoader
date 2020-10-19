@@ -124,16 +124,12 @@ def vep(self = None, config = None, hl = None, log = None):
 	vep_config = config['annotation/clean/vep']
 	autosave = config['process/autosave']
 
-	self.log.debug('> Argument "self" was set' is isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "vep_config" filled with "{}"'.format(vep_config))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
-	if autosave and log is not None:
-		log.debug()
-	if not autosave and log is not None:
-		log.debug()
 
 	if 'data' not in vars(self):
 		self.data = hl.methods.read_matrix_table(source_path)
