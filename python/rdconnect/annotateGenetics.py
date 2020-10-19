@@ -2,6 +2,33 @@
 import os
 import rdconnect.utils as utils
 from rdconnect.classGenome import GenomicData
+from rdconnect.classLog import VoidLog
+from rdconnect.classException import *
+
+
+def _check_class_and_config(self, config, hl, log):
+	check = [False, False]
+	if self is None:
+		self = GenomicData()
+
+	if config is not None:
+		self.config = config
+		check[0] = True
+	elif config is None and 'config' in vars(self):
+		check[0] = True
+
+	if hl is not None:
+		self.hl = hl
+		check[1] = True
+	elif 'hl' in vars(self):
+		check[1] = True
+
+	if log is not None:
+		self.log = log
+	elif 'log' not in vars(self):
+		self.log = VoidLog()
+
+	return [self] + check
 
 
 def _transcript_annotations(hl, annotations):
@@ -26,6 +53,7 @@ def _transcript_annotations(hl, annotations):
 		),
 	annotations)
 
+
 def _intergenic_annotations(hl, annotations):
 	""" Transcript level annotations for VEP 
 		:param Hailcontext hl: The Hail context
@@ -48,16 +76,8 @@ def _intergenic_annotations(hl, annotations):
 		),
 	annotations)
 
-def vep(self, config):
+def vep(self = None, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with VEP annotations.
-
-	This functions seeks for two global variables. One called `hl` which it is 
-	mandatory and it is the reference to the HAIL packages imported as:
-
-		>> import hail as hl
-
-	The second one is called 'log', it is optional and it is an object of class
-	logger, preferably created using 'create_logger' function in main.
 
 	Parameters
 	----------
@@ -65,28 +85,37 @@ def vep(self, config):
 		Set it to None to load the dataset from 'source_path'. If a GenomicData
 		is assigned to this argument, no set is loaded from 'source_path' and
 		the argument is ignored.
-	config: ConfigFile, mandatory
-		Configuration for this step of the pipeline.
-
-	Raises
-	------
-	The function raises a raw Exception if no 'hl' object is found in the 
-	global environment.
+	config: ConfigFile, optional
+		Configuration for this step of the pipeline. If not provided or set to
+		None the configuration is looked into the GenomicData in self.
+	hl: context, optional
+		HAIL context. If not provided or set to None the reference to the 
+		module is looked into the GenomicData in self.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process. If not
+		provided or set to None the logger is looked into the GenomicData in 
+		self. If no logger is in the provided nor in the GenomicData, then no
+		log is performed.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with VEP.
 	"""
-	try:
-		global log
-		log.info('Entering annotation step "VEP"')
-	except Exception:
-		log = None
 
-	try:
-		global hl
-	except Exception:
-		raise Exception('Unavailable to get HAIL reference as "hl"')
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self.log.info('Entering annotation step "VEP"')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if no isHl:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -95,22 +124,18 @@ def vep(self, config):
 	vep_config = config['annotation/clean/vep']
 	autosave = config['process/autosave']
 
-	if self is None and log is not None:
-		log.debug('> Argument "self" was not set')
-	if self is not None and log is not None:
-		log.debug('> Argument "self" was set')
-	if log is not None: 
-		log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
-		log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-		log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
-		log.debug('> Argument "vep_config" filled with "{}"'.format(vep_config))
+	self.log.debug('> Argument "self" was set' is isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "vep_config" filled with "{}"'.format(vep_config))
+	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 	if autosave and log is not None:
-		log.debug('> Argument "autosave" was set')
+		log.debug()
 	if not autosave and log is not None:
-		log.debug('> Argument "autosave" was not set')
+		log.debug()
 
-	if self is None:
-		self = GenomicData()
+	if 'data' not in vars(self):
 		self.data = hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
@@ -192,21 +217,8 @@ def _removeDot(hl, n, precision):
 	return hl.cond(n.startswith('.'),0.0,_truncateAt(hl,hl.float(n),precision))
 
 
-def dbnsfp(self, config):
+def dbnsfp(self, config, hl = None, log = None):
 	"""Annotates given genetic dataset with dbSNFP annotations.
-
-	This functions seeks for two global variables. One called `hl` which it is 
-	mandatory and it is the reference to the HAIL packages imported as:
-
-		>> import hail as hl
-
-	The second one is called 'log', it is optional and it is an object of class
-	logger, preferably created using 'create_logger' function in main.
-
-	Raises
-	------
-	The function raises a raw Exception if no 'hl' object is found in the 
-	global environment.
 
 	Parameters
 	----------
@@ -216,21 +228,17 @@ def dbnsfp(self, config):
 		the argument is ignored.
 	config: ConfigFile, mandatory
 		Configuration for this step of the pipeline.
+	hl: context, optional
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with dbSNFP.
 	"""
-	try:
-		global log
+	if log is not None:
 		log.info('Entering annotation step "dbSNFP"')
-	except Exception:
-		log = None
-
-	try:
-		global hl
-	except Exception:
-		raise Exception('Unavailable to get HAIL reference as "hl"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -284,21 +292,8 @@ def dbnsfp(self, config):
 	return self
 
 
-def cadd(self, config):
+def cadd(self, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with CADD annotations.
-
-	This functions seeks for two global variables. One called `hl` which it is 
-	mandatory and it is the reference to the HAIL packages imported as:
-
-		>> import hail as hl
-
-	The second one is called 'log', it is optional and it is an object of class
-	logger, preferably created using 'create_logger' function in main.
-
-	Raises
-	------
-	The function raises a raw Exception if no 'hl' object is found in the 
-	global environment.
 
 	Parameters
 	----------
@@ -306,23 +301,19 @@ def cadd(self, config):
 		Set it to None to load the dataset from 'source_path'. If a GenomicData
 		is assigned to this argument, no set is loaded from 'source_path' and
 		the argument is ignored.
-	config: ConfigFile, mandatory
+	config: ConfigFile, optional
 		Configuration for this step of the pipeline.
+	hl: context, optional
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with CADD.
 	"""
-	try:
-		global log
+	if log is not None:
 		log.info('Entering annotation step "CADD"')
-	except Exception:
-		log = None
-
-	try:
-		global hl
-	except Exception:
-		raise Exception('Unavailable to get HAIL reference as "hl"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
@@ -412,21 +403,8 @@ def _clinvar_preprocess(hl, annotation, is_filter_field):
 	return _clinvar_filtering(hl,preprocessed,is_filter_field)
 
 
-def clinvar(self, config):
+def clinvar(self, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with ClinVar annotations.
-
-	This functions seeks for two global variables. One called `hl` which it is 
-	mandatory and it is the reference to the HAIL packages imported as:
-
-		>> import hail as hl
-
-	The second one is called 'log', it is optional and it is an object of class
-	logger, preferably created using 'create_logger' function in main.
-
-	Raises
-	------
-	The function raises a raw Exception if no 'hl' object is found in the 
-	global environment.
 
 	Parameters
 	----------
@@ -434,23 +412,19 @@ def clinvar(self, config):
 		Set it to None to load the dataset from 'source_path'. If a GenomicData
 		is assigned to this argument, no set is loaded from 'source_path' and
 		the argument is ignored.
-	config: ConfigFile, mandatory
+	config: ConfigFile, optional
 		Configuration for this step of the pipeline.
+	hl: context, optional
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
 
 	Returns
 	-------
 	The function returns a 'GenomicData' object annotated with ClinVar.
 	"""
-	try:
-		global log
+	if log is not None:
 		log.info('Entering annotation step "ClinVar"')
-	except Exception:
-		log = None
-
-	try:
-		global hl
-	except Exception:
-		raise Exception('Unavailable to get HAIL reference as "hl"')
 
 	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])

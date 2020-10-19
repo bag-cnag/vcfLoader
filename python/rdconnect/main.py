@@ -80,6 +80,7 @@ def stop_pipeline(log, msg):
 
 # MAIN METHOD SECTION ---------------------------------------------------------
 def main(sqlContext, sc, config, chrom, step, somaticFlag):
+	global log
 	var = None
 	log = create_logger('vcfLoader')
 	now = datetime.now()
@@ -107,26 +108,28 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 		pass
 
 	if 'annotateVEP' in step:
-		var = annotate.vep(None, config)
+		var = annotate.vep(None, config.overwrite('process/autosave', True))
 
 	if 'annotatedbNSFP' in step:
-		var = annotate.dbnsfp(None, config)
+		var = annotate.dbnsfp(None, config.overwrite('process/autosave', True))
 
 	if 'annotateCADD' in step:
-		var = annotate.cadd(None, config)
+		var = annotate.cadd(None, config.overwrite('process/autosave', True))
 
 	if 'annotateClinVar' in step:
-		var = annotate.clinvar(None, config)
+		var = annotate.clinvar(None, config.overwrite('process/autosave', True))
 
 	if 'annotateFullDenseMatrix' in step:
 		add_funcs_from_module(annotate)
 		local = config.overwrite('process/autosave', False)
 		final = config.overwrite('process/autosave', True)
-		
+
 		var = annotate.vep(None, local) \
-				.dbnsfp(local) \
-				.cadd(local) \
-				.clinvar(final)
+			.dbnsfp(local) \
+			.cadd(local) \
+			.clinvar(final)
+
+
 
 
 
