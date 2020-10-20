@@ -124,7 +124,6 @@ def vep(self = None, config = None, hl = None, log = None):
 	autosave = config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "vep_config" filled with "{}"'.format(vep_config))
@@ -261,14 +260,12 @@ def dbnsfp(self, config, hl = None, log = None):
 	autosave = config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	dbnsfp = hl.read_table(dbnsfp_path)
-	print("------>", vars(self))
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
 		self.data = hl.methods.read_matrix_table(source_path)
@@ -346,7 +343,6 @@ def cadd(self, config = None, hl = None, log = None):
 	autosave = config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "cad_path" filled with "{}"'.format(cad_path))
@@ -461,7 +457,6 @@ def clinvar(self, config = None, hl = None, log = None):
 	autosave = config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "clinvar_path" filled with "{}"'.format(clinvar_path))
@@ -485,6 +480,77 @@ def clinvar(self, config = None, hl = None, log = None):
 	)
 
 	self.state = ['ClinVar'] + self.state
+	if autosave and destination_path != '':
+		filename = utils.destination_clinvar(destination_path, source_file)
+		self.data.write(filename, overwrite = True)
+		self.file = [destination_path] + self.file
+	return self
+
+
+
+def gnomADEx(self, config = None, hl = None, log = None):
+    """Annotates given genetic dataset with gnomeAD exome annotations.
+
+	Parameters
+	----------
+	self: GenomicData, mandatory
+		Set it to None to load the dataset from 'source_path'. If a GenomicData
+		is assigned to this argument, no set is loaded from 'source_path' and
+		the argument is ignored.
+	config: ConfigFile, optional
+		Configuration for this step of the pipeline.
+	hl: context, optional
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
+
+	Returns
+	-------
+	The function returns a 'GenomicData' object annotated with ClinVar.
+	"""
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self.log.info('Entering annotation step "gnomeAD Exome"')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if not isHl:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
+
+	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
+	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_path = os.path.join(source_path, source_file)
+	destination_path = config['process/destination_path']
+	gnomeAdEx_path = utils.create_chrom_filename(config['annotation/clean/exomesGnomad'], config['process/chrom'])
+	autosave = config['process/autosave']
+
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "gnomeAdEx_path" filled with "{}"'.format(gnomeAdEx_path))
+	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
+
+	gnomad = hl.split_multi_hts(hl.read_matrix_table(gnomeAdEx_path)) \
+		.rows() \
+		.key_by("locus","alleles")
+
+	self.data = self.data.annotate_rows(
+		gnomad_af = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_ac = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_an = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN),gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN, 0.0),
+		gnomad_af_popmax = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_ac_popmax = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_an_popmax = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_filter = hl.cond(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
+	)
+
+	self.state = ['gnomeADEx'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_clinvar(destination_path, source_file)
 		self.data.write(filename, overwrite = True)

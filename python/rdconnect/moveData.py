@@ -6,11 +6,12 @@ This module contains the functions used to move data from main cluster to HDFS.
 import os
 from subprocess import call
 from traceback import format_exc
+from rdconnect.classLog import VoidLog
 
 from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 
 
-def gvcf(conf, log):
+def gvcf(config, log = VoidLog()):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
@@ -36,12 +37,12 @@ def gvcf(conf, log):
 
 	Parameters
 	----------
-	conf: ConfigFile, mandatory
+	config: ConfigFile, mandatory
 		Configuration for the job that must include the keys 'process/chrom',
 		'process/moving_gvcf_list', 'process/moving_from', 'process/moving_to',
 		'process/moving_s1', and 'process/moving_s2'.
-	log: logger, mandatory
-		Used to track the loading process
+	log: logger, optional
+		Used to track the moving process
 	"""
 	chrom = main_conf['process/chrom']
 	chrom = chrom_str_to_int(chrom)
@@ -52,12 +53,12 @@ def gvcf(conf, log):
 	cmd_2main_conf['process/moving_s2']
 
 	log.info('Entering step "move_gvcf"')
-	log.debug('- Argument "chrom" filled with "{}"'.format(chrom))
-	log.debug('- Argument "gvcf_list" filled with "{}"'.format(gvcf_list))
-	log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
-	log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
-	log.debug('- Argument "cmd_1" filled with "{}"'.format(cmd_1))
-	log.debug('- Argument "cmd_2" filled with "{}"'.format(cmd_2))
+	log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
+	log.debug('> Argument "gvcf_list" filled with "{}"'.format(gvcf_list))
+	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	log.debug('> Argument "cmd_1" filled with "{}"'.format(cmd_1))
+	log.debug('> Argument "cmd_2" filled with "{}"'.format(cmd_2))
 	
 	with open(gvcf_list, 'r') as rd:
 		for idx, line in enumerate(rd):
