@@ -119,10 +119,10 @@ def get_experiments_to_process(experiment_available, experiment_status, check_hd
 		By default 'False'. If set to true if filters out those experiments
 		where 'hdfs' is not set to 'pass'.
 	"""
-    experiment_status = [ x for x in experiment_status if x[ 'genomicsdb' ] == 'waiting' ]
-    if check_hdfs:
-        experiment_status = [ x for x in experiment_status if x[ 'hdfs' ] == 'pass' ]
-    experiment_status_2 = [ x[ 'Experiment' ] for x in experiment_status ]
-    experiment_available_2 = [ x[ 'RD_Connect_ID_Experiment' ] for x in experiment_available ]
-    selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
-    return experiment_available
+	experiment_status = [ x for x in experiment_status if x[ 'genomicsdb' ] == 'waiting' ]
+	if check_hdfs:
+		experiment_status = [ x for x in experiment_status if x[ 'hdfs' ] == 'pass' ]
+	experiment_status_2 = [ x[ 'Experiment' ] for x in experiment_status ]
+	experiment_available_2 = [ x[ 'RD_Connect_ID_Experiment' ] for x in experiment_available ]
+	selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
+	return experiment_available

@@ -100,12 +100,55 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 	if 'move_gvcf' in step:
 		mv.gvcf(config, log)
 
+	if 'dbtransfer':
+		pass
+
+	if 'importGermline':
+		pass
+
+	if 'importSomaric':
+		pass
+
+	if 'create_sparse_matrix':
+		pass
+
+	if 'create_dense_matrix':
+		pass
+
 	if 'load_dense_matrix' in step:
 		#fileName = "variants-chrom-{0}-mtx-{1}.ht".format(str(chrom), str(ii))
 		#destination_path = None if destination_path == '' else os.path.join(destination_path, 'dense_matrices')
 		#config.overwrite('process/filename', )
 		#var = load.dense_matrix(local_conf log, hl, config['process']['source_path'], destination_path)
 		pass
+
+
+
+
+	# if 'add_to_sparse_matrix':
+	# 	pass
+
+
+	# if 'from_add_sparse_to_dense':
+	# 	pass
+
+
+
+	# mv.gvcf(config, log)
+	# mng.add_to_dense(config, )
+	# mng.new_dense_mtx()
+
+
+	# for ii in nmtrx:
+	if 'annotateFullDenseMatrix' in step:
+		add_funcs_from_module(annotate)
+		local = config.overwrite('process/autosave', False)
+		final = config.overwrite('process/autosave', True)
+		var = annotate.vep(None, local, hl, log) \
+			.dbnsfp() \
+			.cadd() \
+			.clinvar() \
+			.gnomADEx(config = final)
 
 	if 'annotateVEP' in step:
 		var = annotate.vep(None, config.overwrite('process/autosave', True), hl, log)
@@ -119,15 +162,10 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 	if 'annotateClinVar' in step:
 		var = annotate.clinvar(None, config.overwrite('process/autosave', True), hl, log)
 
-	if 'annotateFullDenseMatrix' in step:
-		add_funcs_from_module(annotate)
-		local = config.overwrite('process/autosave', False)
-		final = config.overwrite('process/autosave', True)
+	if 'annotateExomesGnomad' in step:
+		var = annotate.gnomADEx(None, config.overwrite('process/autosave', True), hl, log)
 
-		var = annotate.vep(None, local, hl, log) \
-			.dbnsfp() \
-			.cadd() \
-			.clinvar(config = final)
+			
 
 
 
@@ -137,7 +175,7 @@ def main(sqlContext, sc, config, chrom, step, somaticFlag):
 if __name__ == "__main__":
 	# Command line options parsing
 	chrom, path, step, cores, somaticFlag = optionParser(sys.argv[1:])
-	config = ConfigFile(path)
+	config = ConfigFile.from_file(path)
 	spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
 	spark = SparkSession.builder.config(conf = spark_conf).getOrCreate()
 	spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size", config["resources/dfs_block_size"])
