@@ -60,15 +60,9 @@ def _set_nested(dic, key_list, value):
 
 class ConfigFile:
 
-	def __init__(self, config_path):
-		self.config_path = config_path
+	def __init__(self):
+		self.config_path = None
 		self.data = {}
-		with open(config_path) as data_file:
-			self.data = json.load(data_file)
-		try:
-			self.keys = _get_keys_dict(self.data)
-		except Exception as ex:
-			raise Exception('Invalid configuration file provided.\n{}\n{}'.format(str(ex), str(format_exc())))
 
 	def __getitem__(self, key):
 		if key in self.keys:
@@ -77,7 +71,7 @@ class ConfigFile:
 			return None
 
 	def __str__(self):
-		return 'ConfigFile<{}>'.format(self.config_path)
+		return 'ConfigFile<{}>'.format(str(self.config_path))
 
 	def get(self, key):
 		return self[key]
@@ -87,3 +81,27 @@ class ConfigFile:
 		_set_nested(new.data, key.split('/'), value)
 		new.keys = _get_keys_dict(new.data)
 		return new
+
+	@staticmethod
+	def from_file(config_path):
+		x = ConfigFile()
+		x.config_path = config_path
+		x.data = {}
+		with open(config_path) as data_file:
+			x.data = json.load(data_file)
+		try:
+			x.keys = _get_keys_dict(x.data)
+		except Exception as ex:
+			raise Exception('Invalid configuration file provided.\n{}\n{}'.format(str(ex), str(format_exc())))
+		return x
+
+	@staticmethod
+	def from_str(data_str):
+		x = ConfigFile()
+		x.config_path = None
+		x.data = json.loads(data_str)
+		try:
+			x.keys = _get_keys_dict(x.data)
+		except Exception as ex:
+			raise Exception('Invalid configuration file provided.\n{}\n{}'.format(str(ex), str(format_exc())))
+		return x
