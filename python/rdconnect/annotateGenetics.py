@@ -186,7 +186,7 @@ def _removeDot(hl, n, precision):
 	return hl.cond(n.startswith('.'),0.0,_truncateAt(hl,hl.float(n),precision))
 
 
-def dbnsfp(self = None, config, hl = None, log = None):
+def dbnsfp(self = None, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with dbSNFP annotations.
 
 	Parameters
