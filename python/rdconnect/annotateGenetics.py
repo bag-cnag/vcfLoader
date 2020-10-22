@@ -90,12 +90,12 @@ def vep(self = None, config = None, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
-	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(self.self.config['process/source_file'], self.config['process/chrom'])
+	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = config['process/destination_path']
-	vep_config = config['annotation/clean/vep']
-	autosave = config['process/autosave']
+	destination_path = self.config['process/destination_path']
+	vep_config = self.config['annotation/clean/vep']
+	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
@@ -226,12 +226,12 @@ def dbnsfp(self, config, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
-	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
+	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = config['process/destination_path']
-	dbnsfp_path = utils.create_chrom_filename(config['annotation/clean/dbNSFP'], config['process/chrom'])
-	autosave = config['process/autosave']
+	destination_path = self.config['process/destination_path']
+	dbnsfp_path = utils.create_chrom_filename(self.config['annotation/clean/dbNSFP'], self.config['process/chrom'])
+	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
@@ -309,12 +309,12 @@ def cadd(self, config = None, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
-	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
+	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = config['process/destination_path']
-	cad_path = utils.create_chrom_filename(config['annotation/clean/cadd'], config['process/chrom'])
-	autosave = config['process/autosave']
+	destination_path = self.config['process/destination_path']
+	cad_path = utils.create_chrom_filename(self.config['annotation/clean/cadd'], self.config['process/chrom'])
+	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
@@ -423,12 +423,12 @@ def clinvar(self, config = None, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
-	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
+	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = config['process/destination_path']
-	clinvar_path = utils.create_chrom_filename(config['annotation/clean/clinvar'], config['process/chrom'])
-	autosave = config['process/autosave']
+	destination_path = self.config['process/destination_path']
+	clinvar_path = utils.create_chrom_filename(self.config['annotation/clean/clinvar'], self.config['process/chrom'])
+	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
@@ -497,12 +497,12 @@ def gnomADEx(self, config = None, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
-	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
+	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = config['process/destination_path']
-	gnomeAdEx_path = utils.create_chrom_filename(config['annotation/clean/exomesGnomad'], config['process/chrom'])
-	autosave = config['process/autosave']
+	destination_path = self.config['process/destination_path']
+	gnomeAdEx_path = utils.create_chrom_filename(self.config['annotation/clean/exomesGnomad'], self.config['process/chrom'])
+	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
