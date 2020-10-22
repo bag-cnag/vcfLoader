@@ -12,7 +12,7 @@ from traceback import format_exc
 import rdconnect.utils as utils
 from rdconnect.classGenome import GenomicData
 from rdconnect.classLog import VoidLog
-from utils import _check_class_and_config
+from rdconnect.utils import _check_class_and_config
 
 # #def dense_matrix(log, hl, source_path, destination_path = None):
 # def dense_matrix(config, log, hl):
