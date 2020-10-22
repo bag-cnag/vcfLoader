@@ -113,8 +113,8 @@ def vep(self = None, config = None, hl = None, log = None):
 	self.data = self.data.annotate_rows(
 		effs = self.hl.cond(
 			self.hl.is_defined(self.data.vep.transcript_consequences),
-			_transcript_annotations(hl,self.data.vep.transcript_consequences),
-			_intergenic_annotations(hl,self.data.vep.intergenic_consequences)
+			_transcript_annotations(self.hl,self.data.vep.transcript_consequences),
+			_intergenic_annotations(self.hl,self.data.vep.intergenic_consequences)
 		),
 		rs = self.data.vep.colocated_variants[0].id
 	)
@@ -247,18 +247,18 @@ def dbnsfp(self, config, hl = None, log = None):
 		self.file = []
 
 	self.data = self.data.annotate_rows(
-		gp1_asn_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_ASN_AF1000, '6'), 0.0),
-		gp1_eur_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_EUR_AF1000, '6'), 0.0),
-		gp1_afr_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AFR_AF1000, '6'), 0.0),
-		gp1_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AF1000, '6'), 0.0),
+		gp1_asn_af = self.hl.or_else(_removeDot(self.hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_ASN_AF1000, '6'), 0.0),
+		gp1_eur_af = self.hl.or_else(_removeDot(self.hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_EUR_AF1000, '6'), 0.0),
+		gp1_afr_af = self.hl.or_else(_removeDot(self.hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AFR_AF1000, '6'), 0.0),
+		gp1_af = self.hl.or_else(_removeDot(self.hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AF1000, '6'), 0.0),
 		gerp_rs = dbnsfp[self.data.locus, self.data.alleles].GERP_RS,
-		mt = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].MutationTaster_score.split(';').map(lambda x:_removeDot(hl, x, '4'))), 0.0),
-		mutationtaster_pred = _mt_pred_annotations(hl, dbnsfp[self.data.locus, self.data.alleles]),
-		phyloP46way_placental = _removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].phyloP46way_placental, '4'),
-		polyphen2_hvar_pred = _polyphen_pred_annotations(hl, dbnsfp[self.data.locus, self.data.alleles]),
-		polyphen2_hvar_score = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].Polyphen2_HVAR_score.split(';').map(lambda x: _removeDot(hl, x, '4'))), 0.0),
-		sift_pred = _sift_pred_annotations(hl, dbnsfp[self.data.locus, self.data.alleles]),
-		sift_score = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].SIFT_score.split(';').map(lambda x: _removeDot(hl, x, '4'))), 0.0),
+		mt = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].MutationTaster_score.split(';').map(lambda x:_removeDot(self.hl, x, '4'))), 0.0),
+		mutationtaster_pred = _mt_pred_annotations(self.hl, dbnsfp[self.data.locus, self.data.alleles]),
+		phyloP46way_placental = _removeDot(self.hl, dbnsfp[self.data.locus, self.data.alleles].phyloP46way_placental, '4'),
+		polyphen2_hvar_pred = _polyphen_pred_annotations(self.hl, dbnsfp[self.data.locus, self.data.alleles]),
+		polyphen2_hvar_score = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].Polyphen2_HVAR_score.split(';').map(lambda x: _removeDot(self.hl, x, '4'))), 0.0),
+		sift_pred = _sift_pred_annotations(self.hl, dbnsfp[self.data.locus, self.data.alleles]),
+		sift_score = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].SIFT_score.split(';').map(lambda x: _removeDot(self.hl, x, '4'))), 0.0),
 		cosmic_id = dbnsfp[self.data.locus, self.data.alleles].COSMIC_ID)
 
 	self.state = ['dbNSFP'] + self.state
@@ -332,7 +332,7 @@ def cadd(self, config = None, hl = None, log = None):
 		self.state = []
 		self.file = []
 
-	self.data = self.data.annotate_rows(cadd_phred=cadd[self.data.locus, self.data.alleles].info.CADD13_PHRED[cadd[self.data.locus, self.data.alleles].a_index-1])
+	self.data = self.data.annotate_rows(cadd_phred = cadd[self.data.locus, self.data.alleles].info.CADD13_PHRED[cadd[self.data.locus, self.data.alleles].a_index-1])
 
 	self.state = ['CADD'] + self.state
 	if autosave and destination_path != '':
@@ -449,8 +449,8 @@ def clinvar(self, config = None, hl = None, log = None):
 	self.data = self.data.annotate_rows(
 		clinvar_id = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), clinvar[self.data.locus, self.data.alleles].rsid, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL[0].split(':')[0]),
 		clinvar_clnsigconf = self.hl.delimit(clinvar[self.data.locus, self.data.alleles].info.CLNSIGCONF),
-		clinvar_clnsig = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), self.hl.delimit(_clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,False), "|"), self.hl.delimit(_clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, False), "|")),
-		clinvar_filter = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), _clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,True), _clinvar_preprocess(hl, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, True))
+		clinvar_clnsig = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), self.hl.delimit(_clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,False), "|"), self.hl.delimit(_clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, False), "|")),
+		clinvar_filter = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), _clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,True), _clinvar_preprocess(self.hl, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, True))
 	)
 
 	self.state = ['ClinVar'] + self.state
