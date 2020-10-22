@@ -1,7 +1,7 @@
 
 import os
 from rdconnect.classException import *
-from utils import _check_class_and_config
+from rdconnect.utils import _check_class_and_config
 
 def transform(self = None, config = None, hl = None, log = None):
 	"""Transforms a given dataset into the dataframe format for ElasticSearch.
