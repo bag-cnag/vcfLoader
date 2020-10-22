@@ -1,7 +1,7 @@
 
 import os
 from rdconnect.classException import *
-from rdconnect.utils import _check_class_and_config
+import rdconnect.utils as utils
 
 def transform(self = None, config = None, hl = None, log = None):
 	"""Transforms a given dataset into the dataframe format for ElasticSearch.
@@ -45,7 +45,7 @@ def transform(self = None, config = None, hl = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = utils._check_class_and_config(self, config, hl, log)
 	self.log.info('Entering transform step')
 
 	if not isConfig:
