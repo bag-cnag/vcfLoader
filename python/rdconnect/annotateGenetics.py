@@ -90,7 +90,7 @@ def vep(self = None, config = None, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(self.self.config['process/source_file'], self.config['process/chrom'])
+	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
 	destination_path = self.config['process/destination_path']
