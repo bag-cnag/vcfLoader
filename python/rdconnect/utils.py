@@ -149,6 +149,26 @@ def destination_clinvar(destination_path, filename, somatic = False):
 	return os.path.join(destination_path, 'annotated_clinvar{}'.format('_somatic' if somatic else ''), filename)
 
 
+def destination_gnomadex(destination_path, filename, somatic = False):
+	"""This function returns the path to a file annotated with gnomAD exome.
+
+	Parameters
+	----------
+	destination_path: str, mandatory
+		Path where the file will be saved.
+	filename: str, mandatory
+		Template used to create the chromosome's iterative files.
+	somatic: bool, mandatory
+		Indicates if the saved wile contains somatic mutations (set it to True)
+		or germline (set it to False).
+
+	Returns
+	-------
+	A string with the path to save the annotated gnomeAD exome file.
+	"""
+	return os.path.join(destination_path, 'annotated_gnomadex{}'.format('_somatic' if somatic else ''), filename)
+
+
 def destination_germline(destination_path, filename, somatic = False):
 	"""This function returns the path to a loaded germline VCF.
 
@@ -164,7 +184,7 @@ def destination_germline(destination_path, filename, somatic = False):
 
 	Returns
 	-------
-	A string with the path to save the annotated ClinVar file.
+	A string with the path to save the germline data in HDFS.
 	"""
 	return os.path.join(destination_path, 'loaded{}'.format('_somatic' if somatic else ''), filename)
 
@@ -183,7 +203,7 @@ def destination_transform(destination_path, version, filename):
 
 	Returns
 	-------
-	A string with the path to save the annotated ClinVar file.
+	A string with the path to save the transformed dataset.
 	"""
 	return os.path.join(destination_path, version, filename)
 

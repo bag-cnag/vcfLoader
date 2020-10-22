@@ -526,7 +526,7 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 
 	self.state = ['gnomeADEx'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_clinvar(destination_path, source_file)
+		filename = utils.destination_gnomadex(destination_path, source_file)
 		self.data.write(filename, overwrite = True)
 		self.file = [destination_path] + self.file
 	return self
