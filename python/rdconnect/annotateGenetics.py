@@ -463,7 +463,7 @@ def clinvar(self, config = None, hl = None, log = None):
 
 
 def gnomADEx(self, config = None, hl = None, log = None):
-    """Annotates given genetic dataset with gnomeAD exome annotations.
+	"""Annotates given genetic dataset with gnomeAD exome annotations.
 
 	Parameters
 	----------
