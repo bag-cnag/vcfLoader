@@ -15,6 +15,10 @@ from rdconnect.classGenome import GenomicData
 from rdconnect.classLog import VoidLog
 from rdconnect.utils import _check_class_and_config
 
+MIN_DP = 7
+MIN_GQ = 19
+SAMPLES_CNV = 939
+
 # #def dense_matrix(log, hl, source_path, destination_path = None):
 # def dense_matrix(config, log, hl):
 # 	"""This function is used to load a dense matrix into HAIL structure
