@@ -71,7 +71,7 @@ def transform(self = None, config = None, hl = None, log = None):
 		self.state = []
 		self.file = []
 
-	out_file = os.path.join(destination_path + 'chrom=' + self.config['process/chrom'])
+	out_file = os.path.join(destination_path + 'chrom=' + str(self.config['process/chrom']))
 	vcf = self.data.rows()
 	vcf.key_by(vcf.locus, vcf.alleles).distinct()
 	vcf.to_spark() \
