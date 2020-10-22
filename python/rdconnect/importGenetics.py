@@ -169,7 +169,6 @@ def germline(config = None, hl = None, log = None):
 		truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),self.data.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,self.data.samples_germline))),"6"), 0.0)
 	).drop('sample')
 	self.data = self.data.key_rows_by(self.data.locus, self.data.alleles )
-    self.data = 
 
 	# if (originPath != ""):
 	# 	print ("[INFO]:   . Provided origin path '{}' to be loaded and merged.".format(originPath))
