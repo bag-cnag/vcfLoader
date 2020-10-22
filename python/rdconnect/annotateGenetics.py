@@ -3,7 +3,7 @@ import os
 import rdconnect.utils as utils
 from rdconnect.classGenome import GenomicData
 from rdconnect.classException import *
-from utils import _check_class_and_config
+from rdconnect.utils import _check_class_and_config
 
 def _transcript_annotations(hl, annotations):
 	""" Transcript level annotations for VEP 
