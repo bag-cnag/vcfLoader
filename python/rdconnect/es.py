@@ -1,5 +1,6 @@
 
 import os
+import requests
 from rdconnect.classException import *
 import rdconnect.utils as utils
 
