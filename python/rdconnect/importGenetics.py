@@ -7,6 +7,7 @@ This module contains the functions used to load genetic data including:
 	* CNV data stored as '.csv' files from HDFS, placed there using 'moveData' module functions
 """
 
+import os
 from traceback import format_exc
 
 import rdconnect.utils as utils
