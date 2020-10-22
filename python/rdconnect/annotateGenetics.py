@@ -186,7 +186,7 @@ def _removeDot(hl, n, precision):
 	return hl.cond(n.startswith('.'),0.0,_truncateAt(hl,hl.float(n),precision))
 
 
-def dbnsfp(self, config, hl = None, log = None):
+def dbnsfp(self = None, config, hl = None, log = None):
 	"""Annotates given genetic dataset with dbSNFP annotations.
 
 	Parameters
@@ -269,7 +269,7 @@ def dbnsfp(self, config, hl = None, log = None):
 	return self
 
 
-def cadd(self, config = None, hl = None, log = None):
+def cadd(self = None, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with CADD annotations.
 
 	Parameters
@@ -388,7 +388,7 @@ def _clinvar_preprocess(hl, annotation, is_filter_field):
 	return _clinvar_filtering(hl,preprocessed,is_filter_field)
 
 
-def clinvar(self, config = None, hl = None, log = None):
+def clinvar(self = None, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with ClinVar annotations.
 
 	Parameters
@@ -462,7 +462,7 @@ def clinvar(self, config = None, hl = None, log = None):
 
 
 
-def gnomADEx(self, config = None, hl = None, log = None):
+def gnomADEx(self = None, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with gnomeAD exome annotations.
 
 	Parameters
