@@ -56,11 +56,10 @@ def transform(self = None, config = None, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
-	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
+	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	
-	destination_path = config['process/destination_path']
+	destination_path = self.config['process/destination_path']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
@@ -72,7 +71,7 @@ def transform(self = None, config = None, hl = None, log = None):
 		self.state = []
 		self.file = []
 
-	out_file = os.path.join(destination_path + 'chrom=' + config['process/chrom'])
+	out_file = os.path.join(destination_path + 'chrom=' + self.config['process/chrom'])
 	vcf = self.data.rows()
 	vcf.key_by(vcf.locus, vcf.alleles).distinct()
 	vcf.to_spark() \
@@ -141,14 +140,14 @@ def create_index_snv(self = None, config = None, log = None):
 	if self is not None and not 'config' in vars(self) and config is None:
 		raise NoConfigurationException('No configuration was provided in form of ConfigFile (was None) and provided GenomicData does not contain configuration') 
 
-	host = config['resources/elasticsearch/host']
-	port = config['resources/elasticsearch/port']
-	index_name = config['resources/elasticsearch/index_name']
-	user = config['resources/elasticsearch/user']
-	pwd = config['resources/elasticsearch/pwd']
-	num_shards = config['resources/elasticsearch/num_shards']
-	num_replicas = config['resources/elasticsearch/num_replicas']
-	version = config['resources/elasticsearch/type']
+	host = self.config['resources/elasticsearch/host']
+	port = self.config['resources/elasticsearch/port']
+	index_name = self.config['resources/elasticsearch/index_name']
+	user = self.config['resources/elasticsearch/user']
+	pwd = self.config['resources/elasticsearch/pwd']
+	num_shards = self.config['resources/elasticsearch/num_shards']
+	num_replicas = self.config['resources/elasticsearch/num_replicas']
+	version = self.config['resources/elasticsearch/type']
 
 	data = """
 		{"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + """, "refresh_interval":"-1"}} ,"mappings":{"""+"\"" + version + "\""+""" :{
