@@ -105,14 +105,14 @@ def vep(self = None, config = None, hl = None, log = None):
 
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
-		self.data = hl.methods.read_matrix_table(source_path)
+		self.data = self.hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
 
-	self.data = hl.vep(self.data, vep_config)
+	self.data = self.hl.vep(self.data, vep_config)
 	self.data = self.data.annotate_rows(
-		effs = hl.cond(
-			hl.is_defined(self.data.vep.transcript_consequences),
+		effs = self.hl.cond(
+			self.hl.is_defined(self.data.vep.transcript_consequences),
 			_transcript_annotations(hl,self.data.vep.transcript_consequences),
 			_intergenic_annotations(hl,self.data.vep.intergenic_consequences)
 		),
@@ -239,26 +239,26 @@ def dbnsfp(self, config, hl = None, log = None):
 	self.log.debug('> Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
-	dbnsfp = hl.read_table(dbnsfp_path)
+	dbnsfp = self.hl.read_table(dbnsfp_path)
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
-		self.data = hl.methods.read_matrix_table(source_path)
+		self.data = self.hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
 
 	self.data = self.data.annotate_rows(
-		gp1_asn_af = hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_ASN_AF1000, '6'), 0.0),
-		gp1_eur_af = hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_EUR_AF1000, '6'), 0.0),
-		gp1_afr_af = hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AFR_AF1000, '6'), 0.0),
-		gp1_af = hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AF1000, '6'), 0.0),
+		gp1_asn_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_ASN_AF1000, '6'), 0.0),
+		gp1_eur_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_EUR_AF1000, '6'), 0.0),
+		gp1_afr_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AFR_AF1000, '6'), 0.0),
+		gp1_af = self.hl.or_else(_removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].Gp1_AF1000, '6'), 0.0),
 		gerp_rs = dbnsfp[self.data.locus, self.data.alleles].GERP_RS,
-		mt = hl.or_else(hl.max(dbnsfp[self.data.locus, self.data.alleles].MutationTaster_score.split(';').map(lambda x:_removeDot(hl, x, '4'))), 0.0),
+		mt = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].MutationTaster_score.split(';').map(lambda x:_removeDot(hl, x, '4'))), 0.0),
 		mutationtaster_pred = _mt_pred_annotations(hl, dbnsfp[self.data.locus, self.data.alleles]),
 		phyloP46way_placental = _removeDot(hl, dbnsfp[self.data.locus, self.data.alleles].phyloP46way_placental, '4'),
 		polyphen2_hvar_pred = _polyphen_pred_annotations(hl, dbnsfp[self.data.locus, self.data.alleles]),
-		polyphen2_hvar_score = hl.or_else(hl.max(dbnsfp[self.data.locus, self.data.alleles].Polyphen2_HVAR_score.split(';').map(lambda x: _removeDot(hl, x, '4'))), 0.0),
+		polyphen2_hvar_score = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].Polyphen2_HVAR_score.split(';').map(lambda x: _removeDot(hl, x, '4'))), 0.0),
 		sift_pred = _sift_pred_annotations(hl, dbnsfp[self.data.locus, self.data.alleles]),
-		sift_score = hl.or_else(hl.max(dbnsfp[self.data.locus, self.data.alleles].SIFT_score.split(';').map(lambda x: _removeDot(hl, x, '4'))), 0.0),
+		sift_score = self.hl.or_else(self.hl.max(dbnsfp[self.data.locus, self.data.alleles].SIFT_score.split(';').map(lambda x: _removeDot(hl, x, '4'))), 0.0),
 		cosmic_id = dbnsfp[self.data.locus, self.data.alleles].COSMIC_ID)
 
 	self.state = ['dbNSFP'] + self.state
@@ -322,13 +322,13 @@ def cadd(self, config = None, hl = None, log = None):
 	self.log.debug('> Argument "cad_path" filled with "{}"'.format(cad_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
-	cadd = hl.split_multi_hts(hl.read_matrix_table(cad_path)) \
+	cadd = self.hl.split_multi_hts(self.hl.read_matrix_table(cad_path)) \
 		.rows() \
 		.key_by('locus', 'alleles')
 
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
-		self.data = hl.methods.read_matrix_table(source_path)
+		self.data = self.hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
 
@@ -436,21 +436,21 @@ def clinvar(self, config = None, hl = None, log = None):
 	self.log.debug('> Argument "clinvar_path" filled with "{}"'.format(clinvar_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
-	clinvar = hl.split_multi_hts(hl.read_matrix_table(clinvar_path)) \
+	clinvar = self.hl.split_multi_hts(self.hl.read_matrix_table(clinvar_path)) \
 		.rows() \
 		.key_by('locus', 'alleles')
 
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
-		self.data = hl.methods.read_matrix_table(source_path)
+		self.data = self.hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
 
 	self.data = self.data.annotate_rows(
-		clinvar_id = hl.cond(hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), clinvar[self.data.locus, self.data.alleles].rsid, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL[0].split(':')[0]),
-		clinvar_clnsigconf = hl.delimit(clinvar[self.data.locus, self.data.alleles].info.CLNSIGCONF),
-		clinvar_clnsig = hl.cond(hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), hl.delimit(_clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,False), "|"), hl.delimit(_clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, False), "|")),
-		clinvar_filter = hl.cond(hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), _clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,True), _clinvar_preprocess(hl, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, True))
+		clinvar_id = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), clinvar[self.data.locus, self.data.alleles].rsid, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL[0].split(':')[0]),
+		clinvar_clnsigconf = self.hl.delimit(clinvar[self.data.locus, self.data.alleles].info.CLNSIGCONF),
+		clinvar_clnsig = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), self.hl.delimit(_clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,False), "|"), self.hl.delimit(_clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, False), "|")),
+		clinvar_filter = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), _clinvar_preprocess(hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,True), _clinvar_preprocess(hl, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, True))
 	)
 
 	self.state = ['ClinVar'] + self.state
@@ -510,18 +510,18 @@ def gnomADEx(self, config = None, hl = None, log = None):
 	self.log.debug('> Argument "gnomeAdEx_path" filled with "{}"'.format(gnomeAdEx_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
-	gnomad = hl.split_multi_hts(hl.read_matrix_table(gnomeAdEx_path)) \
+	gnomad = self.hl.split_multi_hts(self.hl.read_matrix_table(gnomeAdEx_path)) \
 		.rows() \
 		.key_by('locus','alleles')
 
 	self.data = self.data.annotate_rows(
-		gnomad_af = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_ac = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_an = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN),gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN, 0.0),
-		gnomad_af_popmax = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_ac_popmax = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_an_popmax = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_filter = hl.cond(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
+		gnomad_af = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_ac = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_an = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN),gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN, 0.0),
+		gnomad_af_popmax = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_ac_popmax = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_an_popmax = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_filter = self.hl.cond(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
 	)
 
 	self.state = ['gnomeADEx'] + self.state
