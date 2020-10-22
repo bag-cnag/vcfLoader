@@ -145,8 +145,7 @@ def germline(config = None, hl = None, log = None):
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 
-	self.data = hl.methods.read_matrix_table(source_path)
-	self.data = hl.split_multi_hts(hl.import_vcf(str(sourcePath), array_elements_required = False, force_bgz = True, min_partitions = nPartitions))
+	self.data = hl.split_multi_hts(hl.import_vcf(str(source_path), array_elements_required = False, force_bgz = True, min_partitions = config['resources/number_of_partitions']))
 	x = [y.get('s') for y in self.data.col.collect()]
 	self.log.info('> 	. Experiments in loaded VCF: {}'.format(len(x)))
 	self.log.info('> 	. First and last sample: {} // {}'.format(x[ 0 ], x[len(x) - 1]))
