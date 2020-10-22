@@ -70,6 +70,10 @@ class ConfigFile:
 		else:
 			return None
 
+	def __setitem__(self, key, value):
+		_set_nested(self.data, key.split('/'), value)
+		self.keys = _get_keys_dict(self.data)
+
 	def __str__(self):
 		return 'ConfigFile<{}>'.format(str(self.config_path))
 
