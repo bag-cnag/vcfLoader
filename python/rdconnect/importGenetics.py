@@ -151,7 +151,7 @@ def germline(config = None, hl = None, log = None):
 	self.log.info('> 	. First and last sample: {} // {}'.format(x[ 0 ], x[len(x) - 1]))
 	self.data = self.data.transmute_entries(sample = hl.struct(
 		sample=self.data.s,
-		ad = truncateAt(hl,self.data.AD[ 1 ]/hl.sum(self.data.AD), '2'),
+		ad = utils.truncateAt(hl,self.data.AD[ 1 ]/hl.sum(self.data.AD), '2'),
 		dp = self.data.DP,
 		gtInt = self.data.GT,
 		gt = hl.str(self.data.GT),

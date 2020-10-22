@@ -192,3 +192,12 @@ def _check_class_and_config(self, config, hl, log):
 		self.log = VoidLog()
 
 	return [self] + check
+
+
+def truncateAt(hl, n, p):
+	""" Formats a input number to 'p' decimals
+		:param Hailcontext hl: The Hail context
+		:param String n: Number to format
+		:param String p: Decimal precision
+	"""
+	return hl.float(hl.int((10 ** hl.int(p) * n))) / (10 ** hl.int(p))
