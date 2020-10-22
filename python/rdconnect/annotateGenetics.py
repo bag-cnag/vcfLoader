@@ -2,34 +2,8 @@
 import os
 import rdconnect.utils as utils
 from rdconnect.classGenome import GenomicData
-from rdconnect.classLog import VoidLog
 from rdconnect.classException import *
-
-
-def _check_class_and_config(self, config, hl, log):
-	check = [False, False]
-	if self is None:
-		self = GenomicData()
-
-	if config is not None:
-		self.config = config
-		check[0] = True
-	elif config is None and 'config' in vars(self):
-		check[0] = True
-
-	if hl is not None:
-		self.hl = hl
-		check[1] = True
-	elif 'hl' in vars(self):
-		check[1] = True
-
-	if log is not None:
-		self.log = log
-	elif 'log' not in vars(self):
-		self.log = VoidLog()
-
-	return [self] + check
-
+from utils import _check_class_and_config
 
 def _transcript_annotations(hl, annotations):
 	""" Transcript level annotations for VEP 
@@ -538,7 +512,7 @@ def gnomADEx(self, config = None, hl = None, log = None):
 
 	gnomad = hl.split_multi_hts(hl.read_matrix_table(gnomeAdEx_path)) \
 		.rows() \
-		.key_by("locus","alleles")
+		.key_by('locus','alleles')
 
 	self.data = self.data.annotate_rows(
 		gnomad_af = hl.cond(hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
