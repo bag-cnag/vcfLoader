@@ -257,7 +257,7 @@ def index_exists(config):
 	port = config['resources/elasticsearch/port']
 	index_name = config['resources/elasticsearch/index_name']
 	user = config['resources/elasticsearch/user']
-	psw = config['resources/elasticsearch/psw']
+	pwd = config['resources/elasticsearch/pwd']
 
 	sts = requests.head('http://{}:{}/{}'.format(host, port, index_name), auth=(user, pwd))
 	return sts.status_code
