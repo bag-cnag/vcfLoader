@@ -253,11 +253,11 @@ def create_index_snv(self = None, config = None, log = None):
 		return sts
 
 def index_exists(config):
-	host = self.config['resources/elasticsearch/host']
-	port = self.config['resources/elasticsearch/port']
-	index_name = self.config['resources/elasticsearch/index_name']
-	user = self.config['resources/elasticsearch/user']
-	psw = self.config['resources/elasticsearch/psw']
+	host = config['resources/elasticsearch/host']
+	port = config['resources/elasticsearch/port']
+	index_name = config['resources/elasticsearch/index_name']
+	user = config['resources/elasticsearch/user']
+	psw = config['resources/elasticsearch/psw']
 
 	sts = requests.head('http://{}:{}/{}'.format(host, port, index_name), auth=(user, pwd))
 	return sts.status_code
