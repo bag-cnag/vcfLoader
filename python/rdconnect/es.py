@@ -1,8 +1,11 @@
 
 import os
 import requests
-from rdconnect.classException import *
+from pyspark.sql.functions import lit
+
 import rdconnect.utils as utils
+from rdconnect.classException import *
+
 
 def transform(self = None, config = None, hl = None, log = None):
 	"""Transforms a given dataset into the dataframe format for ElasticSearch.
@@ -236,14 +239,72 @@ def create_index_snv(self = None, config = None, log = None):
 						,"nprogs":{"type":"integer","index":"true"}
 						,"progs":{"type":"keyword"}}}}}}}
 	"""
-	x = _create_index(host, port, index_name, data, user, pwd)
+	sts = index_exists(self.config)
+	if sts != 200:
+		sts = _create_index(host, port, index_name, data, user, pwd)
 
 	if self is not None:
 		if 'flags' not in vars(self):
-			self.flags = {'index': (x == 200, x)}
+			self.flags = {'index': (sts == 200, sts)}
 		else:
-			self.flags['index'] = (x == 200, x)
+			self.flags['index'] = (sts == 200, sts)
 		return self
 	else:
-		return x
+		return sts
+
+def index_exists(config):
+	host = self.config['resources/elasticsearch/host']
+	port = self.config['resources/elasticsearch/port']
+	index_name = self.config['resources/elasticsearch/index_name']
+	user = self.config['resources/elasticsearch/user']
+	psw = self.config['resources/elasticsearch/psw']
+
+	sts = requests.head('http://{}:{}/{}'.format(host, port, index_name), auth=(user, pwd))
+	return sts.status_code
+
+
+def push_snv(self = None, cofig = None, hl = None, log = None):
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = utils._check_class_and_config(self, config, hl, log)
+	self.log.info('Entering push data to ElasticSearch step')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if not isHl:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
+
+	source_path = utils.destination_transform(self.config['process/destination_path'], self.config['resources/elasticsearch/version'], 'chrom=' + str(self.config['process/chrom']))
+
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+
+	es_conf = {
+		"es.net.http.auth.user": self.config['resources/elasticsearch/user'],
+		"es.net.http.auth.pass": self.config['resources/elasticsearch/pwd'],
+		"es.nodes": self.config['resources/elasticsearch/host'],
+		"es.port": self.config['resources/elasticsearch/port']
+	}
+
+	index_name = self.config['resources/elasticsearch/index_name']
+	if index_exists(self.config) != 200:
+		self.log.warning('Given index does not exists. "push_snv" step will attempt to create the index')
+		sts = create_index_snv(self)
+		if sts != 200:
+			self.log.error('Trying to perform a "push_snv" operation without creating the index and index could not be created (response: {})'.format(str(sts)))
+			raise Exception('Trying to perform a "push_snv" operation without creating the index and index could not be created (response: {})'.format(str(sts)))
+
+	# Getting annotated variants and adding the chromosome column
+	variants = sqlContext.read.load(source_path)\
+		.withColumn('chrom', lit(chrom))
+	variants.printSchema()
+	x = variants.write.format('org.elasticsearch.spark.sql')\
+		.options(**es_conf)\
+		.save('{}/{}'.format(index_name, self.config['resources/elasticsearch/type']), mode = 'append')
+	return x
 
