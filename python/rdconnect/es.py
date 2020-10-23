@@ -305,7 +305,7 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 
 	# Getting annotated variants and adding the chromosome column
 	variants = sql.read.load(source_path)\
-		.withColumn('chrom', lit(chrom))
+		.withColumn('chrom', lit(self.config['process/chrom']))
 	variants.printSchema()
 	x = variants.write.format('org.elasticsearch.spark.sql')\
 		.options(**es_conf)\
