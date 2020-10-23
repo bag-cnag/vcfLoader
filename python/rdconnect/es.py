@@ -279,7 +279,11 @@ def push_snv(self = None, config = None, hl = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_path = utils.destination_transform(self.config['process/destination_path'], self.config['resources/elasticsearch/version'], 'chrom=' + str(self.config['process/chrom']))
+	source_path = utils.destination_transform(
+		self.config['process/destination_path'], 
+		self.config['resources/elasticsearch/version'], 
+		'chrom={}'.format(str(self.config['process/chrom']))
+	)
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
