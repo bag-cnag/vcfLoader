@@ -263,7 +263,7 @@ def index_exists(config):
 	return sts.status_code
 
 
-def push_snv(self = None, cofig = None, hl = None, log = None):
+def push_snv(self = None, config = None, hl = None, log = None):
 	isSelf = True
 	if self is None:
 		isSelf = False
