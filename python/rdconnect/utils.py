@@ -1,4 +1,5 @@
 import os
+from rdconnect.classGenome import GenomicData
 from rdconnect.classLog import VoidLog
 
 def chrom_str_to_int(chrom):
