@@ -263,7 +263,7 @@ def index_exists(config):
 	return sts.status_code
 
 
-def push_snv(self = None, config = None, hl = None, log = None):
+def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 	isSelf = True
 	if self is None:
 		isSelf = False
@@ -304,7 +304,7 @@ def push_snv(self = None, config = None, hl = None, log = None):
 			raise Exception('Trying to perform a "push_snv" operation without creating the index and index could not be created (response: {})'.format(str(sts)))
 
 	# Getting annotated variants and adding the chromosome column
-	variants = sqlContext.read.load(source_path)\
+	variants = sql.read.load(source_path)\
 		.withColumn('chrom', lit(chrom))
 	variants.printSchema()
 	x = variants.write.format('org.elasticsearch.spark.sql')\
