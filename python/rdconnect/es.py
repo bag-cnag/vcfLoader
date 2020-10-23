@@ -307,8 +307,9 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 	variants = sql.read.load(source_path)\
 		.withColumn('chrom', lit(self.config['process/chrom']))
 	variants.printSchema()
-	x = variants.write.format('org.elasticsearch.spark.sql')\
+	variants.write.format('org.elasticsearch.spark.sql')\
 		.options(**es_conf)\
 		.save('{}/{}'.format(index_name, self.config['resources/elasticsearch/type']), mode = 'append')
-	return x
+
+	return self
 
