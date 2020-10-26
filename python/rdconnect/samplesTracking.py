@@ -51,7 +51,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 			q_url = ur2 + sam
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
-				self.log.error('> Query for "{}" resulted in {}. Forced the update failed with {}'.format(sa, response.status_code, response2.status_code))
+				self.log.error('> Query for "{}" resulted in {}. Forced the update failed with {}'.format(sam, response.status_code, response2.status_code))
 			else:
 				self.log.warning('> Query for "{}" resulted in {}. Forced the update was successful with {}'.format(sa, response.status_code, response2.status_code))
 				
