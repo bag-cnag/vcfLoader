@@ -95,7 +95,7 @@ class ConfigFile:
 		x = ConfigFile()
 		x._config_path = config_path
 		x._data = {}
-		with open(_config_path) as data_file:
+		with open(config_path) as data_file:
 			x._data = json.load(data_file)
 		try:
 			x._keys = _get_keys_dict(x._data)
