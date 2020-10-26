@@ -86,6 +86,9 @@ class ConfigFile:
 		new.keys = _get_keys_dict(new.data)
 		return new
 
+	def keys(sekf):
+		return _get_keys_dict(self.data)
+
 	@staticmethod
 	def from_file(config_path):
 		x = ConfigFile()

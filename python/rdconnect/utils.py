@@ -206,7 +206,7 @@ def destination_transform(destination_path, version, filename):
 	-------
 	A string with the path to save the transformed dataset.
 	"""
-	return os.path.join(destination_path, 'transformed', filename)
+	return os.path.join(destination_path, version, 'transformed', filename)
 
 
 def _check_class_and_config(self, config, hl, log):
