@@ -45,15 +45,17 @@ def sample_index(self = None, config = None, hl = None, log = None):
 
 	for sam in full_samples:
 		q_url = url + sam
+		print("---->", q_url)
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			ur2 = config['applications/datamanagement/api_dm_status_force'].format(config['applications/datamanagement/ip'])
 			q_url = ur2 + sam
+			print("---->", q_url)
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
-				self.log.error('> Query for "{}" resulted in {}. Forced the update failed with {}'.format(sam, response.status_code, response2.status_code))
+				self.log.error('> Query for "{}" resulted in {}. Forced update failed with {}'.format(sam, response.status_code, response2.status_code))
 			else:
-				self.log.warning('> Query for "{}" resulted in {}. Forced the update was successful with {}'.format(sa, response.status_code, response2.status_code))
+				self.log.warning('> Query for "{}" resulted in {}. Forced update was successful with {}'.format(sa, response.status_code, response2.status_code))
 				
 				# data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
 				# 	\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
