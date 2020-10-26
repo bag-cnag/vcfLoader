@@ -40,8 +40,6 @@ def sample_index(self = None, config = None, hl = None, log = None):
 
 	self.log.info('> Experiments in loaded VCF: {}'.format(len(full_samples)))
 	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
-	self.log.debug('> Provided IP for data-management: {}'.format(data_ip))
-	self.log.debug('> Provided URL for data-management: {}'.format(data_url))	
 	self.log.debug('> Provided update content: "{}"'.format(str(data)))
 	self.log.debug('> Created query URL for data-management: {}'.format(url))
 
