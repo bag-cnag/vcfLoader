@@ -5,7 +5,7 @@ import requests
 import rdconnect.utils as utils
 from rdconnect.classException import *
 
-def dm_index(self = None, config = None, hl = None, log = None):
+def sample_index(self = None, config = None, hl = None, log = None):
 	isSelf = True
 	if self is None:
 		isSelf = False
