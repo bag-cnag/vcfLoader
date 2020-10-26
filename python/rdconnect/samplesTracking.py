@@ -18,8 +18,8 @@ def sample_index(self = None, config = None, hl = None, log = None):
 		raise NoConfigurationException('No configuration was provided')
 
 	if not 'process/chrom' in config.keys():
-		log.warning('Provided configuration with no chromosome attached ("process/chrom"). Chromosome 1 will be used.')
-		config['process/chrom'] = 1
+		log.warning('Provided configuration with no chromosome attached ("process/chrom"). Chromosome 21 will be used.')
+		config['process/chrom'] = 21
 
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
@@ -46,6 +46,8 @@ def sample_index(self = None, config = None, hl = None, log = None):
 	for sam in full_samples:
 		q_url = url + sam
 		print("---->", q_url)
+		print("----->", data)
+		print("------>", headers)
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			ur2 = config['applications/datamanagement/api_dm_status_force'].format(config['applications/datamanagement/ip'])
