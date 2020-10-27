@@ -94,13 +94,14 @@ def vep(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+	destination_file = utils.destination_vep(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	vep_config = self.config['annotation/clean/vep']
 	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "vep_config" filled with "{}"'.format(vep_config))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
@@ -123,9 +124,8 @@ def vep(self = None, config = None, hl = None, log = None):
 
 	self.state = ['VEP'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_vep(destination_path, destination_file)
-		self.data.write(filename, overwrite = True)
-		self.file = [filename] + self.file
+		self.data.write(destination_file, overwrite = True)
+		self.file = [destination_file] + self.file
 	return self
 
 
@@ -231,13 +231,14 @@ def dbnsfp(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+	destination_file = utils.destination_dbnsfp(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	dbnsfp_path = utils.create_chrom_filename(self.config['annotation/clean/dbNSFP'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "dbnsfp_path" filled with "{}"'.format(dbnsfp_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
@@ -265,9 +266,8 @@ def dbnsfp(self = None, config = None, hl = None, log = None):
 
 	self.state = ['dbNSFP'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_dbnsfp(destination_path, destination_file)
-		self.data.write(filename, overwrite = True)
-		self.file = [filename] + self.file
+		self.data.write(destination_file, overwrite = True)
+		self.file = [destination_file] + self.file
 	return self
 
 
@@ -315,13 +315,14 @@ def cadd(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+	destination_file = utils.destination_cadd(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	cad_path = utils.create_chrom_filename(self.config['annotation/clean/cadd'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "cad_path" filled with "{}"'.format(cad_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
@@ -339,9 +340,8 @@ def cadd(self = None, config = None, hl = None, log = None):
 
 	self.state = ['CADD'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_cadd(destination_path, destination_file)
-		self.data.write(filename, overwrite = True)
-		self.file = [filename] + self.file
+		self.data.write(destination_file, overwrite = True)
+		self.file = [destination_file] + self.file
 	return self
 
 
@@ -430,13 +430,14 @@ def clinvar(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+	destination_file = utils.destination_clinvar(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	clinvar_path = utils.create_chrom_filename(self.config['annotation/clean/clinvar'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "clinvar_path" filled with "{}"'.format(clinvar_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
@@ -459,9 +460,8 @@ def clinvar(self = None, config = None, hl = None, log = None):
 
 	self.state = ['ClinVar'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_clinvar(destination_path, destination_file)
-		self.data.write(filename, overwrite = True)
-		self.file = [filename] + self.file
+		self.data.write(destination_file, overwrite = True)
+		self.file = [destination_file] + self.file
 	return self
 
 
@@ -505,13 +505,14 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+	destination_file = utils.destination_gnomadex(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	gnomeAdEx_path = utils.create_chrom_filename(self.config['annotation/clean/exomesGnomad'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "gnomeAdEx_path" filled with "{}"'.format(gnomeAdEx_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
@@ -531,7 +532,6 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 
 	self.state = ['gnomeADEx'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_gnomadex(destination_path, destination_file)
-		self.data.write(filename, overwrite = True)
-		self.file = [filename] + self.file
+		self.data.write(destination_file, overwrite = True)
+		self.file = [destination_file] + self.file
 	return self
