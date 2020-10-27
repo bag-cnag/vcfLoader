@@ -92,8 +92,9 @@ def vep(self = None, config = None, hl = None, log = None):
 
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
+	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = self.config['process/destination_path']
 	vep_config = self.config['annotation/clean/vep']
 	autosave = self.config['process/autosave']
 
@@ -122,9 +123,9 @@ def vep(self = None, config = None, hl = None, log = None):
 
 	self.state = ['VEP'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_vep(destination_path, source_file)
+		filename = utils.destination_vep(destination_path, destination_file)
 		self.data.write(filename, overwrite = True)
-		self.file = [destination_path] + self.file
+		self.file = [filename] + self.file
 	return self
 
 
@@ -228,8 +229,9 @@ def dbnsfp(self = None, config = None, hl = None, log = None):
 
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
+	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = self.config['process/destination_path']
 	dbnsfp_path = utils.create_chrom_filename(self.config['annotation/clean/dbNSFP'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
@@ -263,9 +265,9 @@ def dbnsfp(self = None, config = None, hl = None, log = None):
 
 	self.state = ['dbNSFP'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_dbnsfp(destination_path, source_file)
+		filename = utils.destination_dbnsfp(destination_path, destination_file)
 		self.data.write(filename, overwrite = True)
-		self.file = [destination_path] + self.file
+		self.file = [filename] + self.file
 	return self
 
 
@@ -311,8 +313,9 @@ def cadd(self = None, config = None, hl = None, log = None):
 
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
+	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = self.config['process/destination_path']
 	cad_path = utils.create_chrom_filename(self.config['annotation/clean/cadd'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
@@ -336,9 +339,9 @@ def cadd(self = None, config = None, hl = None, log = None):
 
 	self.state = ['CADD'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_cadd(destination_path, source_file)
+		filename = utils.destination_cadd(destination_path, destination_file)
 		self.data.write(filename, overwrite = True)
-		self.file = [destination_path] + self.file
+		self.file = [filename] + self.file
 	return self
 
 
@@ -425,8 +428,9 @@ def clinvar(self = None, config = None, hl = None, log = None):
 
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
+	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = self.config['process/destination_path']
 	clinvar_path = utils.create_chrom_filename(self.config['annotation/clean/clinvar'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
@@ -455,9 +459,9 @@ def clinvar(self = None, config = None, hl = None, log = None):
 
 	self.state = ['ClinVar'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_clinvar(destination_path, source_file)
+		filename = utils.destination_clinvar(destination_path, destination_file)
 		self.data.write(filename, overwrite = True)
-		self.file = [destination_path] + self.file
+		self.file = [filename] + self.file
 	return self
 
 
@@ -499,8 +503,9 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
+	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	destination_path = self.config['process/destination_path']
 	gnomeAdEx_path = utils.create_chrom_filename(self.config['annotation/clean/exomesGnomad'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
@@ -526,7 +531,7 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 
 	self.state = ['gnomeADEx'] + self.state
 	if autosave and destination_path != '':
-		filename = utils.destination_gnomadex(destination_path, source_file)
+		filename = utils.destination_gnomadex(destination_path, destination_file)
 		self.data.write(filename, overwrite = True)
-		self.file = [destination_path] + self.file
+		self.file = [filename] + self.file
 	return self
