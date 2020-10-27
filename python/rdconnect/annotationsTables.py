@@ -23,7 +23,7 @@ def dbsnfp(config, hl, log):
 		self. If no logger is in the provided nor in the GenomicData, then no
 		log is performed.
 	"""
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = _check_class_and_config(None, config, hl, log)
 	self.log.info('Entering importing step "dbSNFP"')
 
 	if not isConfig:
@@ -91,7 +91,7 @@ def cgi(config, hl, log):
 		self. If no logger is in the provided nor in the GenomicData, then no
 		log is performed.
 	"""
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = _check_class_and_config(None, config, hl, log)
 	self.log.info('Entering importing step "CGI"')
 
 	if not isConfig:
@@ -131,7 +131,7 @@ def cadd(config, hl, log):
 		self. If no logger is in the provided nor in the GenomicData, then no
 		log is performed.
 	"""
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = _check_class_and_config(None, config, hl, log)
 	self.log.info('Entering importing step "CADD"')
 
 	if not isConfig:
@@ -168,7 +168,7 @@ def clinvar(config, hl, log):
 		self. If no logger is in the provided nor in the GenomicData, then no
 		log is performed.
 	"""
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = _check_class_and_config(None, config, hl, log)
 	self.log.info('Entering importing step "ClinVar"')
 
 	if not isConfig:
@@ -205,7 +205,7 @@ def gnomADEx(config, hl, log):
 		self. If no logger is in the provided nor in the GenomicData, then no
 		log is performed.
 	"""
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = _check_class_and_config(None, config, hl, log)
 	self.log.info('Entering importing step "ClinVar"')
 
 	if not isConfig:
