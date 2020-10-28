@@ -4,6 +4,52 @@ import requests
 
 from rdconnect.classLog import VoidLog
 
+def experiments(config, log = VoidLog(), is_playground = False):
+	"""Function used to query data-management and get a list of all experiments.
+
+	The queering is done using the token provided by 
+	'applications/datamanagement/token' to the end point provided by the 
+	configuration slot:
+
+		'applications/datamanagement/ip' ('applications/datamanagement/host')
+
+	The base URL for the API consumption is indicated, using the argument 
+	'is_playground', at:
+
+		'applications/combine/api_exp'
+		'applications/combine/api_exp_playground'
+
+	Parameters
+	----------
+	config: ConfigFile, mandatory
+		Configuration for the job that must include the keys 
+		'applications/datamanagement/ip','applications/datamanagement/token',
+		'applications/datamanagement/host', 'applications/combine/api_exp_group',
+		and 'applications/combine/api_exp_group_playground'.
+	log: logger, optional
+		Used to track the queering process
+	is_playground: bool, optional
+		Boolean indicating it playground URLs shall be used.
+	"""
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
+	if is_playground:
+		url = config['applications/combine/api_exp_playground'].format(
+			url, config['applications/combine/api_group'])
+	else:
+		url = config['applications/combine/api_exp'].format(
+			url, config['applications/combine/api_group'])
+	headers = { 
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}
+	log.debug('Querying experiment by group using url "{}"'.format(url))
+	resp = requests.get(url, headers = headers, verify = False)
+	data = json.loads(resp.content)
+	return data
+
 def experiment_by_group(config, log = VoidLog(), is_playground = False):
 	"""Function used to query data-management and get a list of experiments
 	that belongs to a specific group of users.
