@@ -91,11 +91,9 @@ def experiment_status(config, log = VoidLog(), is_playground = False):
 		url = config['applications/combine/api_exp_status'].format(
 			url, config['applications/combine/api_group'])
 	headers = { 
-		'Authorization': config['applications/datamanagement/token'], 
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
-	}
-	print(url)
-	print(headers)
+	}	
 	log.debug('Querying experiment\'s status using url "{}"'.format(url))
 	resp = requests.get(url, headers = headers, verify = False)
 	data = json.loads(resp.content)
