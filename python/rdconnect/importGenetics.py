@@ -19,83 +19,50 @@ MIN_DP = 7
 MIN_GQ = 19
 SAMPLES_CNV = 939
 
-# #def dense_matrix(log, hl, source_path, destination_path = None):
-# def dense_matrix(config, log, hl):
-# 	"""This function is used to load a dense matrix into HAIL structure
 
-# 	This function loads a dense matrix into HAIL structure in the HDFS. It 
-# 	creates annotates the variants with general annotations:
+def sparse_matrix(self = None, config = None, hl = None, log = None):
+	self = GenomicData()
+	self.state = []
+	self.file = []
+	if log is None:
+		self.log = VoidLog()
+	else:
+		self.log = log
 
-# 		* samples, ad, dp, gtInt, gt, and gq freqInt, pos, alt, ref)
+	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self.log.info('Entering loading step "sparse_matrix"')
 
-# 	Ant is also applied some filtering on the variants:
+	if config is None:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
 
-# 		* row filtering: both genotypes are reference, dp > 10, and gq > 20
-# 		* remove duplicated according to locus and allele
+	if hl is None:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
 
-# 	Parameters
-# 	----------
-# 	config: ConfigFile, mandatory
-# 		Object of class 'ConfigFile' with the configuration of the pipeline. It
-# 		will be used to extract 'source_path' and 'destination_path',
-# 	log: logger, mandatory
-# 		A logger to have track of the steps used in the loading process
-# 	hl: context, mandatory
-# 		HAIL context
+	source_path = config['applications/combine/sparse_matrix_path']
+	self.log.debug('Locating last version of sparse matrix in "{0}"'.format(source_path))
+	source_file = self.hl.utils.hadoop_ls(source_path)
+	print("----->", source_file)
+	source_file = [ (m['path'], int(m['path'].replace(".", ""))) for z in source_file ]
+	source_file = sorted(source_file, key=lambda x: x[1])
+	print("------->", source_file)
+	
+	# source_file = utils.create_chrom_filename(os.path(
+	# 	, 
+	# 	XXX, 'chrom-chromosome'), config['process/chrom'])
+	# source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	# source_path = os.path.join(source_path, source_file)
+	# destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
+	# destination_path = config['process/destination_path']
+	# autosave = config['process/autosave']
 
-# 	Returns
-# 	-------
-# 	The function returns a 'GenomicData' object.
-# 	"""
-# 	log.info('Entering step "load_dense_matrix"')
-# 	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
-# 	destination_path = utils.destination_dense_matrices(config['process/destination_path'])
-# 	log.debug('- Argument "source_path" filled with "{}"'.format(source_path))
-# 	log.debug('- Argument "destination_path" filled with "{}"'.format(destination_path))
+	# self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	# self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
+	# self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	# self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
-# 	try:
-# 		vcf = hl.read_matrix_table( sourcePath )
-# 		x = [y.get('s') for y in vcf.col.collect()]
-# 		log.info('Experiments in loaded VCF: {}'.format(len(x)))
-# 		log.info('First and last sample: {} // {}'.format(x[ 0 ], x[ len( x ) - 1 ]))
-# 		vcf = vcf.transmute_entries(
-# 			sample = hl.struct(
-# 				sample = vcf.s,
-# 				ad = truncateAt(hl,vcf.AD[ 1 ] / hl.sum( vcf.AD ), "2"),
-# 				dp = vcf.DP,
-# 				gtInt = vcf.GT,
-# 				gt = hl.str(vcf.GT),
-# 				gq = vcf.GQ
-# 			)
-# 		)
-# 		vcf = vcf.annotate_rows(
-# 			ref = vcf.alleles[ 0 ],
-# 			alt = vcf.alleles[ 1 ],
-# 			pos = vcf.locus.position,
-# 			indel = hl.cond(
-# 				(hl.len(vcf.alleles[ 0 ]) != (hl.len(vcf.alleles[ 1 ]))) | (hl.len(vcf.alleles[ 0 ]) != 1) | (hl.len(vcf.alleles[ 0 ]) != 1), True, False 
-# 			),
-# 			samples_germline = hl.filter(
-# 				lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf.sample)
-# 			)
-# 		)
-# 		vcf = vcf.filter_rows(hl.agg.any((vcf.sample.gtInt.is_non_ref()) & (vcf.sample.dp > 10) & (vcf.sample.gq > 20)))
-# 		vcf = vcf.key_rows_by(vcf.locus, vcf.alleles).distinct_by_row()
-# 		if destination_path is not None:
-# 			log.debug('Output VCF file will be saved to "{}". Contents will be overwritten.'.format(destination_path))
-# 			vcf = vcf.write(destination_path, overwrite = True)
-# 		var = GenomicData()
-# 		var.vcf = vcf
-# 		var.state = ['dense_matrix']
-# 		var.file = [destination_path]
-# 		return var
-# 	except Exception as ex:
-# 		log.debug('Unexpected error during the load of dense matrix "{}"'.format(source_path))
-# 		log.error('Unexpected error:\n{}'.format(str(ex)))
-# 		log.debug('Stack: {}'.format(str(format_exc())))
-# 		sys.exit(2)
 
-#def load_germline(log, hl, nPartitions, source_path, destination_path = None):
 def germline(config = None, hl = None, log = None):
 	"""Function to load a VCF from POSIX and stores it into HDFS.
 
@@ -147,7 +114,6 @@ def germline(config = None, hl = None, log = None):
 	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
-
 
 	self.data = hl.split_multi_hts(hl.import_vcf(str(source_path), array_elements_required = False, force_bgz = True, min_partitions = config['resources/number_of_partitions']))
 	x = [y.get('s') for y in self.data.col.collect()]
