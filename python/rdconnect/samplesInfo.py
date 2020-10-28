@@ -16,16 +16,13 @@ def experiments(config, log = VoidLog(), is_playground = False):
 	The base URL for the API consumption is indicated, using the argument 
 	'is_playground', at:
 
-		'applications/combine/api_exp'
-		'applications/combine/api_exp_playground'
+		'applications/datamanagement/api_exp'
+		'applications/datamanagement/api_exp_playground'
 
 	Parameters
 	----------
 	config: ConfigFile, mandatory
-		Configuration for the job that must include the keys 
-		'applications/datamanagement/ip','applications/datamanagement/token',
-		'applications/datamanagement/host', 'applications/combine/api_exp_group',
-		and 'applications/combine/api_exp_group_playground'.
+		Configuration for the job.
 	log: logger, optional
 		Used to track the queering process
 	is_playground: bool, optional
@@ -36,11 +33,9 @@ def experiments(config, log = VoidLog(), is_playground = False):
 		url = 'https://{0}'.format(url)
 
 	if is_playground:
-		url = config['applications/combine/api_exp_playground'].format(
-			url, config['applications/combine/api_group'])
+		url = config['applications/datamanagement/api_exp_playground'].format(url)
 	else:
-		url = config['applications/combine/api_exp'].format(
-			url, config['applications/combine/api_group'])
+		url = config['applications/datamanagement/api_exp'].format(url)
 	headers = { 
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
@@ -63,16 +58,16 @@ def experiment_by_group(config, log = VoidLog(), is_playground = False):
 	The base URL for the API consumption is indicated, using the argument 
 	'is_playground', at:
 
-		'applications/combine/api_exp_group'
-		'applications/combine/api_exp_group_playground'
+		'applications/datamanagement/api_exp_group'
+		'applications/datamanagement/api_exp_group_playground'
 
 	Parameters
 	----------
 	config: ConfigFile, mandatory
 		Configuration for the job that must include the keys 
 		'applications/datamanagement/ip','applications/datamanagement/token',
-		'applications/datamanagement/host', 'applications/combine/api_exp_group',
-		and 'applications/combine/api_exp_group_playground'.
+		'applications/datamanagement/host', 'applications/datamanagement/api_exp_group',
+		and 'applications/datamanagement/api_exp_group_playground'.
 	log: logger, optional
 		Used to track the queering process
 	is_playground: bool, optional
@@ -83,11 +78,11 @@ def experiment_by_group(config, log = VoidLog(), is_playground = False):
 		url = 'https://{0}'.format(url)
 
 	if is_playground:
-		url = config['applications/combine/api_exp_group_playground'].format(
-			url, config['applications/combine/api_group'])
+		url = config['applications/datamanagement/api_exp_group_playground'].format(
+			url, config['applications/api_group'])
 	else:
-		url = config['applications/combine/api_exp_group'].format(
-			url, config['applications/combine/api_group'])
+		url = config['applications/datamanagement/api_exp_group'].format(
+			url, config['applications/api_group'])
 	headers = { 
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
@@ -111,16 +106,16 @@ def experiment_status(config, log = VoidLog(), is_playground = False):
 	The base URL for the API consumption is indicated, using the argument 
 	'is_playground', at:
 
-		'applications/combine/api_exp_status'
-		'applications/combine/api_exp_status_playground'
+		'applications/datamanagement/api_exp_status'
+		'applications/datamanagement/api_exp_status_playground'
 
 	Parameters
 	----------
 	config: ConfigFile, mandatory
 		Configuration for the job that must include the keys 
 		'applications/datamanagement/ip','applications/datamanagement/token',
-		'applications/datamanagement/host', 'applications/combine/api_exp_status',
-		and 'applications/combine/api_exp_status_playground'.
+		'applications/datamanagement/host', 'applications/datamanagement/api_exp_status',
+		and 'applications/datamanagement/api_exp_status_playground'.
 	log: logger, optional
 		Used to track the queering process
 	is_playground: bool, optional
@@ -131,11 +126,11 @@ def experiment_status(config, log = VoidLog(), is_playground = False):
 		url = 'https://{0}'.format(url)
 
 	if is_playground:
-		url = config['applications/combine/api_exp_status_playground'].format(
-			url, config['applications/combine/api_group'])
+		url = config['applications/datamanagement/api_exp_status_playground'].format(
+			url, config['applications/api_group'])
 	else:
-		url = config['applications/combine/api_exp_status'].format(
-			url, config['applications/combine/api_group'])
+		url = config['applications/datamanagement/api_exp_status'].format(
+			url, config['applications/api_group'])
 	headers = { 
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
