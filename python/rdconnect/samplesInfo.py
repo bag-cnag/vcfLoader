@@ -46,8 +46,6 @@ def experiment_by_group(config, log = VoidLog(), is_playground = False):
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
 	}
-	print(headers)
-	print(url)
 	log.debug('Querying experiment by group using url "{}"'.format(url))
 	resp = requests.get(url, headers = headers, verify = False)
 	data = json.loads(resp.content)
@@ -96,6 +94,8 @@ def experiment_status(config, log = VoidLog(), is_playground = False):
 		'Authorization': config['applications/datamanagement/token'], 
 		'Host': config['applications/datamanagement/host'] 
 	}
+	print(url)
+	print(headers)
 	log.debug('Querying experiment\'s status using url "{}"'.format(url))
 	resp = requests.get(url, headers = headers, verify = False)
 	data = json.loads(resp.content)
