@@ -4,7 +4,7 @@ import requests
 
 from rdconnect.classLog import VoidLog
 
-def experiment_by_group(config, is_playground = False, log = VoidLog()):
+def experiment_by_group(config, log = VoidLog(), is_playground = False):
 	"""Function used to query data-management and get a list of experiments
 	that belongs to a specific group of users.
 
@@ -27,10 +27,10 @@ def experiment_by_group(config, is_playground = False, log = VoidLog()):
 		'applications/datamanagement/ip','applications/datamanagement/token',
 		'applications/datamanagement/host', 'applications/combine/api_exp_group',
 		and 'applications/combine/api_exp_group_playground'.
-	is_playground: bool, optional
-		Boolean indicating it playground URLs shall be used.
 	log: logger, optional
 		Used to track the queering process
+	is_playground: bool, optional
+		Boolean indicating it playground URLs shall be used.
 	"""
 	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
@@ -54,7 +54,7 @@ def experiment_by_group(config, is_playground = False, log = VoidLog()):
 	return data
 
 
-def experiment_status(config, is_playground = False, log = VoidLog()):
+def experiment_status(config, log = VoidLog(), is_playground = False):
 	"""Function used to query data-management and get the status of a the 
 	experiments belonging to a group of users.
 
@@ -77,10 +77,10 @@ def experiment_status(config, is_playground = False, log = VoidLog()):
 		'applications/datamanagement/ip','applications/datamanagement/token',
 		'applications/datamanagement/host', 'applications/combine/api_exp_status',
 		and 'applications/combine/api_exp_status_playground'.
-	is_playground: bool, optional
-		Boolean indicating it playground URLs shall be used.
 	log: logger, optional
 		Used to track the queering process
+	is_playground: bool, optional
+		Boolean indicating it playground URLs shall be used.
 	"""
 	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
@@ -103,7 +103,7 @@ def experiment_status(config, is_playground = False, log = VoidLog()):
 
 
 
-def get_experiments_to_process(experiment_available, experiment_status, check_hdfs = False):
+def experiments_to_process(experiment_available, experiment_status, check_hdfs = False):
 	"""Given the experiments seen by the user as well as their status, returns 
 	the ones that are in HDFS and have to be processed.
 
