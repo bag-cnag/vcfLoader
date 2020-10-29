@@ -13,7 +13,7 @@ from traceback import format_exc
 import rdconnect.utils as utils
 from rdconnect.classGenome import GenomicData, SparseMatrix
 from rdconnect.classLog import VoidLog
-from rdconnect.utils import _check_class_and_config
+from rdconnect.utils import check_class_and_config
 
 MIN_DP = 7
 MIN_GQ = 19
@@ -29,7 +29,7 @@ def sparse_matrix(self = None, config = None, hl = None, log = None):
 	else:
 		self.log = log
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering loading step "sparse_matrix"')
 
 	if config is None:
