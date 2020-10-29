@@ -48,7 +48,7 @@ def sparse_matrix(self = None, config = None, hl = None, log = None):
 
 	self.log.debug('> Set "source_path" with version "{}"'.format(source_path))
 	
-	source_file = utils.create_chrom_filename(os.path(source_path, 'chrom-chromosome'), config['process/chrom'])
+	source_file = utils.create_chrom_filename(os.path.join(source_path, 'chrom-chromosome'), config['process/chrom'])
 
 	self.log.info('Loading sparse matrix data from "source_file" "{0}"'.format(source_file))
 	self.data = self.hl.methods.read_matrix_table(source_file)
