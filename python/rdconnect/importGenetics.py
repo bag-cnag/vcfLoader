@@ -11,7 +11,7 @@ import os
 from traceback import format_exc
 
 import rdconnect.utils as utils
-from rdconnect.classGenome import GenomicData
+from rdconnect.classGenome import GenomicData, SparseMatrix
 from rdconnect.classLog import VoidLog
 from rdconnect.utils import _check_class_and_config
 
@@ -29,7 +29,7 @@ def sparse_matrix(self = None, config = None, hl = None, log = None):
 	else:
 		self.log = log
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = _check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering loading step "sparse_matrix"')
 
 	if config is None:
@@ -41,27 +41,21 @@ def sparse_matrix(self = None, config = None, hl = None, log = None):
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
 	source_path = config['applications/combine/sparse_matrix_path']
-	self.log.debug('Locating last version of sparse matrix in "{0}"'.format(source_path))
-	source_file = self.hl.utils.hadoop_ls(source_path)
+	self.log.debug('> Locating last version of sparse matrix in "{0}"'.format(source_path))
+	source_path = self.hl.utils.hadoop_ls(source_path)
+	source_path = [ (m['path'], int(m['path'].split('/')[-1].replace('.', ''))) for m in source_path ]
+	source_path = sorted(source_path, key=lambda x: x[1])[0][0]
 
-	print("----->", source_file)
-	source_file = [ (m['path'], int(m['path'].split('/')[-1].replace('.', ''))) for m in source_file ]
-	source_file = sorted(source_file, key=lambda x: x[1])
-	print("------->", source_file)
+	self.log.debug('> Set "source_path" with version "{}"'.format(source_path))
 	
-	# source_file = utils.create_chrom_filename(os.path(
-	# 	, 
-	# 	XXX, 'chrom-chromosome'), config['process/chrom'])
-	# source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
-	# source_path = os.path.join(source_path, source_file)
-	# destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
-	# destination_path = config['process/destination_path']
-	# autosave = config['process/autosave']
+	source_file = utils.create_chrom_filename(os.path(source_path, 'chrom-chromosome'), config['process/chrom'])
 
-	# self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	# self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
-	# self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
-	# self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
+	self.log.info('Loading sparse matrix data from "source_file" "{0}"'.format(source_file))
+	self.data = self.hl.methods.read_matrix_table(source_file)
+	x = [y.get('s') for y in self.data.col.collect()]
+	self.log.info('> 	. Experiments in loaded VCF: {}'.format(len(x)))
+	self.log.info('> 	. First and last sample: {} // {}'.format(x[ 0 ], x[len(x) - 1]))
+	return self
 
 
 def germline(config = None, hl = None, log = None):
@@ -93,7 +87,7 @@ def germline(config = None, hl = None, log = None):
 	else:
 		self.log = log
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
 	self.log.info('Entering loading step "germline"')
 
 	if config is None:

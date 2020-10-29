@@ -3,7 +3,7 @@ import os
 import rdconnect.utils as utils
 from rdconnect.classGenome import GenomicData
 from rdconnect.classException import *
-from rdconnect.utils import _check_class_and_config
+from rdconnect.utils import check_class_and_config
 
 def _transcript_annotations(hl, annotations):
 	""" Transcript level annotations for VEP 
@@ -79,7 +79,7 @@ def vep(self = None, config = None, hl = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
 	self.log.info('Entering annotation step "VEP"')
 
 	if not isConfig:
@@ -216,7 +216,7 @@ def dbnsfp(self = None, config = None, hl = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
 	self.log.info('Entering annotation step "dbSNFP"')
 
 	if not isConfig:
@@ -300,7 +300,7 @@ def cadd(self = None, config = None, hl = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
 	self.log.info('Entering annotation step "CADD"')
 
 	if not isConfig:
@@ -415,7 +415,7 @@ def clinvar(self = None, config = None, hl = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
 	self.log.info('Entering annotation step "ClinVar"')
 
 	if not isConfig:
@@ -490,7 +490,7 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = _check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
 	self.log.info('Entering annotation step "gnomeAD Exome"')
 
 	if not isConfig:

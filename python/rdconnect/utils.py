@@ -209,10 +209,10 @@ def destination_transform(destination_path, version, filename):
 	return os.path.join(destination_path, version, 'transformed', filename)
 
 
-def _check_class_and_config(self, config, hl, log):
+def check_class_and_config(self, config, hl, log, class_to=GenomicData):
 	check = [False, False]
 	if self is None:
-		self = GenomicData()
+		self = class_to()
 
 	if config is not None:
 		self.config = config

@@ -13,6 +13,7 @@ To add new methods to the class:
 
 from inspect import getmembers, isfunction
 
+
 class GenomicData():
 	"""
 	A class used to represent any type of genomic data through the pipeline
@@ -26,7 +27,20 @@ class GenomicData():
 		return '<GenomicData>'
 
 
-def add_method(function, calling):
+class SparseMatrix():
+	"""
+	A class used to represent any type of genomic data through the pipeline
+	implemented in 'vcfLoader'.
+
+	It is an abstract class with no attributes and no methods, only '__str__' is
+	overloaded. Methods and attributes are being attached to the class 
+	dynamically using the function 'add_method' and 'add_funcs_from_module'.
+	"""
+	def __str__(self):
+		return '<SparseMatrix>'
+
+
+def add_method(function, calling, class_to=GenomicData):
 	"""Adds a new method to GenomicData
 
 	This functions creates a new method in 'GenomicData' class with the name 
@@ -38,7 +52,8 @@ def add_method(function, calling):
 		The function to be attached to 'GenomicData' class.
 	calling: str, mandatory
 		Name of the new created method.
-
+	class_to: class, optional
+		To which class the function has to be added. By default 'GenomicData'.
 	Raises
 	------
 	Exception
@@ -48,10 +63,10 @@ def add_method(function, calling):
 		raise Exception('Given a "calling" that is no string.')
 	if not callable(function):
 		raise Exception('Given a "function" that can not be called.')
-	setattr(GenomicData, calling, function)
+	setattr(class_to, calling, function)
 
 
-def add_funcs_from_module(module):
+def add_funcs_from_module(module, class_to=GenomicData):
 	"""Adds all the public functions of a module as new method to GenomicData
 
 	This functions creates a new method in 'GenomicData' class for each of the 
@@ -62,6 +77,9 @@ def add_funcs_from_module(module):
 	----------
 	module: module, mandatory
 		The module from witch to get all functions to be added to 'GenomicData'
+		or other class.
+	class_to: class, optional
+		To which class the function has to be added. By default 'GenomicData'.
 	
 	Raises
 	------
@@ -72,5 +90,5 @@ def add_funcs_from_module(module):
 	fun_list = [x for x in getmembers(module) if isfunction(x[1])]
 	pub_fun = [x for x in fun_list if not x[0].startswith('_')]
 	for nam, fun in pub_fun:
-		add_method(fun, nam)
+		add_method(fun, nam, class_to)
 
