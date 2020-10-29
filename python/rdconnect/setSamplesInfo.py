@@ -56,7 +56,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
 		'Host': self.config['applications/datamanagement/host'] 
 	}
-	data = "{\"{0}\": \"{1}\"}".format(flag, value)
+	data = "{\"" + flag + "\": \"" + value + "\"}"
 
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
