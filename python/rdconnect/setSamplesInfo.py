@@ -47,10 +47,10 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 
 	if is_playground:
 		url = self.config['applications/datamanagement/api_exp_status_playground'].format(
-			url, config['applications/api_group'])
+			url, self.config['applications/api_group'])
 	else:
 		url = self.config['applications/datamanagement/api_exp_status'].format(
-			url, config['applications/api_group'])
+			url, self.config['applications/api_group'])
 	headers = { 
 		'accept': 'application/json', 'Content-Type': 'application/json',
 		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
