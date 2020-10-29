@@ -41,23 +41,22 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	self.log.debug('> Argument "samples" was set' if isList else '> Argument "samples" was not set')
 	
 
-
-	url = config['applications/datamanagement/ip']
+	url = self.config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
 	if is_playground:
-		url = config['applications/datamanagement/api_exp_status_playground'].format(url)
+		url = self.config['applications/datamanagement/api_exp_status_playground'].format(url)
 	else:
-		url = config['applications/datamanagement/api_exp_status'].format(url)
+		url = self.config['applications/datamanagement/api_exp_status'].format(url)
 	headers = { 
 		'accept': 'application/json', 'Content-Type': 'application/json',
-		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
-		'Host': config['applications/datamanagement/host'] 
+		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
+		'Host': self.config['applications/datamanagement/host'] 
 	}
 	data = "{\"{0}\": \"{1}\"}".format(flag, value)
 
-	log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
+	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
 	for sam in samples:
 		q_url = url + sam
