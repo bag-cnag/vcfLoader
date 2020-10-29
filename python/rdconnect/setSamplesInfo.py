@@ -9,7 +9,7 @@ from rdconnect.utils import check_class_and_config
 
 from rdconnect.classLog import VoidLog
 
-def set_experiment(self = None, config = None, log = VoidLog(), is_playground = False, samples = [], flag = None, value = 'pass'):
+def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_playground = False, samples = [], flag = None, value = 'pass'):
 	isSelf = True
 	if self is None:
 		isSelf = False
