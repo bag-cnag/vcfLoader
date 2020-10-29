@@ -44,7 +44,7 @@ def sparse_matrix(self = None, config = None, hl = None, log = None):
 	self.log.debug('Locating last version of sparse matrix in "{0}"'.format(source_path))
 	source_file = self.hl.utils.hadoop_ls(source_path)
 	print("----->", source_file)
-	source_file = [ (m['path'], int(m['path'].replace(".", ""))) for z in source_file ]
+	source_file = [ (m['path'], int(m['path'].replace(".", ""))) for m in source_file ]
 	source_file = sorted(source_file, key=lambda x: x[1])
 	print("------->", source_file)
 	
