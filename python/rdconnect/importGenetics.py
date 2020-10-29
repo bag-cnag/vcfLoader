@@ -53,6 +53,9 @@ def sparse_matrix(self = None, config = None, hl = None, log = None):
 	self.log.info('Loading sparse matrix data from "source_file" "{0}"'.format(source_file))
 	self.data = self.hl.methods.read_matrix_table(source_file)
 	x = [y.get('s') for y in self.data.col.collect()]
+	print("\n" * 4)
+	print(x)
+	print("\n" * 4)
 	self.log.info('> 	. Experiments in loaded VCF: {}'.format(len(x)))
 	self.log.info('> 	. First and last sample: {} // {}'.format(x[ 0 ], x[len(x) - 1]))
 	return self
