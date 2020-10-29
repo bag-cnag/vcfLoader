@@ -24,15 +24,15 @@ def sparse_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering loading step "sparse_matrix"')
 
-	if config is None:
+	if self.config is None:
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if hl is None:
+	if self.hl is None:
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_path = config['applications/combine/sparse_matrix_path']
+	source_path = self.config['applications/combine/sparse_matrix_path']
 	self.log.debug('> Locating last version of sparse matrix in "{0}"'.format(source_path))
 	source_path = self.hl.utils.hadoop_ls(source_path)
 	source_path = [ (m['path'], int(m['path'].split('/')[-1].replace('.', ''))) for m in source_path ]
