@@ -51,6 +51,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	else:
 		url = self.config['applications/datamanagement/api_exp_status'].format(
 			url, self.config['applications/api_group'])
+	url = '/'.join(url.split('/')[:-1])
 	headers = { 
 		'accept': 'application/json', 'Content-Type': 'application/json',
 		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
