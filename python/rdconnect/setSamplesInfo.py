@@ -61,16 +61,12 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
-	for sam in samples:
+	for ii, sam in enumerate(samples):
 		q_url = url + '?experiment=' + sam
-		print('q_url', q_url)
-		print('data', data)
-		print('headers', headers)
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			print(response.status_code)
-			print(response.content)
-			raise Exception("no 200")
+			self.log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), sam, str(response.status_code)))
+			raise Exception('Query for experiment {} resulted in a {} status with content "{}"'.format(sam, str(response.status_code), str(response.content)))
 
 	return self
 
