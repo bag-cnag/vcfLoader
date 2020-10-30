@@ -62,6 +62,9 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	
 	for sam in samples:
 		q_url = url + sam
+		print('q_url', q_url)
+		print('data', data)
+		print('headers', headers)
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			print(response.status_code)
