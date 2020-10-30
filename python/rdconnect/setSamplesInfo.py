@@ -41,7 +41,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	self.log.debug('> Argument "samples" was set' if isList else '> Argument "samples" was not set')
 	
 
-	url = '{0}&experiment='.format(self.config['applications/datamanagement/ip'])
+	url = self.config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
@@ -61,7 +61,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
 	for sam in samples:
-		q_url = url + sam
+		q_url = url + '?experiment=' + sam
 		print('q_url', q_url)
 		print('data', data)
 		print('headers', headers)
