@@ -41,7 +41,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	self.log.debug('> Argument "samples" was set' if isList else '> Argument "samples" was not set')
 	
 
-	url = self.config['applications/datamanagement/ip']
+	url = '{0}&experiment='.format(self.config['applications/datamanagement/ip'])
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
