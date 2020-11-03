@@ -20,7 +20,7 @@ MIN_GQ = 19
 SAMPLES_CNV = 939
 
 def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
-	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = GenomicData)
 	self.log.info('Entering loading step "sparse_matrix"')
 
 	if self.config is None:
