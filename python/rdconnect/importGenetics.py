@@ -44,8 +44,10 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	
-	self.data = hl.read_matrix_table( sourcePath )#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
-	x = [y.get('s') for y in self.data.col.collect()]
+	self.data = hl.read_matrix_table( source_path )
+	x = [ y.get('s') for y in self.data.col.collect() ]
+	for ii in x:
+		print(ii)
 	lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
 	lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
 	lgr.debug( 'Starting "transmute_entries"' )
@@ -76,7 +78,7 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
 
 	self.data = self.data.key_rows_by( self.data.locus, self.data.alleles )
-	
+
 	self.state = ['dense_matrix'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_germline(destination_path, destination_file)
