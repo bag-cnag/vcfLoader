@@ -213,6 +213,9 @@ def check_class_and_config(self, config, hl, log, class_to=GenomicData):
 	check = [False, False]
 	if self is None:
 		self = class_to()
+		if class_to == GenomicData:
+			self.state = []
+			self.file = []
 
 	if config is not None:
 		self.config = config

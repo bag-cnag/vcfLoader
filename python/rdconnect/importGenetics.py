@@ -80,7 +80,7 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	if autosave and destination_path != '':
 		filename = utils.destination_germline(destination_path, destination_file)
 		self.data.distinct_by_row().write(filename, overwrite = True )
-		self.file = [destination_path] + self.file
+		self.file = [destination_path]
 	return self
 
 
