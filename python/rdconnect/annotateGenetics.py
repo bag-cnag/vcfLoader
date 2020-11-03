@@ -592,18 +592,18 @@ def internal_freq(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Argument "internal_path" filled with "{}"'.format(internal_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
-	int_freq = hl.read_table(source_path).key_by('locus', 'alleles')
+	int_freq = self.hl.read_table(source_path).key_by('locus', 'alleles')
 
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
 		self.data = self.hl.methods.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
-	
+
 	variants = variants.annotate_rows(
-		freqInt = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
-		freqIntqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
-		freqIntDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
+		freqInt = self.hl.cond(self.hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
+		freqIntqNum = self.hl.cond(self.hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
+		freqIntDem = self.hl.cond(self.hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
 	)
 
 	self.state = ['internal_freq'] + self.state
