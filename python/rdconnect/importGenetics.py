@@ -76,7 +76,7 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 
 	self.data = self.data.key_rows_by( self.data.locus, self.data.alleles )
 
-	self.state = ['dense_matrix'] + self.state
+	self.state = ['dense_matrix']
 	if autosave and destination_path != '':
 		filename = utils.destination_germline(destination_path, destination_file)
 		self.data.distinct_by_row().write(filename, overwrite = True )
