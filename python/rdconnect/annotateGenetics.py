@@ -465,7 +465,6 @@ def clinvar(self = None, config = None, hl = None, log = None):
 	return self
 
 
-
 def gnomADEx(self = None, config = None, hl = None, log = None):
 	"""Annotates given genetic dataset with gnomeAD exome annotations.
 
@@ -531,6 +530,70 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 	)
 
 	self.state = ['gnomeADEx'] + self.state
+	if autosave and destination_path != '':
+		self.data.write(destination_file, overwrite = True)
+		self.file = [destination_file] + self.file
+	return self
+
+
+def internal_freq(self = None, config = None, hl = None, log = None):
+	"""Annotates given genetic dataset with GPAP's internal frequency.
+
+	Parameters
+	----------
+	self: GenomicData, mandatory
+		Set it to None to load the dataset from 'source_path'. If a GenomicData
+		is assigned to this argument, no set is loaded from 'source_path' and
+		the argument is ignored.
+	config: ConfigFile, optional
+		Configuration for this step of the pipeline.
+	hl: context, optional
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
+
+	Returns
+	-------
+	The function returns a 'GenomicData' object annotated with GPAP's internal frequency.
+	"""
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
+	self.log.info('Entering annotation step "internal frequency"')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if not isHl:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
+
+	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
+	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
+	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+	destination_file = utils.destination_gnomadex(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
+	source_path = os.path.join(source_path, source_file)
+	internal_path = utils.create_chrom_filename(self.config['annotation/clean/intFreq'], self.config['process/chrom'])
+	autosave = self.config['process/autosave']
+
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
+	self.log.debug('> Argument "internal_path" filled with "{}"'.format(internal_path))
+	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
+
+	int_freq = hl.read_table(source_path).key_by('locus', 'alleles')
+	variants = variants.annotate_rows(
+		freqInt = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
+		freqIntqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
+		freqIntDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
+	)
+
+	self.state = ['internal_freq'] + self.state
 	if autosave and destination_path != '':
 		self.data.write(destination_file, overwrite = True)
 		self.file = [destination_file] + self.file
