@@ -48,9 +48,9 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	x = [ y.get('s') for y in self.data.col.collect() ]
 	for ii in x:
 		print(ii)
-	lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
-	lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
-	lgr.debug( 'Starting "transmute_entries"' )
+	self.log.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
+	self.log.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
+	self.log.debug( 'Starting "transmute_entries"' )
 	self.data = self.data.transmute_entries(
 		sample = hl.struct(
 			sample = self.data.s,
@@ -61,7 +61,6 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 			gq = self.data.GQ
 		)
 	)
-	lgr.debug( 'Starting "annotate_rows"' )
 	self.data = self.data.annotate_rows(
 		ref = self.data.alleles[ 0 ],
 		alt = self.data.alleles[ 1 ],
@@ -74,8 +73,6 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 		)
 	)
 	self.data = self.data.filter_rows( hl.agg.any( (self.data.sample.gtInt.is_non_ref()) & (self.data.sample.dp > 10) & (self.data.sample.gq > 20)) )
-	lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
-	lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
 
 	self.data = self.data.key_rows_by( self.data.locus, self.data.alleles )
 
