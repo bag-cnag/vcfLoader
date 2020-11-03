@@ -519,6 +519,12 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 		.rows() \
 		.key_by('locus','alleles')
 
+	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
+		self.data = self.hl.methods.read_matrix_table(source_path)
+		self.state = []
+		self.file = []
+
 	self.data = self.data.annotate_rows(
 		gnomad_af = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
 		gnomad_ac = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
@@ -587,6 +593,13 @@ def internal_freq(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	int_freq = hl.read_table(source_path).key_by('locus', 'alleles')
+
+	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
+		self.data = self.hl.methods.read_matrix_table(source_path)
+		self.state = []
+		self.file = []
+	
 	variants = variants.annotate_rows(
 		freqInt = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
 		freqIntqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),

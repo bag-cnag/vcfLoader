@@ -19,6 +19,71 @@ MIN_DP = 7
 MIN_GQ = 19
 SAMPLES_CNV = 939
 
+def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
+	self.log.info('Entering loading step "sparse_matrix"')
+
+	if self.config is None:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if self.hl is None:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
+
+	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
+	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_path = os.path.join(source_path, source_file)
+	destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
+	destination_path = config['process/destination_path']
+	autosave = config['process/autosave']
+
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
+
+	
+	self.data = hl.read_matrix_table( sourcePath )#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
+	x = [y.get('s') for y in self.data.col.collect()]
+	lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
+	lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
+	lgr.debug( 'Starting "transmute_entries"' )
+	self.data = self.data.transmute_entries(
+		sample = hl.struct(
+			sample = self.data.s,
+			ad = truncateAt( hl,self.data.AD[ 1 ] / hl.sum( self.data.AD ),"2" ),
+			dp = self.data.DP,
+			gtInt = self.data.GT,
+			gt = hl.str( self.data.GT ),
+			gq = self.data.GQ
+		)
+	)
+	lgr.debug( 'Starting "annotate_rows"' )
+	self.data = self.data.annotate_rows(
+		ref = self.data.alleles[ 0 ],
+		alt = self.data.alleles[ 1 ],
+		pos = self.data.locus.position,
+		indel = hl.cond(
+			( hl.len( self.data.alleles[ 0 ] ) != ( hl.len( self.data.alleles[ 1 ] ) ) ) | ( hl.len( self.data.alleles[ 0 ] ) != 1 ) | ( hl.len( self.data.alleles[ 0 ] ) != 1 ), True, False 
+		),
+		samples_germline = hl.filter(
+			lambda x: ( x.dp > MIN_DP ) & ( x.gq > MIN_GQ ), hl.agg.collect( self.data.sample )
+		)
+	)
+	self.data = self.data.filter_rows( hl.agg.any( (self.data.sample.gtInt.is_non_ref()) & (self.data.sample.dp > 10) & (self.data.sample.gq > 20)) )
+	lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
+	lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
+
+	self.data = self.data.key_rows_by( self.data.locus, self.data.alleles )
+	
+	self.state = ['dense_matrix'] + self.state
+	if autosave and destination_path != '':
+		filename = utils.destination_germline(destination_path, destination_file)
+		self.data.distinct_by_row().write(filename, overwrite = True )
+		self.file = [destination_path] + self.file
+	return self
+
 
 def sparse_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
