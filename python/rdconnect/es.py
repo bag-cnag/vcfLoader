@@ -270,7 +270,7 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = utils._check_class_and_config(self, config, hl, log)
+	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
 	self.log.info('Entering push data to ElasticSearch step')
 
 	if not isConfig:
