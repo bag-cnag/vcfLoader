@@ -71,6 +71,7 @@ def transform(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
@@ -88,8 +89,6 @@ def transform(self = None, config = None, hl = None, log = None):
 		self.flags = {'transform': (True, destination_file)}
 
 	return self
-
-
 
 
 def _index_exists(host, port, index_name, user, pwd):
@@ -248,6 +247,8 @@ def create_index_snv(self = None, config = None, log = None):
 	if sts != 200:
 		sts = _create_index(host, port, index_name, data, user, pwd)
 
+	log.debug('Index creation ("{}") resulted in {}'.format(index_name, str(sts)))
+
 	if self is not None:
 		if 'flags' not in vars(self):
 			self.flags = {'index': (sts == 200, sts)}
@@ -284,14 +285,18 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_path = utils.destination_transform(
-		self.config['process/destination_path'], 
-		self.config['resources/elasticsearch/version'], 
-		'chrom={}'.format(str(self.config['process/chrom']))
-	)
+	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+	destination_file = utils.destination_transform(destination_path, destination_file, self.config['resources/elasticsearch/type'])
+
+	# source_path = utils.destination_transform(
+	# 	self.config['process/destination_path'], 
+	# 	self.config['resources/elasticsearch/type'], 
+	# 	'chrom={}'.format(str(self.config['process/chrom']))
+	# )
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "source_path" ("destination_file") filled with "{}"'.format(destination_file))
 
 	es_conf = {
 		"es.net.http.auth.user": self.config['resources/elasticsearch/user'],
@@ -309,7 +314,7 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 			raise Exception('Trying to perform a "push_snv" operation without creating the index and index could not be created (response: {})'.format(str(sts)))
 
 	# Getting annotated variants and adding the chromosome column
-	variants = sql.read.load(source_path)\
+	variants = sql.read.load(destination_file)\
 		.withColumn('chrom', lit(self.config['process/chrom']))
 	variants.printSchema()
 	variants.write.format('org.elasticsearch.spark.sql')\

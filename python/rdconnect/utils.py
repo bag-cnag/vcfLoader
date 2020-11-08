@@ -190,13 +190,15 @@ def destination_germline(destination_path, filename, somatic = False):
 	return os.path.join(destination_path, 'loaded{}'.format('_somatic' if somatic else ''), filename)
 
 
-def destination_transform(destination_path, version, filename):
+def destination_transform(destination_path, filename, version, somatic = False):
 	"""This function returns the path to a loaded germline VCF.
 
 	Parameters
 	----------
 	destination_path: str, mandatory
 		Path where the file will be saved.
+	filename: str, mandatory
+		Template used to create the chromosome's iterative files.
 	version: str, mandatory
 		Version of the index in ElasticSearch.
 	filename: str, mandatory
