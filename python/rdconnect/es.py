@@ -247,7 +247,7 @@ def create_index_snv(self = None, config = None, log = None):
 	if sts != 200:
 		sts = _create_index(host, port, index_name, data, user, pwd)
 
-	log.debug('Index creation ("{}") resulted in {}'.format(index_name, str(sts)))
+	self.log.debug('Index creation ("{}") resulted in {}'.format(index_name, str(sts)))
 
 	if self is not None:
 		if 'flags' not in vars(self):
