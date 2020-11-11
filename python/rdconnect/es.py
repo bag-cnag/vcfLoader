@@ -264,23 +264,31 @@ def index_exists(config):
 	return sts.status_code
 
 
-def push_snv(self = None, config = None, sql = None, log = None):
+def push_snv(self = None, config = None, hl = None, sql = None, log = None):
+	isSelf = True
+	if self is None:
+		isSelf = False
 
-	if self is None and config is None:
-		raise NoConfigurationException('No configuration was provided in form of GenomicData nor ConfigFile (both were None)') 
-
-	if self is not None and 'config' in vars(self) and config is None:
-		config = self.config
-
-	if self is not None and not 'config' in vars(self) and config is None:
-		raise NoConfigurationException('No configuration was provided in form of ConfigFile (was None) and provided GenomicData does not contain configuration') 
-
-
+	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
 	self.log.info('Entering push data to ElasticSearch step')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if not isHl:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
 
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	destination_file = utils.destination_transform(destination_path, destination_file, self.config['resources/elasticsearch/type'])
+
+	# source_path = utils.destination_transform(
+	# 	self.config['process/destination_path'], 
+	# 	self.config['resources/elasticsearch/type'], 
+	# 	'chrom={}'.format(str(self.config['process/chrom']))
+	# )
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" ("destination_file") filled with "{}"'.format(destination_file))
