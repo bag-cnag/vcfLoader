@@ -15,7 +15,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		isSelf = False
 
 	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
-	self.log.info('Entering annotation step "ClinVar"')
+	self.log.info('Entering annotation step "set_experiment"')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
