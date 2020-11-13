@@ -157,9 +157,9 @@ def create_index_snv(self = None, config = None, log = None):
 				,"ref":{"type":"keyword","index":"false"}
 				,"alt":{"type":"keyword","index":"false"}
 				,"indel":{"type":"keyword","index":"true"}
-				,"freqInt":{"type":"float"}
-				,"freqIntqNum":{"type":"float"}
-				,"freqIntDem":{"type":"float"}
+				,"freqIntGermline":{"type":"float"}
+				,"freqIntGermlineNum":{"type":"float"}
+				,"freqIntGermlineDem":{"type":"float"}
 				,"rs":{"type":"keyword", "index":"true"}
 				,"cadd_phred":{"type":"float","index":"true"}
 				,"gerp_rs":{"type":"keyword","index":"false"}

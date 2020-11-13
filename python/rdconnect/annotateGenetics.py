@@ -601,9 +601,9 @@ def internal_freq(self = None, config = None, hl = None, log = None):
 		self.file = []
 
 	self.data = self.data.annotate_rows(
-		freqInt = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].freqIntGermline), int_freq[self.data.locus, self.data.alleles].freqIntGermline, 0.0),
-		freqIntqNum = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].num), int_freq[self.data.locus, self.data.alleles].num, 0.0),
-		freqIntDem = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].dem), int_freq[self.data.locus, self.data.alleles].dem, 0.0),
+		freqIntGermline = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].freqIntGermline), int_freq[self.data.locus, self.data.alleles].freqIntGermline, 0.0),
+		freqIntGermlineNum = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].num), int_freq[self.data.locus, self.data.alleles].num, 0.0),
+		freqIntGermlineDem = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].dem), int_freq[self.data.locus, self.data.alleles].dem, 0.0),
 	)
 
 	self.state = ['internal_freq'] + self.state
