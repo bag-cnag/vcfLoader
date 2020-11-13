@@ -47,14 +47,14 @@ def sample_index(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Created query URL for data-management: {}'.format(url))
 
 	for sam in full_samples:
-		q_url = url + sam
+		q_url = url + '&experiment=' + sam
 		print("---->", q_url)
 		print("----->", data)
 		print("------>", headers)
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			ur2 = config['applications/datamanagement/api_dm_status_force'].format(config['applications/datamanagement/ip'])
-			q_url = ur2 + sam
+			q_url = ur2 + '&experiment=' + sam
 			print("---->", q_url)
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
