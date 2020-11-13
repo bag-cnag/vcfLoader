@@ -27,6 +27,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "index_name" filled with "{}"'.format(index_name))
 
 	url = config['applications/datamanagement/api_exp_status'].format(config['applications/datamanagement/ip'])
 	headers = { 'accept': 'application/json', 
