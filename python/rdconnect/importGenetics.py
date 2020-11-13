@@ -46,8 +46,6 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	
 	self.data = hl.read_matrix_table( source_path )
 	x = [ y.get('s') for y in self.data.col.collect() ]
-	for ii in x:
-		print(ii)
 	self.log.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
 	self.log.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
 	self.log.debug( 'Starting "transmute_entries"' )
@@ -73,7 +71,6 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 		)
 	)
 	self.data = self.data.filter_rows( hl.agg.any( (self.data.sample.gtInt.is_non_ref()) & (self.data.sample.dp > 10) & (self.data.sample.gq > 20)) )
-
 	self.data = self.data.key_rows_by( self.data.locus, self.data.alleles )
 
 	self.state = ['dense_matrix']
