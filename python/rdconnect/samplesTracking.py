@@ -29,7 +29,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "index_name" filled with "{}"'.format(config['resources/elasticsearch/index_name']))
 
-	url = config['applications/datamanagement/api_exp_status'].format(config['applications/datamanagement/ip'])
+	url = config['applications/datamanagement/api_exp_status'].format(config['applications/datamanagement/ip'], config['applications/datamanagement/api_group'])
 	headers = { 'accept': 'application/json', 
 		'Content-Type': 'application/json', 
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
