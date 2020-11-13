@@ -38,8 +38,8 @@ def sample_index(self = None, config = None, hl = None, log = None):
 	
 	# vcf = self.hl.split_multi_hts(self.hl.import_vcf(str(source_path), array_elements_required = False, force_bgz = True, min_partitions = 2))
 	# full_samples = [y.get('s') for y in vcf.col.collect()]
-	data = self.hl.methods.read_matrix_table(source_path)
-	full_samples = [ y.get('s') for y in data.col.collect() ]
+	mtbl = self.hl.methods.read_matrix_table(source_path)
+	full_samples = [ y.get('s') for y in mtbl.col.collect() ]
 
 	self.log.info('> Experiments in loaded VCF: {}'.format(len(full_samples)))
 	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
