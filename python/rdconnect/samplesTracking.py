@@ -48,14 +48,9 @@ def sample_index(self = None, config = None, hl = None, log = None):
 
 	for sam in full_samples:
 		q_url = url + '&experiment=' + sam
-		print("---->", q_url)
-		print("----->", data)
-		print("------>", headers)
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			ur2 = config['applications/datamanagement/api_dm_status_force'].format(config['applications/datamanagement/ip'])
-			q_url = ur2 + '&experiment=' + sam
-			print("---->", q_url)
+			q_url = url + 'forceupdate=true&experiment=' + sam
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
 				self.log.error('> Query for "{}" resulted in {}. Forced update failed with {}'.format(sam, response.status_code, response2.status_code))
