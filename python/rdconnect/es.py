@@ -131,17 +131,26 @@ def create_index_snv(self = None, config = None, log = None):
 	If no 'GenomicData' is given to the function, it returns the status code
 	obtained from the query.
 	"""
-	if self is None and config is None:
-		raise NoConfigurationException('No configuration was provided in form of GenomicData nor ConfigFile (both were None)') 
+	isSelf = True
+	if self is None:
+		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
-	self.log.info('Entering push data to ElasticSearch step')
+	self.log.info('Entering transform step')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	#if not isHl:
+	#	self.log.error('No pointer to HAIL module was provided')
+	#	raise NoHailContextException('No pointer to HAIL module was provided')
 
 	#if self is not None and 'config' in vars(self) and config is None:
 	#	config = self.config
 
-	if self is not None and not 'config' in vars(self) and config is None:
-		raise NoConfigurationException('No configuration was provided in form of ConfigFile (was None) and provided GenomicData does not contain configuration') 
+	#if self is not None and not 'config' in vars(self) and config is None:
+	#	raise NoConfigurationException('No configuration was provided in form of ConfigFile (was None) and provided GenomicData does not contain configuration') 
 
 	host = self.config['resources/elasticsearch/host']
 	port = self.config['resources/elasticsearch/port']
