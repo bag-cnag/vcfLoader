@@ -134,8 +134,11 @@ def create_index_snv(self = None, config = None, log = None):
 	if self is None and config is None:
 		raise NoConfigurationException('No configuration was provided in form of GenomicData nor ConfigFile (both were None)') 
 
-	if self is not None and 'config' in vars(self) and config is None:
-		config = self.config
+	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
+	self.log.info('Entering push data to ElasticSearch step')
+
+	#if self is not None and 'config' in vars(self) and config is None:
+	#	config = self.config
 
 	if self is not None and not 'config' in vars(self) and config is None:
 		raise NoConfigurationException('No configuration was provided in form of ConfigFile (was None) and provided GenomicData does not contain configuration') 
@@ -238,13 +241,12 @@ def create_index_snv(self = None, config = None, log = None):
 						,"nprogs":{"type":"integer","index":"true"}
 						,"progs":{"type":"keyword"}}}}}}}
 	"""
-	sts = index_exists(self.config)
+	sts = index_exists(config)
 	if sts != 200:
 		sts = _create_index(host, port, index_name, data, user, pwd)
 
-	self.log.debug('Index creation ("{}") resulted in {}'.format(index_name, str(sts)))
-
 	if self is not None:
+		self.log.debug('Index creation ("{}") resulted in {}'.format(index_name, str(sts)))
 		if 'flags' not in vars(self):
 			self.flags = {'index': (sts == 200, sts)}
 		else:
