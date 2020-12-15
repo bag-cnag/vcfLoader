@@ -308,7 +308,8 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 		"es.net.http.auth.user": self.config['resources/elasticsearch/user'],
 		"es.net.http.auth.pass": self.config['resources/elasticsearch/pwd'],
 		"es.nodes": self.config['resources/elasticsearch/host'],
-		"es.port": self.config['resources/elasticsearch/port']
+		"es.port": self.config['resources/elasticsearch/port'],
+		"es.nodes.wan.only":True
 	}
 
 	index_name = self.config['resources/elasticsearch/index_name']
