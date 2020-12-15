@@ -100,7 +100,7 @@ def _create_index(host,port,index_name,data,user,pwd):
 	return response.status_code
 
 
-def create_index_snv(self = None, config = None, log = None):
+def create_index_snv(self = None, config = None, hl = None, log = None):
 	"""Creates an index for SNV data into ElasticSearch.
 
 	Location, data access credentials and index name is looked first into the
