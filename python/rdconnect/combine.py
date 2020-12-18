@@ -340,6 +340,27 @@ def load_table_log( sq, path ):
 
 
 
+def createDenseMatrixWhole( sc, sq, url_project, host_project, prefix_hdfs, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
+    lgr = create_logger( 'createDenseMatrix Whole', '' )
+
+
+    if sparse_matrix_path is None:
+        raise Exception('No information on "sparse_matrix_path" was provided.')
+    
+    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    lgr.debug( 'READING from in {0}'.format( path_matrix ) )
+    sparse_matrix = hl.read_matrix_table( path_matrix )
+    
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
+    small_matrix = sparse_matrix.key_rows_by(sparse_matrix.locus, sparse_matrix.alleles)
+    small_matrix = hl.experimental.sparse_split_multi( small_matrix, filter_changed_loci=True )
+    small_matrix = hl.experimental.densify( small_matrix )
+    small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.GT.is_non_ref() ) )
+    path = '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, 1 )
+    lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
+    small_matrix.write( path, overwrite = True )
+    lgr.debug( "Ending writing dense matrix" )
+
 def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
@@ -370,7 +391,6 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, dense_mat
             lgr.debug( "Ending writing dense matrix" )
     except Exception as ex:
         raise ex
-
 
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):
     """Function to get the IDs from phenotips, from experiments, and from family."""
