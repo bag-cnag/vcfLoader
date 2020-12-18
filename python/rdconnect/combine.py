@@ -340,7 +340,7 @@ def load_table_log( sq, path ):
 
 
 
-def createDenseMatrixWhole( sc, sq, url_project, host_project, prefix_hdfs, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
+def createDenseMatrixWhole( sc, sq,dense_matrix_path, sparse_matrix_path, chrom):
     lgr = create_logger( 'createDenseMatrix Whole', '' )
 
 
