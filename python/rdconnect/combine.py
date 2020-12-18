@@ -130,8 +130,8 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # Having the multiple IDs (RD-Connect ID and PhenoTIPS/PhenoStore ID) we can create the path to the gVCF
 
 
-    experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
-    files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
+    experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_2384_1' ]
+    files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_2384_1")
 
 
     print('files_to_be_loaded', len( files_to_be_loaded.keys() ))
