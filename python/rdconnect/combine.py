@@ -357,7 +357,7 @@ def createDenseMatrixWhole( hl,dense_matrix_path, sparse_matrix_path, chrom):
     small_matrix = hl.experimental.densify( small_matrix )
     small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.GT.is_non_ref() ) )
     path = '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, 1 )
-    lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
+    lgr.info( 'Writing dense matrix {} to disk ({})'.format( 1, path ) )
     small_matrix.write( path, overwrite = True )
     lgr.debug( "Ending writing dense matrix" )
 
