@@ -97,7 +97,7 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
 
 def create_files_list( experiments, chrom, elastic_dataset ):
     """Creates a dictionary using RD-Connect Experiment ID as key and the its file as value."""
-    prefix = 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF'
+    prefix = 'hdfs://10.1.11.7:27000/test/rdconnect/gVCF'
     rst = {}
     for x in experiments:
         if x[ 'RD_Connect_ID_Experiment' ] not in rst.keys() and x[ 'elastic_dataset' ] == elastic_dataset:
