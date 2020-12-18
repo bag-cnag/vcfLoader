@@ -199,7 +199,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             added = False
             
         smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
-            'Phenotips_ID': itm[ 'Phenotips_ID' ],
+            'Participant_ID': itm[ 'Participant_ID' ],
             'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
         } )
 
@@ -380,7 +380,7 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
     data=[]
     headers = { 'Content-Type': 'application/json' }
     for i in range(0,(len(pids)//1000)+1) :
-        body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
+        body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
         resp = requests.post( url, headers = headers, json = body, verify = False )
         data = data + resp.json()
     parsed = {}
@@ -392,7 +392,7 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
         else: 
             fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
         parsed[ pid ] = fam
-    rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Phenotips_ID' ], parsed[ pak[ 'Phenotips_ID' ] ] ] for pak in pids ]
+    rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Participant_ID' ], parsed[ pak[ 'Participant_ID' ] ] ] for pak in pids ]
     if sort_output:
         return sorted( rst, key = lambda x: x[ 2 ] )
     else:
