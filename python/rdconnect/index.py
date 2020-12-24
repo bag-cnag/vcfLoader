@@ -121,8 +121,8 @@ def create_index_cnv(host,port,index_name,version,num_shards,num_replicas,user,p
                 ,"cnt":{"type":"integer","index":"true"}  
                 ,"tool":{"type":"keyword","index":"true"}  
                 ,"bf":{"type":"float","index":"true"}
-                ,"DGV_goldstd_overlap":{"type":"keyword","index":"false"}
-                ,"DGV_goldstd_coordinates":{"type":"keyword","index":"false"}
+                ,"DGV_goldstd_overlap":{"type":"text","index":"false"}
+                ,"DGV_goldstd_coordinates":{"type":"text","index":"false"}
                 ,"sample_id":{"type": "keyword","index":"true"}
                 ,"omim_number":{"type":"integer", "index":"false"}
                 ,"omim_phenotype":{"type":"keyword"}
