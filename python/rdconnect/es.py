@@ -100,7 +100,7 @@ def _create_index(host,port,index_name,data,user,pwd):
 	return response.status_code
 
 
-def create_index_snv(self = None, config = None, log = None):
+def create_index_snv(self = None, config = None, hl = None, log = None):
 	"""Creates an index for SNV data into ElasticSearch.
 
 	Location, data access credentials and index name is looked first into the
@@ -308,7 +308,8 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 		"es.net.http.auth.user": self.config['resources/elasticsearch/user'],
 		"es.net.http.auth.pass": self.config['resources/elasticsearch/pwd'],
 		"es.nodes": self.config['resources/elasticsearch/host'],
-		"es.port": self.config['resources/elasticsearch/port']
+		"es.port": self.config['resources/elasticsearch/port'],
+		"es.nodes.wan.only":True
 	}
 
 	index_name = self.config['resources/elasticsearch/index_name']
