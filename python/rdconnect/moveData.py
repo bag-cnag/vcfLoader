@@ -82,8 +82,8 @@ def gvcf(config, log = VoidLog(), batch = 500):
 	log.debug('> Querying DM using url "{1}"'.format(url))
 	
 	response = requests.post(url, data = data, headers = headers, verify = False)
-		if response.status_code != 200:
-			log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+	if response.status_code != 200:
+		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
 	
 
 
