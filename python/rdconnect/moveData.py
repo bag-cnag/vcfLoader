@@ -85,6 +85,9 @@ def gvcf(config, log = VoidLog(), batch = 10):
 		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
 		sys.exit(2)
 
+	print(response)
+	print(response.status_code)
+	print(response.content)
 	data = json.loads(response.content)
 	print(data)
 	return data
