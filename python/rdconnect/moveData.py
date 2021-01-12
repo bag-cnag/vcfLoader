@@ -89,7 +89,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	data = [x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items']]
 
 
-	x = experiment_by_group(config, log, False)
+	x = get.experiment_by_group(config, log, False)
 	print(x)
 
 
