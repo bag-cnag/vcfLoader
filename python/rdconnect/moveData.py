@@ -105,7 +105,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 			des = os.path.join(destination_path, file).replace('gz', 'bgz')
 
 			print("FROM: ", ori)
-			print("TO: ", to)
+			print("TO: ", des)
 			print()
 
 			command_1 = cmd_1 + ori + " ' | "
