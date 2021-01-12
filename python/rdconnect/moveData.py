@@ -74,9 +74,6 @@ def gvcf(config, log = VoidLog(), batch = 10):
 		'Host': config['applications/datamanagement/host'] 
 	}
 	data = "{\"page\": 1, \"pageSize\": " + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
-
-	print(data)
-	print(headers)
 	log.debug('> Querying DM using url "{0}"'.format(url))
 	
 	response = requests.post(url, data = data, headers = headers, verify = False)
@@ -91,6 +88,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	print('=' * 25)
 	all_group = get.experiment_by_group(config, log, False)
 	print(len(all_group))
+	print(all_group[:10])
 
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 	print(len(to_process_group))
