@@ -50,7 +50,7 @@ def gvcf(config, log = VoidLog(), batch = 500):
 		the function ends.
 	"""
 	chrom = config['process/chrom']
-	chrom = chrom_str_to_int(chrom)
+	chrom = chrom_str_to_int(str(chrom))
 	source_path = config['process/moving_from'], 
 	destination_path = config['process/moving_to'], 
 	cmd_1 = config['process/moving_s1'], 
