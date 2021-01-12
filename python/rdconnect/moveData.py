@@ -88,7 +88,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	for idx, sam in enumerate(to_process):
 		print(idx, sam)
 
-	pint('=' * 25)
+	print('=' * 25)
 	all_group = get.experiment_by_group(config, log, False)
 	print(len(all_group))
 
