@@ -51,8 +51,8 @@ def gvcf(config, log = VoidLog(), batch = 500):
 	"""
 	chrom = config['process/chrom']
 	chrom = chrom_str_to_int(str(chrom))
-	source_path = config['process/moving_from'], 
-	destination_path = config['process/moving_to'], 
+	source_path = config['process/moving_from']
+	destination_path = config['process/moving_to']
 	cmd_1 = config['process/moving_s1'], 
 	cmd_2 = config['process/moving_s2']
 
@@ -81,6 +81,11 @@ def gvcf(config, log = VoidLog(), batch = 500):
 	response = requests.post(url, data = data, headers = headers, verify = False)
 	if response.status_code != 200:
 		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+		sys.exit(2)
+
+	data = json.loads(response.content)["items"]
+	print(dtaa[0:2])
+	return data
 	
 
 
