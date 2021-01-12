@@ -13,7 +13,7 @@ from rdconnect.classLog import VoidLog
 
 from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 
-def gvcf(config, log = VoidLog(), batch = 500):
+def gvcf(config, log = VoidLog(), batch = 10):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
@@ -83,8 +83,8 @@ def gvcf(config, log = VoidLog(), batch = 500):
 		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
 		sys.exit(2)
 
-	data = json.loads(response.content)["items"]
-	print(dtaa[0:2])
+	data = json.loads(response.content)
+	print(data)
 	return data
 	
 
