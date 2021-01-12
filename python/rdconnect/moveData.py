@@ -60,7 +60,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
-	url = config['applications/datamanagement/api_exp_status_list'].format(url) + '?inplatform=all'
+	url = config['applications/datamanagement/api_exp_status_list'].format(url)
 
 	log.info('Entering step "gvcf"')
 	log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
@@ -99,7 +99,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	for idx, line in enumerate(to_process_group):
 		log.debug('Processing samples #{} "{}"'.format(str(idx), line['RD_Connect_ID_Experiment']))
 		try:
-			file = '{}.chromosome.g.vcf.gz'.frormat(line['RD_Connect_ID_Experiment'])
+			file = '{}.chromosome.g.vcf.gz'.format(line['RD_Connect_ID_Experiment'])
 			file = create_chrom_filename(file, chrom)
 			ori = source_path.replace('filename', file)
 			des = os.path.join(destination_path, file).replace('gz', 'bgz')
@@ -173,7 +173,7 @@ def gvcf_from_file(config, log = VoidLog()):
 		for idx, line in enumerate(rd):
 			log.debug('Processing line #{} with content "{}"'.format(str(idx), line.strip()))
 			try:
-				line = '{}.chromosome.g.vcf.gz'.frormat(line.strip().split('/')[ 1 ])
+				line = '{}.chromosome.g.vcf.gz'.format(line.strip().split('/')[ 1 ])
 				line = create_chrom_filename(line, chrom)
 				ori = source_path.replace('filename', line)
 				des = os.path.join(destination_path, line).replace('gz', 'bgz')
