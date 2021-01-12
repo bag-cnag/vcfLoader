@@ -54,7 +54,7 @@ def gvcf(config, log = VoidLog(), batch = 500):
 	source_path = config['process/moving_from'], 
 	destination_path = config['process/moving_to'], 
 	cmd_1 = config['process/moving_s1'], 
-	cmd_2main_conf['process/moving_s2']
+	cmd_2 = config['process/moving_s2']
 
 	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
