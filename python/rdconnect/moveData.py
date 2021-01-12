@@ -59,7 +59,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
-	url = config['applications/datamanagement/api_exp_status_list'].format(url)
+	url = config['applications/datamanagement/api_exp_status_list'].format(url) + 'inplatform="all"'
 
 	log.info('Entering step "gvcf"')
 	log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
