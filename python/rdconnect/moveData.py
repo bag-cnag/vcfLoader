@@ -18,16 +18,14 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
-	It makes a query to DM using the endpoint 'api_exp_status_list' to get the
-	list of unprocessed experiments.
+	It makes a first query to DM using the endpoint 'api_exp_status_list' to 
+	get the list of unprocessed experiments. The it used the function '
+	experiment_by_group' frm the module 'getSamplesInfo' to get their owner.
 
-	Then, it wors as descrived in 'gvcf_from_file'. A summary follows:
+	Then, and taking the sour path from 'moving_from' it will add the location
+	of the file following: 
 
-	Using the values of 'moving_from' and 'moving_to' it creates the path to
-	locate the gVCF to be moved. The real file to be moved from POSIX to HDSF,
-	replacing as:
-
-		[patient-id].chromosome.g.vcf.gz
+		[owner]/[patient-id]/[patient-id].chromosome.g.vcf.gz
 
 	Where 'chromosome' will be replaced by the current chromosome being
 	transferred.
@@ -86,14 +84,33 @@ def gvcf(config, log = VoidLog(), batch = 10):
 		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
 		sys.exit(2)
 
-	data = [x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items']]
+	to_process = [ x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items'] ]
 
+	all_group = get.experiment_by_group(config, log, False)
 
-	x = get.experiment_by_group(config, log, False)
-	print(x)
+	to_process_group = [ x['RD_Connect_ID_Experiment'] in to_process for x in all_group ]
+	print(to_process_group)
 
+	for idx, line in enumerate(to_process_group):
+		log.debug('Processing samples #{} "{}"'.format(str(idx), line['RD_Connect_ID_Experiment']))
+		try:
+			file = '{}.chromosome.g.vcf.gz'.frormat(line['RD_Connect_ID_Experiment'])
+			file = create_chrom_filename(file, chrom)
+			ori = source_path.replace('filename', file)
+			des = os.path.join(destination_path, file).replace('gz', 'bgz')
 
-	return data
+			print("FROM: ", ori)
+			print("TO: ", to)
+			print()
+
+			command_1 = cmd_1 + ori + " ' | "
+			command_2 = cmd_2 + des + "'"
+			command = command_1 + command_2
+			#os.system(command)
+		except Exception as ex:
+			log.error('Unexpected error:\n{}'.format(str(ex)))
+			log.debug('Stack: {}'.format(str(format_exc())))
+			sys.exit(2)
 	
 
 
