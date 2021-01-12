@@ -85,10 +85,15 @@ def gvcf(config, log = VoidLog(), batch = 10):
 		sys.exit(2)
 
 	to_process = [ x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items'] ]
+	for idx, sam in enumerate(to_process):
+		print(idx, sam)
 
+	pint('=' * 25)
 	all_group = get.experiment_by_group(config, log, False)
+	print(len(all_group))
 
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+	print(len(to_process_group))
 	print(to_process_group)
 
 	for idx, line in enumerate(to_process_group):
