@@ -88,7 +88,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 
 	all_group = get.experiment_by_group(config, log, False)
 
-	to_process_group = [ x['RD_Connect_ID_Experiment'] in to_process for x in all_group ]
+	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 	print(to_process_group)
 
 	for idx, line in enumerate(to_process_group):
