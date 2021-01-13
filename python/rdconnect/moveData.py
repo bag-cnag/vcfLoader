@@ -16,7 +16,7 @@ from rdconnect.classLog import VoidLog
 
 from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 
-def gvcf(config, log = VoidLog(), batch = 10):
+def gvcf(config, log = VoidLog(), batch = 1):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
@@ -49,6 +49,10 @@ def gvcf(config, log = VoidLog(), batch = 10):
 		Used to track the moving process
 	batch: number of files to be moved as a batch. Once this limit is reached 
 		the function ends.
+
+	Returns
+	-------
+	A list with the "RD_Connect_ID_Experiment" for moved experiments.
 	"""
 	chrom = config['process/chrom']
 	chrom = chrom_str_to_int(str(chrom))
@@ -99,20 +103,18 @@ def gvcf(config, log = VoidLog(), batch = 10):
 			ori = source_path.replace('filename', path.join(line['Owner'], line['RD_Connect_ID_Experiment'], file))
 			des = os.path.join(destination_path, file).replace('gz', 'bgz')
 
-			print("FROM: ", ori)
-			print("TO: ", des)
-			print()
-
+			log.debug('>> Moving experiment {} from "{}" to "{}"'.format(line['RD_Connect_ID_Experiment'], ori, des))
+			
 			command_1 = cmd_1 + ori + " ' | "
 			command_2 = cmd_2 + des + "'"
 			command = command_1 + command_2
-
-			print(command)
-			#os.system(command)
+			os.system(command)
 		except Exception as ex:
 			log.error('Unexpected error:\n{}'.format(str(ex)))
 			log.debug('Stack: {}'.format(str(format_exc())))
 			sys.exit(2)
+
+	return [ x['RD_Connect_ID_Experiment'] for x in to_process_group ]
 	
 
 
