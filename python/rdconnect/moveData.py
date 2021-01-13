@@ -101,7 +101,7 @@ def gvcf(config, log = VoidLog(), batch = 500):
 			file = '{}.chromosome.g.vcf.gz'.format(line['RD_Connect_ID_Experiment'])
 			file = create_chrom_filename(file, chrom)
 			ori = source_path.replace('filename', path.join(line['Owner'], line['RD_Connect_ID_Experiment'], file))
-			des = os.path.join(destination_path, file).replace('gz', 'bgz')
+			des = os.path.join(destination_path, line['Owner'], line['RD_Connect_ID_Experiment'], file).replace('gz', 'bgz')
 
 			log.debug('>> Moving experiment {} from "{}" to "{}"'.format(line['RD_Connect_ID_Experiment'], ori, des))
 			
