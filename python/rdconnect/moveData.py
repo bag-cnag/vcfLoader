@@ -16,7 +16,7 @@ from rdconnect.classLog import VoidLog
 
 from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 
-def gvcf(config, log = VoidLog(), batch = 500, move_tbi = True):
+def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
@@ -48,10 +48,12 @@ def gvcf(config, log = VoidLog(), batch = 500, move_tbi = True):
 		'process/moving_s1', and 'process/moving_s2'.
 	log: logger, optional
 		Used to track the moving process
-	batch: numeric, optionañ
+	batch: numeric, optional
 		Number of files to be moved as a batch. Once this limit is reached 
-		the function ends (default = 500).
-	
+		the function ends (default: 500).
+	include_tbi, boolean, optional
+		If set to True it also copies the tbi files associated to the gVCF 
+		(default: True).
 	Returns
 	-------
 	A list with the "RD_Connect_ID_Experiment" for moved experiments.
@@ -100,35 +102,33 @@ def gvcf(config, log = VoidLog(), batch = 500, move_tbi = True):
 	for idx, line in enumerate(to_process_group):
 		log.debug('Processing samples #{} "{}"'.format(str(idx), line['RD_Connect_ID_Experiment']))
 		try:
-			#file = '{}.chromosome.g.vcf.gz'.format(line['RD_Connect_ID_Experiment'])
-			#file = create_chrom_filename(file, chrom)
-			#ori = source_path.replace('filename', path.join(line['Owner'], line['RD_Connect_ID_Experiment'], file))
-			#des = os.path.join(destination_path, line['Owner'], line['RD_Connect_ID_Experiment'], file).replace('gz', 'bgz')
+			chrom_ori = chrom
+			if chrom_ori == 23:
+				chrom_ori = 'M'
+			elif chrom_ori == 24:
+				chrom_ori = 'X'
+			elif chrom_ori == 25:
+				chrom_ori = 'Y'
 
 			ori = source_path.replace('[owner]', line['Owner'])\
 				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom))
+				.replace('[chromosome]', str(chrom_ori))
 			des = destination_path.replace('[owner]', line['Owner'])\
 				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom))
+				.replace('[chromosome]', str(chrom))	
 
 			log.debug('>> Moving experiment {} from "{}" to "{}"'.format(line['RD_Connect_ID_Experiment'], ori, des))
 			
 			command_1 = cmd_1 + ori + " ' | "
 			command_2 = cmd_2 + des + "'"
 			command = command_1 + command_2
-			print()
-			print(command)
-			print()
 			os.system(command)
 
-			command_1 = cmd_1 + ori + ".tbi ' | "
-			command_2 = cmd_2 + des + ".tbi'"
-			command = command_1 + command_2
-			print()
-			print(command)
-			print()
-			os.system(command)
+			if include_tbi:
+				command_1 = cmd_1 + ori + ".tbi ' | "
+				command_2 = cmd_2 + des + ".tbi'"
+				command = command_1 + command_2
+				os.system(command)
 		except Exception as ex:
 			log.error('Unexpected error:\n{}'.format(str(ex)))
 			log.debug('Stack: {}'.format(str(format_exc())))
