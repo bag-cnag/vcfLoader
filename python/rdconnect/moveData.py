@@ -110,7 +110,8 @@ def gvcf(config, log = VoidLog(), batch = 500, move_tbi = True):
 				.replace('[chromosome]', str(chrom))
 			des = destination_path.replace('[owner]', line['Owner'])\
 				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom))
+				.replace('[chromosome]', str(chrom))\
+				.replace('gz', 'bgz')
 
 			log.debug('>> Moving experiment {} from "{}" to "{}"'.format(line['RD_Connect_ID_Experiment'], ori, des))
 			
@@ -120,7 +121,15 @@ def gvcf(config, log = VoidLog(), batch = 500, move_tbi = True):
 			print()
 			print(command)
 			print()
-			#os.system(command)
+			os.system(command)
+
+			command_1 = cmd_1 + ori + ".tbi ' | "
+			command_2 = cmd_2 + des + ".tbi'"
+			command = command_1 + command_2
+			print()
+			print(command)
+			print()
+			os.system(command)
 		except Exception as ex:
 			log.error('Unexpected error:\n{}'.format(str(ex)))
 			log.debug('Stack: {}'.format(str(format_exc())))
