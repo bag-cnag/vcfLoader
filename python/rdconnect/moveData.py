@@ -108,6 +108,9 @@ def gvcf(config, log = VoidLog(), batch = 500):
 			command_1 = cmd_1 + ori + " ' | "
 			command_2 = cmd_2 + des + "'"
 			command = command_1 + command_2
+			print()
+			print(command)
+			print()
 			os.system(command)
 		except Exception as ex:
 			log.error('Unexpected error:\n{}'.format(str(ex)))
