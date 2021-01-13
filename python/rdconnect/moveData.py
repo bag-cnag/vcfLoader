@@ -16,21 +16,22 @@ from rdconnect.classLog import VoidLog
 
 from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 
-def gvcf(config, log = VoidLog(), batch = 500):
+def gvcf(config, log = VoidLog(), batch = 500, move_tbi = True):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
 	It makes a first query to DM using the endpoint 'api_exp_status_list' to 
-	get the list of unprocessed experiments. The it used the function '
-	experiment_by_group' frm the module 'getSamplesInfo' to get their owner.
+	get the list of unprocessed experiments. The it used the function 
+	'experiment_by_group' from the module 'getSamplesInfo' to get their owner.
 
 	Then, and taking the sour path from 'moving_from' it will add the location
-	of the file following: 
+	of the file. The bracket-names in that variables will be substituted, as 
+	well as the ones from 'moving_to', that indicates where the file will be
+	places, as:
 
-		[owner]/[patient-id]/[patient-id].chromosome.g.vcf.gz
-
-	Where 'chromosome' will be replaced by the current chromosome being
-	transferred.
+		* [owner]: name of the PI/Group/... owing the experiment
+		* [patient-id]: identifier of the experiment/patient
+		* [chromosome]: numeric value for the chromosome
 
 	This function relies on to commands ('moving_s1' and 'moving_s2') to 
 	indicate how to perform the multiple ssh commands. An example of them 
@@ -47,9 +48,10 @@ def gvcf(config, log = VoidLog(), batch = 500):
 		'process/moving_s1', and 'process/moving_s2'.
 	log: logger, optional
 		Used to track the moving process
-	batch: number of files to be moved as a batch. Once this limit is reached 
-		the function ends.
-
+	batch: numeric, optionañ
+		Number of files to be moved as a batch. Once this limit is reached 
+		the function ends (default = 500).
+	
 	Returns
 	-------
 	A list with the "RD_Connect_ID_Experiment" for moved experiments.
@@ -98,10 +100,17 @@ def gvcf(config, log = VoidLog(), batch = 500):
 	for idx, line in enumerate(to_process_group):
 		log.debug('Processing samples #{} "{}"'.format(str(idx), line['RD_Connect_ID_Experiment']))
 		try:
-			file = '{}.chromosome.g.vcf.gz'.format(line['RD_Connect_ID_Experiment'])
-			file = create_chrom_filename(file, chrom)
-			ori = source_path.replace('filename', path.join(line['Owner'], line['RD_Connect_ID_Experiment'], file))
-			des = os.path.join(destination_path, line['Owner'], line['RD_Connect_ID_Experiment'], file).replace('gz', 'bgz')
+			#file = '{}.chromosome.g.vcf.gz'.format(line['RD_Connect_ID_Experiment'])
+			#file = create_chrom_filename(file, chrom)
+			#ori = source_path.replace('filename', path.join(line['Owner'], line['RD_Connect_ID_Experiment'], file))
+			#des = os.path.join(destination_path, line['Owner'], line['RD_Connect_ID_Experiment'], file).replace('gz', 'bgz')
+
+			ori = source_path.replace('[owner]', line['Owner'])\
+				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
+				.replace('[chromosome]', str(chrom))
+			des = destination_path.replace('[owner]', line['Owner'])\
+				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
+				.replace('[chromosome]', str(chrom))
 
 			log.debug('>> Moving experiment {} from "{}" to "{}"'.format(line['RD_Connect_ID_Experiment'], ori, des))
 			
@@ -111,7 +120,7 @@ def gvcf(config, log = VoidLog(), batch = 500):
 			print()
 			print(command)
 			print()
-			os.system(command)
+			#os.system(command)
 		except Exception as ex:
 			log.error('Unexpected error:\n{}'.format(str(ex)))
 			log.debug('Stack: {}'.format(str(format_exc())))
@@ -157,10 +166,10 @@ def gvcf_from_file(config, log = VoidLog()):
 	"""
 	chrom = config['process/chrom']
 	chrom = chrom_str_to_int(chrom)
-	gvcf_list = config['process/moving_gvcf_list'], 
-	source_path = config['process/moving_from'], 
-	destination_path = config['process/moving_to'], 
-	cmd_1 = config['process/moving_s1'], 
+	gvcf_list = config['process/moving_gvcf_list']
+	source_path = config['process/moving_from']
+	destination_path = config['process/moving_to']
+	cmd_1 = config['process/moving_s1'],
 	cmd_2main_conf['process/moving_s2']
 
 	log.info('Entering step "gvcf_from_file"')
