@@ -110,8 +110,7 @@ def gvcf(config, log = VoidLog(), batch = 500, move_tbi = True):
 				.replace('[chromosome]', str(chrom))
 			des = destination_path.replace('[owner]', line['Owner'])\
 				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom))\
-				.replace('gz', 'bgz')
+				.replace('[chromosome]', str(chrom))
 
 			log.debug('>> Moving experiment {} from "{}" to "{}"'.format(line['RD_Connect_ID_Experiment'], ori, des))
 			
