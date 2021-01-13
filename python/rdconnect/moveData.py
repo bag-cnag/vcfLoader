@@ -54,7 +54,7 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	chrom = chrom_str_to_int(str(chrom))
 	source_path = config['process/moving_from']
 	destination_path = config['process/moving_to']
-	cmd_1 = config['process/moving_s1'], 
+	cmd_1 = config['process/moving_s1']
 	cmd_2 = config['process/moving_s2']
 
 	url = config['applications/datamanagement/ip']
@@ -69,9 +69,6 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	log.debug('> Argument "cmd_1" filled with "{}"'.format(cmd_1))
 	log.debug('> Argument "cmd_2" filled with "{}"'.format(cmd_2))
-
-	print("1 --->", type(cmd_1), cmd_1)
-	print("2 --->", type(cmd_2), cmd_2)
 
 	headers = { 
 		'accept': 'application/json', 'Content-Type': 'application/json',
@@ -106,9 +103,11 @@ def gvcf(config, log = VoidLog(), batch = 10):
 			print("TO: ", des)
 			print()
 
-			#command_1 = cmd_1 + ori + " ' | "
-			#command_2 = cmd_2 + des + "'"
-			#command = command_1 + command_2
+			command_1 = cmd_1 + ori + " ' | "
+			command_2 = cmd_2 + des + "'"
+			command = command_1 + command_2
+
+			print(command)
 			#os.system(command)
 		except Exception as ex:
 			log.error('Unexpected error:\n{}'.format(str(ex)))
