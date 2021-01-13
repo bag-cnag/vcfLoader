@@ -2,6 +2,7 @@ import json
 import requests
 import rdconnect.getSamplesInfo as get
 import sys
+from os import path
 
 """moveData
 
@@ -69,6 +70,9 @@ def gvcf(config, log = VoidLog(), batch = 10):
 	log.debug('> Argument "cmd_1" filled with "{}"'.format(cmd_1))
 	log.debug('> Argument "cmd_2" filled with "{}"'.format(cmd_2))
 
+	print("1 --->", type(cmd_1), cmd_1)
+	print("2 --->", type(cmd_2), cmd_2)
+
 	headers = { 
 		'accept': 'application/json', 'Content-Type': 'application/json',
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
@@ -83,34 +87,28 @@ def gvcf(config, log = VoidLog(), batch = 10):
 		sys.exit(2)
 
 	to_process = [ x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items'] ]
-	for idx, sam in enumerate(to_process):
-		print(idx, sam)
-
-	print('=' * 25)
+	log.debug('> Obtained a total of "{}" samples to move'.format(len(to_process)))
+	
 	all_group = get.experiment_by_group(config, log, False)
-	print(len(all_group))
-	print(all_group[:10])
-
+	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
+	
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
-	print(len(to_process_group))
-	print(to_process_group[:10])
-	print(to_process_group)
-
+	
 	for idx, line in enumerate(to_process_group):
 		log.debug('Processing samples #{} "{}"'.format(str(idx), line['RD_Connect_ID_Experiment']))
 		try:
 			file = '{}.chromosome.g.vcf.gz'.format(line['RD_Connect_ID_Experiment'])
 			file = create_chrom_filename(file, chrom)
-			ori = source_path.replace('filename', file)
+			ori = source_path.replace('filename', path.join(line['Owner'], line['RD_Connect_ID_Experiment'], file))
 			des = os.path.join(destination_path, file).replace('gz', 'bgz')
 
 			print("FROM: ", ori)
 			print("TO: ", des)
 			print()
 
-			command_1 = cmd_1 + ori + " ' | "
-			command_2 = cmd_2 + des + "'"
-			command = command_1 + command_2
+			#command_1 = cmd_1 + ori + " ' | "
+			#command_2 = cmd_2 + des + "'"
+			#command = command_1 + command_2
 			#os.system(command)
 		except Exception as ex:
 			log.error('Unexpected error:\n{}'.format(str(ex)))
