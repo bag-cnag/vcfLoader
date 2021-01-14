@@ -2,6 +2,7 @@ import json
 import requests
 import rdconnect.utils as utils
 import rdconnect.getSamplesInfo as get
+from os import path
 from rdconnect.classException import *
 from rdconnect.classLog import VoidLog
 
@@ -49,15 +50,28 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	chrom = config['process/chrom']
-	chrom = utils.chrom_str_to_int(str(chrom))
+	chrom = chrom_str_to_int(str(config['process/chrom']))
 	source_path = self.config['process/moving_to']
 	sparse_path = self.config['combine/sparse_matrix_path']
+	source_path = self.config['process/moving_from']
+	source_file = self.config['process/source_file']
 
-	log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
+	chrom_str = chrom
+	if chrom_str == '23':
+		chrom_str = 'MT'
+	elif chrom_str == '24':
+		chrom_str = 'X'
+	elif chrom_str == '25':
+		chrom_str = 'Y'
+
+	log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
 	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
 	log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
+	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
+
+	source_path = path.join(source_path, source_file)
 
 	# Get experiments to load from DM
 
@@ -86,23 +100,27 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	all_group = get.experiment_by_group(config, log, False)
 	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 
-	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+	to_process = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 
-	print("hello! I got {} experiments to process from the total of {} I asked".format(len(to_process_group), largeBatch))
-
-
-	print('-' * 25) 
-	print(to_process[0])
+	clean_to_process = []
+	for idx, itm in enumerate(to_process):
+		clean_to_process.append({
+			'file': source_path.replace('[owner]', itm['Owner'])\
+				.replace('[patient-id]', itm['RD_Connect_ID_Experiment'])\
+				.replace('[chromosome]', str(chrom_str))
+			'id': itm['RD_Connect_ID_Experiment'],
+			'pid': itm['Participant_ID']
+		})
+	
 	print('-' * 25)
-	print(all_group[0])
-	print('-' * 25)
-	print(to_process_group[0])
+	print(clean_to_process[0])
 	print('-' * 25)
 
-	batches = _create__batches(to_process_group, largeBatch, smallBatch)
+	batches = _create__batches(clean_to_process, largeBatch, smallBatch)
 
 	print(len(batches))
-	print(len(batches[0]))
+	print(len(batches[0]['batches']))
+	print(len(batches[0]['batches']['batch']))
 
 
 
