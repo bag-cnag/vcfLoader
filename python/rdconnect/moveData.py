@@ -1,20 +1,21 @@
+import os
+import sys
 import json
 import requests
-import rdconnect.getSamplesInfo as get
-import sys
 from os import path
+
+import rdconnect.getSamplesInfo as get
+from subprocess import call
+from traceback import format_exc
+from rdconnect.classLog import VoidLog
+from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 
 """moveData
 
 This module contains the functions used to move data from main cluster to HDFS.
 """
 
-import os
-from subprocess import call
-from traceback import format_exc
-from rdconnect.classLog import VoidLog
 
-from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 
 def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
@@ -59,7 +60,7 @@ def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True):
 	A list with the "RD_Connect_ID_Experiment" for moved experiments.
 	"""
 	chrom = config['process/chrom']
-	chrom = chrom_str_to_int(str(chrom))
+	chrom_str = chrom_str_to_int(str(chrom))
 	source_path = config['process/moving_from']
 	destination_path = config['process/moving_to']
 	cmd_1 = config['process/moving_s1']
@@ -102,17 +103,9 @@ def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True):
 	for idx, line in enumerate(to_process_group):
 		log.debug('Processing samples #{} "{}"'.format(str(idx), line['RD_Connect_ID_Experiment']))
 		try:
-			chrom_ori = chrom
-			if chrom_ori == 23:
-				chrom_ori = 'M'
-			elif chrom_ori == 24:
-				chrom_ori = 'X'
-			elif chrom_ori == 25:
-				chrom_ori = 'Y'
-
 			ori = source_path.replace('[owner]', line['Owner'])\
 				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom_ori))
+				.replace('[chromosome]', str(chrom_str))
 			des = destination_path.replace('[owner]', line['Owner'])\
 				.replace('[patient-id]', line['RD_Connect_ID_Experiment'])\
 				.replace('[chromosome]', str(chrom))	

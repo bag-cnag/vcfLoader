@@ -1,7 +1,7 @@
 import requests
 import rdconnect.utils as utils
 from rdconnect.classException import *
-
+import rdconnect.getSamplesInfo as get
 
 
 """structuredMatrix
@@ -48,7 +48,7 @@ def append_to_sparse_matrix(self = None, config, log = VoidLog(), largeBatch = 5
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
 	chrom = config['process/chrom']
-	chrom = chrom_str_to_int(str(chrom))
+	chrom = utils.chrom_str_to_int(str(chrom))
 	source_path = self.config['process/moving_to']
 	sparse_path = self.config['combine/sparse_matrix_path']
 
