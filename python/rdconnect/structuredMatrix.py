@@ -50,7 +50,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	chrom = chrom_str_to_int(str(config['process/chrom']))
+	chrom = utils.chrom_str_to_int(str(config['process/chrom']))
 	source_path = self.config['process/moving_to']
 	sparse_path = self.config['combine/sparse_matrix_path']
 	source_path = self.config['process/moving_from']
