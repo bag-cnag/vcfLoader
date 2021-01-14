@@ -66,6 +66,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
+	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
 
 	# Get experiments to load from DM
 
