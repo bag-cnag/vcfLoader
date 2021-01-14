@@ -5,6 +5,13 @@ experiments to an already existing sparse matrix.
 """
 
 
+
+import requests
+
+import rdconnect.utils as utils
+from rdconnect.classException import *
+
+
 def append_to_sparse_matrix(self = None, config, log = VoidLog(), largeBatch = 500, smallBatch = 100):
 	""" [...]
 
