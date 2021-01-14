@@ -122,6 +122,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	
 	print('-' * 25)
+	print(len(clean_to_process))
 	print(clean_to_process[0])
 	print('-' * 25)
 
@@ -132,10 +133,9 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	for idx, elm in enumerate(batches):
 		print(idx)
 		for idx2, elm2 in enumerate(elm['large_batch']):
-			print(idx2, len(elm2))
+			print(idx2, len(elm2['small_batch']))
 
 	print("=" * 25)
-	print(batches)
 
 
 
