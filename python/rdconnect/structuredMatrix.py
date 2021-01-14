@@ -1,7 +1,8 @@
 import requests
 import rdconnect.utils as utils
-from rdconnect.classException import *
 import rdconnect.getSamplesInfo as get
+from rdconnect.classException import *
+from rdconnect.classLog import VoidLog
 
 
 """structuredMatrix
@@ -97,6 +98,56 @@ def append_to_sparse_matrix(self = None, config = None, log = VoidLog(), largeBa
 	print(to_process_group[0])
 	print('-' * 25)
 
+	batches = _create__batches(to_process_group, largeBatch, smallBatch)
+
+	print(len(batches))
+	print(len(batches[0]))
 
 
 
+
+
+def _create__batches(list_experiments, largeBatch = 500, smallBatch = 100):
+	""" Function to create the batches of experiments to be loaded
+	and appended into the sparse matrix.
+	"""
+    cnt = 0
+    rst = []
+
+    smallBatch = []
+    largeBatch = []
+    added = False
+    bumpRev = False
+
+    for idx, itm in enumerate( list_experiments ):   
+        if len( smallBatch ) >= smallSize:
+            #largeBatch.append( { 'uri': uri, 'batch': smallBatch } )
+            largeBatch.append( { 'batch': smallBatch } )
+            cnt += smallSize
+            smallBatch = []
+            added = True
+
+        if cnt >= largeSize:
+            #rst.append( { 'uri': uri, 'batches': largeBatch } )
+            rst.append( { 'batches': largeBatch } )
+            largeBatch = [ ]
+            cnt = 0
+
+        if added:
+            if cnt + smallSize >= largeSize:
+                #uri = utils.version_bump( uri, 'revision' )
+                bumpRev = True
+            else:
+                #uri = utils.version_bump( uri, 'iteration' )
+                bumpRev = False
+            added = False
+            
+        smallBatch.append( item )
+
+    if len( smallBatch ) != 0:
+        if not bumpRev:
+            #uri = utils.version_bump( uri, 'revision' )
+            pass
+        #rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
+        rst.append( { 'batches': [ { 'batch': smallBatch } ] } )
+    return rst
