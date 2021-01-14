@@ -83,6 +83,7 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 
 def sparse_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
+	print(self, isConfig, isHl, self.config)
 	self.log.info('Entering loading step "sparse_matrix"')
 
 	if self.config is None:
@@ -188,12 +189,6 @@ def germline(config = None, hl = None, log = None):
 	).drop('sample')
 	self.data = self.data.key_rows_by(self.data.locus, self.data.alleles )
 
-	# if (originPath != ""):
-	# 	print ("[INFO]:   . Provided origin path '{}' to be loaded and merged.".format(originPath))
-	# 	somatic = hl.read_table(originPath)
-	# 	self.data = merge(hl, self.data, somatic)
-	# print ("[INFO]:   . Output VCF file will be saved to '{}'".format(destinationPath))
-	
 	self.state = ['germline'] + self.state
 	if autosave and destination_path != '':
 		filename = utils.destination_germline(destination_path, destination_file)
