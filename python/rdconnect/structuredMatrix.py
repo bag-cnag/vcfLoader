@@ -4,8 +4,6 @@ This module contains the functions used to create a sparse matrix and to append
 experiments to an already existing sparse matrix.
 """
 
-import 
-
 
 def append_to_sparse_matrix(self = None, config, log = VoidLog(), largeBatch = 500, smallBatch = 100):
     """ [...]
@@ -84,8 +82,13 @@ def append_to_sparse_matrix(self = None, config, log = VoidLog(), largeBatch = 5
     print("hello! I got {} experiments to process from the total of {} I asked".format(len(to_process_group), largeBatch))
 
 
-    
-   
+   print('-' * 25) 
+   print(to_process[0])
+   print('-' * 25)
+   print(all_group[0])
+   print('-' * 25)
+   print(to_process_group[0])
+   print('-' * 25)
 
 
 
