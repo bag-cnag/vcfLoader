@@ -36,7 +36,7 @@ def append_to_sparse_matrix(self = None, config, log = VoidLog(), largeBatch = 5
 	largeBatch
 	smallBatch
 	"""
-	self, isConfig, isHl = check_class_and_config(None, config, hl, log)
+	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log)
 	self.log.info('Entering step "append_to_sparse_matrix"')
 
 	if not isConfig:
