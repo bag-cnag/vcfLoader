@@ -53,8 +53,6 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	chrom = utils.chrom_str_to_int(str(config['process/chrom']))
 	source_path = self.config['process/moving_to']
 	sparse_path = self.config['combine/sparse_matrix_path']
-	source_path = self.config['process/moving_from']
-	source_file = self.config['process/source_file']
 
 	chrom_str = chrom
 	if chrom_str == '23':
@@ -68,10 +66,6 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
 	log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
-	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	log.debug('> Argument "source_file" filled with "{}"'.format(source_file))
-
-	source_path = path.join(source_path, source_file)
 
 	# Get experiments to load from DM
 
@@ -119,8 +113,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	batches = _create__batches(clean_to_process, largeBatch, smallBatch)
 
 	print(len(batches))
-	print(len(batches[0]['batches']))
-	print(len(batches[0]['batches']['batch']))
+	print(len(batches[0][0]))
+	print(len(batches[0][0]['batches'][0]['batch']))
 
 
 
