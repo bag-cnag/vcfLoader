@@ -143,7 +143,7 @@ def _create__batches(list_experiments, largeSize = 500, smallSize = 100):
 				bumpRev = False
 			added = False
 
-		smallBatch.append( item )
+		smallBatch.append( itm )
 
 	if len( smallBatch ) != 0:
 		if not bumpRev:
