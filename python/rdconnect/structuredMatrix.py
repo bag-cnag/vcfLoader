@@ -108,7 +108,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 
 
-def _create__batches(list_experiments, largeBatch = 500, smallBatch = 100):
+def _create__batches(list_experiments, largeSize = 500, smallSize = 100):
 	""" Function to create the batches of experiments to be loaded
 	and appended into the sparse matrix.
 	"""
