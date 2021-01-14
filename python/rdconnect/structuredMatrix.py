@@ -18,7 +18,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 
 	process/moving_to
-	combine/sparse_matrix_path
+	applications/combine/sparse_matrix_path
 
 	'applications/datamanagement/ip'
 	'applications/datamanagement/api_exp_status_list'
@@ -52,7 +52,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	chrom = utils.chrom_str_to_int(str(config['process/chrom']))
 	source_path = self.config['process/moving_to']
-	sparse_path = self.config['combine/sparse_matrix_path']
+	sparse_path = self.config['applications/combine/sparse_matrix_path']
 
 	chrom_str = chrom
 	if chrom_str == '23':
