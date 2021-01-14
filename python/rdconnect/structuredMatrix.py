@@ -11,7 +11,7 @@ This module contains the functions used to create a sparse matrix and to append
 experiments to an already existing sparse matrix.
 """
 
-def append_to_sparse_matrix(self = None, config = None, hr = None, log = VoidLog(), largeBatch = 500, smallBatch = 100):
+def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), largeBatch = 500, smallBatch = 100):
 	""" [...]
 
 
