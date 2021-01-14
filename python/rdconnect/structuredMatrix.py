@@ -49,6 +49,8 @@ def append_to_sparse_matrix(self = None, config, log = VoidLog(), largeBatch = 5
 
     log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
     log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+    log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
+    log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 
     # Get experiments to load from DM
 
