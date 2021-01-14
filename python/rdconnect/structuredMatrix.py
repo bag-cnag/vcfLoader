@@ -107,7 +107,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		clean_to_process.append({
 			'file': source_path.replace('[owner]', itm['Owner'])\
 				.replace('[patient-id]', itm['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom_str))
+				.replace('[chromosome]', str(chrom_str)),
 			'id': itm['RD_Connect_ID_Experiment'],
 			'pid': itm['Participant_ID']
 		})
