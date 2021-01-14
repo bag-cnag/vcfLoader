@@ -1,3 +1,4 @@
+import json
 import requests
 import rdconnect.utils as utils
 import rdconnect.getSamplesInfo as get
