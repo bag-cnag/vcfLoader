@@ -62,10 +62,10 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	elif chrom_str == '25':
 		chrom_str = 'Y'
 
-	log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
-	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
-	log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
+	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
+	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 
 	# Get experiments to load from DM
 
@@ -81,18 +81,18 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		'Host': config['applications/datamanagement/host'] 
 	}
 	data = "{\"page\": 1, \"pageSize\": " + str(largeBatch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
-	log.debug('> Querying DM using url "{0}"'.format(url))
+	self.log.debug('> Querying DM using url "{0}"'.format(url))
 
 	response = requests.post(url, data = data, headers = headers, verify = False)
 	if response.status_code != 200:
-		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+		self.log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
 		sys.exit(2)
 
 	to_process = [ x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items'] ]
-	log.debug('> Obtained a total of "{}" samples to move'.format(len(to_process)))
+	self.log.debug('> Obtained a total of "{}" samples to move'.format(len(to_process)))
 
-	all_group = get.experiment_by_group(config, log, False)
-	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
+	all_group = get.experiment_by_group(config, self.log, False)
+	self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 
 	to_process = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 
@@ -105,6 +105,20 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			'id': itm['RD_Connect_ID_Experiment'],
 			'pid': itm['Participant_ID']
 		})
+
+	# Get version of sparse matrix
+	version = path.basename(path.normpath(sparse_path)).split('.')
+	self.log.debug('> Detected version of sparse matrix {}.{}.{}'.format(version[0], version[1], version[2]))
+
+	try:
+		sm = hl.read_matrix_table(os.path.join(sparse_path), 'chrom-{}'.format(chrom))
+		self.log.info('> Sparse matrix {}.{}.{} was loaded'.format(version[0], version[1], version[2]))
+		sm_loaded = True
+	except:
+		self.log.info('> Sparse matrix {}.{}.{} could not be found and will be created'.format(version[0], version[1], version[2]))
+		sm_loaded = False
+	
+
 	
 	print('-' * 25)
 	print(clean_to_process[0])
@@ -137,15 +151,15 @@ def _create__batches(list_experiments, largeSize = 500, smallSize = 100):
 
 	for idx, itm in enumerate( list_experiments ):   
 		if len( smallBatch ) >= smallSize:
-			#largeBatch.append( { 'uri': uri, 'batch': smallBatch } )
-			largeBatch.append( { 'batch': smallBatch } )
+			#largeBatch.append( { 'uri': uri, 'small_batch': smallBatch } )
+			largeBatch.append( { 'small_batch': smallBatch } )
 			cnt += smallSize
 			smallBatch = []
 			added = True
 
 		if cnt >= largeSize:
-			#rst.append( { 'uri': uri, 'batches': largeBatch } )
-			rst.append( { 'batches': largeBatch } )
+			#rst.append( { 'uri': uri, 'large_batch': largeBatch } )
+			rst.append( { 'large_batch': largeBatch } )
 			largeBatch = [ ]
 			cnt = 0
 
@@ -164,6 +178,6 @@ def _create__batches(list_experiments, largeSize = 500, smallSize = 100):
 		if not bumpRev:
 			#uri = utils.version_bump( uri, 'revision' )
 			pass
-		#rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
-		rst.append( { 'batches': [ { 'batch': smallBatch } ] } )
+		#rst.append( { 'uri': uri, 'large_batch': [ { 'uri': uri, 'small_batch': smallBatch } ] } )
+		rst.append( { 'large_batch': [ { 'small_batch': smallBatch } ] } )
 	return rst
