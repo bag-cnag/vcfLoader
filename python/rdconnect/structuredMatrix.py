@@ -113,8 +113,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	batches = _create__batches(clean_to_process, largeBatch, smallBatch)
 
 	print(len(batches))
-	print(len(batches[0][0]))
-	print(len(batches[0][0]['batches'][0]['batch']))
+	print(len(batches[0]['batches']))
+	print(len(batches[0]['batches'][0]['batch']))
 
 
 
