@@ -241,7 +241,7 @@ def destination_transform(destination_path, filename, version, somatic = False):
 	-------
 	A string with the path to save the transformed dataset.
 	"""
-	return os.path.join(destination_path, 'transformed', version, filename)
+	return os.path.join(destination_path, version, 'transformed', filename)
 
 
 def check_class_and_config(self, config, hl, log, class_to=GenomicData):
