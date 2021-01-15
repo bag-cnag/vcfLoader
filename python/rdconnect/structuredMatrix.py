@@ -133,7 +133,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	print(len(batches))
 
 	for idx, elm in enumerate(batches):
-		print(idx)
+		print(idx, elm['version'])
 		for idx2, elm2 in enumerate(elm['content']):
 			print(idx2, len(elm2['content']), elm2['version'])
 
