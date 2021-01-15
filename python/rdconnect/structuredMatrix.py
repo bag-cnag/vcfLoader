@@ -69,7 +69,6 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
 
 	# Get experiments to load from DM
-
 	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
@@ -108,8 +107,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		})
 
 	# Get version of sparse matrix
-	version = path.basename(path.normpath(sparse_path)).split('.')
-	self.log.debug('> Detected version of sparse matrix {}.{}.{}'.format(version[0], version[1], version[2]))
+	version = path.basename(path.normpath(sparse_path))
+	self.log.debug('> Detected version of sparse matrix {}'.format(version))
 
 	try:
 		sm = hl.read_matrix_table(os.path.join(sparse_path), 'chrom-{}'.format(chrom))
@@ -119,14 +118,17 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		self.log.info('> Sparse matrix {}.{}.{} could not be found and will be created'.format(version[0], version[1], version[2]))
 		sm_loaded = False
 	
+	# Check for loaded experiments
+	if sm_loaded:
+		x = [ y.get('s') for y in self.data.col.collect() ]
+		self.log.debug('> Loaded sparse matrix contains {} experiments'.format(len(x)))
+		y = [ z for z in clean_to_process if z['id'] in x ]
+		if len(y) != 0:
+			self.log.error('> {} experiments are already loaded'.format(len(y)))
+			clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
 
-	
-	print('-' * 25)
-	print(len(clean_to_process))
-	print(clean_to_process[0])
-	print('-' * 25)
-
-	batches = _create__batches(clean_to_process, largeBatch, smallBatch)
+	# Create batches of samples to be loaded
+	batches = _create__batches(clean_to_process, version, largeBatch, smallBatch)
 
 	print(len(batches))
 
@@ -141,47 +143,73 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 
 
-def _create__batches(list_experiments, largeSize = 500, smallSize = 100):
+def _create__batches(experiments, version, largeSize = 500, smallSize = 100):
 	""" Function to create the batches of experiments to be loaded
 	and appended into the sparse matrix.
 	"""
 	cnt = 0
 	rst = []
+	lrg = []
+	sml = []
 
-	smallBatch = []
-	largeBatch = []
-	added = False
-	bumpRev = False
-
-	for idx, itm in enumerate( list_experiments ):   
-		if len( smallBatch ) >= smallSize:
-			#largeBatch.append( { 'uri': uri, 'small_batch': smallBatch } )
-			largeBatch.append( { 'small_batch': smallBatch } )
+	for idx, itm in enumerate(experiments):
+		if len(sml) >= smallSize:
+			version = utils.version_bump(version, 'iteration')
 			cnt += smallSize
-			smallBatch = []
-			added = True
-
+			lrg.append({ 'version': version, 'content': sml })
+			sml = []
+		
 		if cnt >= largeSize:
-			#rst.append( { 'uri': uri, 'large_batch': largeBatch } )
-			rst.append( { 'large_batch': largeBatch } )
-			largeBatch = [ ]
+			version = utils.version_bump(version, 'revision')
+			rst.append({ 'version': version, 'content': lrg })
+			lrg = []
 			cnt = 0
+		
+		sml.append(itm)
 
-		if added:
-			if cnt + smallSize >= largeSize:
-				#uri = utils.version_bump( uri, 'revision' )
-				bumpRev = True
-			else:
-				#uri = utils.version_bump( uri, 'iteration' )
-				bumpRev = False
-			added = False
+	if len(sml) > 0:
+		version = utils.version_bump(version, 'iteration')
+		lrg.append({ 'version': version, 'content': sml })
+		version = utils.version_bump(version, 'revision')
+		rst.append({ 'version': version, 'content': lrg })
 
-		smallBatch.append( itm )
-
-	if len( smallBatch ) != 0:
-		if not bumpRev:
-			#uri = utils.version_bump( uri, 'revision' )
-			pass
-		#rst.append( { 'uri': uri, 'large_batch': [ { 'uri': uri, 'small_batch': smallBatch } ] } )
-		rst.append( { 'large_batch': [ { 'small_batch': smallBatch } ] } )
 	return rst
+
+
+	# smallBatch = []
+	# largeBatch = []
+	# added = False
+	# bumpRev = False
+
+	# for idx, itm in enumerate( list_experiments ):   
+	# 	if len( smallBatch ) >= smallSize:
+	# 		#largeBatch.append( { 'uri': uri, 'small_batch': smallBatch } )
+	# 		largeBatch.append( { 'small_batch': smallBatch } )
+	# 		cnt += smallSize
+	# 		smallBatch = []
+	# 		added = True
+
+	# 	if cnt >= largeSize:
+	# 		#rst.append( { 'uri': uri, 'large_batch': largeBatch } )
+	# 		rst.append( { 'large_batch': largeBatch } )
+	# 		largeBatch = [ ]
+	# 		cnt = 0
+
+	# 	if added:
+	# 		if cnt + smallSize >= largeSize:
+	# 			#uri = utils.version_bump( uri, 'revision' )
+	# 			bumpRev = True
+	# 		else:
+	# 			#uri = utils.version_bump( uri, 'iteration' )
+	# 			bumpRev = False
+	# 		added = False
+
+	# 	smallBatch.append( itm )
+
+	# if len( smallBatch ) != 0:
+	# 	if not bumpRev:
+	# 		#uri = utils.version_bump( uri, 'revision' )
+	# 		pass
+	# 	#rst.append( { 'uri': uri, 'large_batch': [ { 'uri': uri, 'small_batch': smallBatch } ] } )
+	# 	rst.append( { 'large_batch': [ { 'small_batch': smallBatch } ] } )
+	# return rst
