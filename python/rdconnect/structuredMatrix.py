@@ -132,22 +132,22 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.info('> Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
 	batches = _create__batches(clean_to_process, version, largeBatch, smallBatch)
 		
-    for idx1, batch in enumerate(batches):
-        print('> Processing large batch {}/{}'.format(idx1, len(batches)))
-        
-        #accum = None
-        for idx2, pack in enumerate(batch['content']):
-        	small_batch_path = os.path.join(base, pack['version'])
-            print('     > Loading pack #{} of {} gVCF ({})'.format(idx, len(pack['content']), pack['version'], small_batch_path))
-            for f in pack['content']:
-                print(f)
-            #uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
-            #loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
-            #accum = uri
+	for idx1, batch in enumerate(batches):
+		print('> Processing large batch {}/{}'.format(idx1, len(batches)))
 
-    #uris = [ b[ 'uri' ] for b in list_of_batches ]
-    #if not( gvcf_store_path is None or gvcf_store_path == '' ):
-    #    uris = [ gvcf_store_path ] + uris
+		#accum = None
+		for idx2, pack in enumerate(batch['content']):
+			small_batch_path = os.path.join(base, pack['version'])
+			print('     > Loading pack #{} of {} gVCF ({})'.format(idx, len(pack['content']), pack['version'], small_batch_path))
+			for f in pack['content']:
+				print(f)
+			#uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
+			#loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
+			#accum = uri
+
+	#uris = [ b[ 'uri' ] for b in list_of_batches ]
+	#if not( gvcf_store_path is None or gvcf_store_path == '' ):
+	#    uris = [ gvcf_store_path ] + uris
 
 
 
