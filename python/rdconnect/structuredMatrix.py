@@ -147,7 +147,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 				print(f)
 			#uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
 			_load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
-			accum = uri
+			accum = small_batch_path
 
 	#uris = [ b[ 'uri' ] for b in list_of_batches ]
 	#if not( gvcf_store_path is None or gvcf_store_path == '' ):
