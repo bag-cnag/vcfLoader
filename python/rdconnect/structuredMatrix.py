@@ -108,14 +108,15 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	# Get version of sparse matrix
 	version = path.basename(path.normpath(sparse_path))
+	base = sparse_path.replace(version, '')
 	self.log.debug('> Detected version of sparse matrix {}'.format(version))
 
 	try:
 		sm = hl.read_matrix_table(os.path.join(sparse_path), 'chrom-{}'.format(chrom))
-		self.log.info('> Sparse matrix {}.{}.{} was loaded'.format(version[0], version[1], version[2]))
+		self.log.info('> Sparse matrix {} was loaded'.format(version))
 		sm_loaded = True
 	except:
-		self.log.info('> Sparse matrix {}.{}.{} could not be found and will be created'.format(version[0], version[1], version[2]))
+		self.log.info('> Sparse matrix {} could not be found and will be created'.format(version))
 		sm_loaded = False
 	
 	# Check for loaded experiments
@@ -128,17 +129,25 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
 
 	# Create batches of samples to be loaded
+	self.log.info('> Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
 	batches = _create__batches(clean_to_process, version, largeBatch, smallBatch)
+		
+    for idx1, batch in enumerate(batches):
+        print('> Processing large batch {}/{}'.format(idx1, len(batches)))
+        
+        #accum = None
+        for idx2, pack in enumerate(batch['content']):
+        	small_batch_path = os.path.join(base, pack['version'])
+            print('     > Loading pack #{} of {} gVCF ({})'.format(idx, len(pack['content']), pack['version'], small_batch_path))
+            for f in pack['content']:
+                print(f)
+            #uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
+            #loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
+            #accum = uri
 
-	print(len(batches))
-
-	for idx, elm in enumerate(batches):
-		print(idx, elm['version'])
-		for idx2, elm2 in enumerate(elm['content']):
-			print(idx2, len(elm2['content']), elm2['version'])
-
-	print("=" * 25)
-
+    #uris = [ b[ 'uri' ] for b in list_of_batches ]
+    #if not( gvcf_store_path is None or gvcf_store_path == '' ):
+    #    uris = [ gvcf_store_path ] + uris
 
 
 
@@ -174,42 +183,3 @@ def _create__batches(experiments, version, largeSize = 500, smallSize = 100):
 		rst.append({ 'version': version, 'content': lrg })
 
 	return rst
-
-
-	# smallBatch = []
-	# largeBatch = []
-	# added = False
-	# bumpRev = False
-
-	# for idx, itm in enumerate( list_experiments ):   
-	# 	if len( smallBatch ) >= smallSize:
-	# 		#largeBatch.append( { 'uri': uri, 'small_batch': smallBatch } )
-	# 		largeBatch.append( { 'small_batch': smallBatch } )
-	# 		cnt += smallSize
-	# 		smallBatch = []
-	# 		added = True
-
-	# 	if cnt >= largeSize:
-	# 		#rst.append( { 'uri': uri, 'large_batch': largeBatch } )
-	# 		rst.append( { 'large_batch': largeBatch } )
-	# 		largeBatch = [ ]
-	# 		cnt = 0
-
-	# 	if added:
-	# 		if cnt + smallSize >= largeSize:
-	# 			#uri = utils.version_bump( uri, 'revision' )
-	# 			bumpRev = True
-	# 		else:
-	# 			#uri = utils.version_bump( uri, 'iteration' )
-	# 			bumpRev = False
-	# 		added = False
-
-	# 	smallBatch.append( itm )
-
-	# if len( smallBatch ) != 0:
-	# 	if not bumpRev:
-	# 		#uri = utils.version_bump( uri, 'revision' )
-	# 		pass
-	# 	#rst.append( { 'uri': uri, 'large_batch': [ { 'uri': uri, 'small_batch': smallBatch } ] } )
-	# 	rst.append( { 'large_batch': [ { 'small_batch': smallBatch } ] } )
-	# return rst
