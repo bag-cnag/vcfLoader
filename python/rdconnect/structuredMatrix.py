@@ -6,6 +6,10 @@ from os import path
 from rdconnect.classException import *
 from rdconnect.classLog import VoidLog
 
+from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
+from hail.experimental.vcf_combiner.vcf_combiner import transform_gvcf
+
+
 
 """structuredMatrix
 
@@ -135,21 +139,43 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	for idx1, batch in enumerate(batches):
 		print('> Processing large batch {}/{}'.format(idx1, len(batches)))
 
-		#accum = None
+		accum = None
 		for idx2, pack in enumerate(batch['content']):
 			small_batch_path = path.join(base, pack['version'])
 			print('     > Loading pack #{} of {} gVCF ({})'.format(idx, len(pack['content']), pack['version'], small_batch_path))
 			for f in pack['content']:
 				print(f)
 			#uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
-			#loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
-			#accum = uri
+			_load_gvcf( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
+			accum = uri
 
 	#uris = [ b[ 'uri' ] for b in list_of_batches ]
 	#if not( gvcf_store_path is None or gvcf_store_path == '' ):
 	#    uris = [ gvcf_store_path ] + uris
 
+def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, partitions):
+    def transformFile(mt):
+        return transform_gvcf(mt.annotate_rows(
+            info = mt.info.annotate(MQ_DP = hl.null(hl.tint32), VarDP = hl.null(hl.tint32), QUALapprox = hl.null(hl.tint32))
+        ))
+    def importFiles(files):
+        x = hl.import_vcfs(
+            files,
+            partitions = interval[ 'interval' ], 
+            reference_genome = interval[ 'reference_genome' ], 
+            array_elements_required = interval[ 'array_elements_required' ]
+        )
+        return x
 
+    interval = utils.get_chrom_intervals(chrom, partitions)
+    vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
+
+    if previous_version_path == None:
+        comb = combine_gvcfs(vcfs)
+    else:
+        previous = hl.read_matrix_table(previous_version_path)
+        comb = combine_gvcfs([ previous ] + vcfs)
+    comb.write(version_path, overwrite = True)
 
 
 def _create__batches(experiments, version, largeSize = 500, smallSize = 100):
