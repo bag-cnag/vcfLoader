@@ -2,6 +2,39 @@ import os
 from rdconnect.classGenome import GenomicData
 from rdconnect.classLog import VoidLog
 
+
+def version_bump(version, increment = 'version'):
+	"""Function to increment a tag version composed by 
+	version.revision.iteration.
+
+	Parameters
+	----------
+	version: str, mandatory
+		A string as '0.0.1'
+	increment: str, optional
+		Indicator of which element will be increased (default: 'version',
+		options: 'version', 'revision', or 'iteration')
+	
+	Returns
+	-------
+	A string with the new version.
+	"""
+	pos = { 'version': 0, 'revision': 1, 'iteration': 2 }[ increment.lower() ]
+
+	pack = version.split('.')
+	pack[ pos ] = str(int(pack[ pos ]) + 1 )
+
+	if increment.lower() == 'version':
+		pack[ 1 ] = "0"
+
+	if increment.lower() in ('version', 'revision'):
+		pack[ 2 ] = "0"
+
+	new_version = '.'.join(pack)
+    
+	return new_version
+
+
 def chrom_str_to_int(chrom):
 	"""This function is used parse a chromosome from 'string name' to 'numeric
 	name'.
@@ -208,7 +241,7 @@ def destination_transform(destination_path, filename, version, somatic = False):
 	-------
 	A string with the path to save the transformed dataset.
 	"""
-	return os.path.join(destination_path, version, 'transformed', filename)
+	return os.path.join(destination_path, 'transformed', version, filename)
 
 
 def check_class_and_config(self, config, hl, log, class_to=GenomicData):
