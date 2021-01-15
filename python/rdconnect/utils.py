@@ -282,7 +282,7 @@ def truncateAt(hl, n, p):
 
 
 
-def get_chrom_intervals(chrom, partitions):
+def get_chrom_intervals(chrom, partitions, hl):
 	"""Function that given a chromosome and a number of partitions creates the
 	required intervals.
 	"""
@@ -294,38 +294,38 @@ def get_chrom_intervals(chrom, partitions):
 		chrom = 'Y'
 
 	intervals = { # information from https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh37
-		"25": { "interval": _get_intervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
-		"Y":  { "interval": _get_intervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
-		"24": { "interval": _get_intervals( chrom, 155270560, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
-		"X":  { "interval": _get_intervals( chrom, 155270560, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
-		"23": { "interval": _get_intervals( chrom,     16570, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
-		"MT": { "interval": _get_intervals( chrom,     16570, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
-		"22": { "interval": _get_intervals( chrom,  51304566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"21": { "interval": _get_intervals( chrom,  48129895, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"20": { "interval": _get_intervals( chrom,  63025520, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"19": { "interval": _get_intervals( chrom,  59128983, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"18": { "interval": _get_intervals( chrom,  78077248, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"17": { "interval": _get_intervals( chrom,  81195210, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"16": { "interval": _get_intervals( chrom,  90354753, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"15": { "interval": _get_intervals( chrom, 102531392, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"14": { "interval": _get_intervals( chrom, 107349540, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"13": { "interval": _get_intervals( chrom, 115169878, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"12": { "interval": _get_intervals( chrom, 133851895, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"11": { "interval": _get_intervals( chrom, 135006516, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"10": { "interval": _get_intervals( chrom, 135534747, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"9":  { "interval": _get_intervals( chrom, 141213431, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"8":  { "interval": _get_intervals( chrom, 146364022, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"7":  { "interval": _get_intervals( chrom, 159138663, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"6":  { "interval": _get_intervals( chrom, 171115067, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"5":  { "interval": _get_intervals( chrom, 180915260, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"4":  { "interval": _get_intervals( chrom, 191154276, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"3":  { "interval": _get_intervals( chrom, 198022430, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"2":  { "interval": _get_intervals( chrom, 243199373, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-		"1":  { "interval": _get_intervals( chrom, 249250621, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }
+		"25": { "interval": _get_intervals( chrom,  59373566, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
+		"Y":  { "interval": _get_intervals( chrom,  59373566, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
+		"24": { "interval": _get_intervals( chrom, 155270560, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
+		"X":  { "interval": _get_intervals( chrom, 155270560, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
+		"23": { "interval": _get_intervals( chrom,     16570, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
+		"MT": { "interval": _get_intervals( chrom,     16570, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
+		"22": { "interval": _get_intervals( chrom,  51304566, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"21": { "interval": _get_intervals( chrom,  48129895, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"20": { "interval": _get_intervals( chrom,  63025520, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"19": { "interval": _get_intervals( chrom,  59128983, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"18": { "interval": _get_intervals( chrom,  78077248, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"17": { "interval": _get_intervals( chrom,  81195210, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"16": { "interval": _get_intervals( chrom,  90354753, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"15": { "interval": _get_intervals( chrom, 102531392, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"14": { "interval": _get_intervals( chrom, 107349540, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"13": { "interval": _get_intervals( chrom, 115169878, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"12": { "interval": _get_intervals( chrom, 133851895, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"11": { "interval": _get_intervals( chrom, 135006516, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"10": { "interval": _get_intervals( chrom, 135534747, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"9":  { "interval": _get_intervals( chrom, 141213431, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"8":  { "interval": _get_intervals( chrom, 146364022, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"7":  { "interval": _get_intervals( chrom, 159138663, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"6":  { "interval": _get_intervals( chrom, 171115067, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"5":  { "interval": _get_intervals( chrom, 180915260, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"4":  { "interval": _get_intervals( chrom, 191154276, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"3":  { "interval": _get_intervals( chrom, 198022430, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"2":  { "interval": _get_intervals( chrom, 243199373, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
+		"1":  { "interval": _get_intervals( chrom, 249250621, partitions, hl ), 'reference_genome': 'GRCh37', 'array_elements_required': False }
 	}
 	return intervals[chrom]
 
-def _get_intervals(chrom, max_pos, partitions):
+def _get_intervals(chrom, max_pos, partitions, hl):
 	"""Auxiliary function to split an interval according to the partitions 
 	requested.
 	"""
