@@ -18,7 +18,7 @@ This module contains the functions used to create a sparse matrix and to append
 experiments to an already existing sparse matrix.
 """
 
-def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), largeBatch = 500, smallBatch = 100):
+def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), queryBatch = 500, largeBatch = 500, smallBatch = 100):
 	""" [...]
 
 
@@ -69,6 +69,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "queryBatch" filled with "{}"'.format(queryBatch))
 	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
@@ -85,7 +86,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
 	}
-	data = "{\"page\": 1, \"pageSize\": " + str(largeBatch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
+	data = "{\"page\": 1, \"pageSize\": " + str(queryBatch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
 	self.log.debug('> Querying DM using url "{0}"'.format(url))
 
 	response = requests.post(url, data = data, headers = headers, verify = False)
