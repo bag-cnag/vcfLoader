@@ -44,6 +44,9 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	largeBatch
 	smallBatch
 	"""
+	def name_with_chrom(base, chrom):
+		return os.path.join(base, 'chrom-{}'.format(chrom))
+
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_sparse_matrix"')
 
@@ -118,11 +121,11 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.debug('> Detected version of sparse matrix {}'.format(version))
 
 	try:
-		sm = hl.read_matrix_table(os.path.join(sparse_path), 'chrom-{}'.format(chrom))
-		self.log.info('> Sparse matrix {} was loaded'.format(version))
+		sm = hl.read_matrix_table(name_with_chrom(sparse_path, chrom))
+		self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
 		sm_loaded = True
 	except:
-		self.log.info('> Sparse matrix {} could not be found and will be created'.format(version))
+		self.log.info('> Sparse matrix {}/chrom-{} could not be found and will be created'.format(version, chrom))
 		sm_loaded = False
 	
 	# Check for loaded experiments
@@ -146,7 +149,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			vsr = pack[ 'version' ]
 			if idx2 == len(batch[ 'content' ]) - 1:
 				vsr = batch[ 'version' ]
-			small_batch_path = path.join(base, vsr)
+			small_batch_path = name_with_chrom(path.join(base, vsr), chrom)
 			print('     > Loading pack #{} of {} gVCF ({})'.format(idx2, len(batch[ 'content' ]), small_batch_path))
 			for f in pack['content']:
 				print(f)
@@ -164,12 +167,12 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
 	for ii in range(1, len(revisions_to_collect)):
 		print(ii, revisions_to_collect[ ii ])
-		_combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'))
+		_combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'), chrom)
 
-def _combine_mt(hl, base, ver1, ver2, verD):
-	sm1 = path.join(base, ver1)
-	sm2 = path.join(base, ver2)
-	smD = path.join(base, verD)
+def _combine_mt(hl, base, ver1, ver2, verD, chrom):
+	sm1 = name_with_chrom(path.join(base, ver1), chrom)
+	sm2 = name_with_chrom(path.join(base, ver2), chrom)
+	smD = name_with_chrom(path.join(base, verD), chrom)
 	print( '[_combine_mt]: merging "{}" and "{}" and saving it to "{}"'.format(sm1, sm2, smD))
 	sm_1 = hl.read_matrix_table(sm1)
 	sm_2 = hl.read_matrix_table(sm2)
