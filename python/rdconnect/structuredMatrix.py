@@ -154,7 +154,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			accum = small_batch_path
 
 	# Collect all the small sparse matrix and iteratively accumulate them
-	revisions_to_collect = [ (pack[ 'version'], pack[ 'content' ][ -1 ][ 'version' ]) for pack in batches ]
+	revisions_to_collect = [ pack[ 'version' ] for pack in batches ]
 	if sm_loaded:
 		revisions_to_collect = [ (None, version) ] + revisions_to_collect
 
@@ -164,7 +164,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
 	for ii in range(1, len(revisions_to_collect)):
 		print(ii, revisions_to_collect[ ii ])
-		_combine_mt(self.config, revisions_to_collect[ ii-1 ][ 1 ], revisions_to_collect[ ii ][ 1 ], revisions_to_collect[ ii ][ 0 ])
+		_combine_mt(self.config, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'))
 
 def _combine_mt(config, ver1, ver2, verD):
     print( '[_combine_mt]: merging "{}" and "{}" and saving it to "{}"'.format(ver1, ver2, verD))
