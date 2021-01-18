@@ -86,9 +86,9 @@ def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True):
 	data = "{\"page\": 1, \"pageSize\": " + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
 	log.debug('> Querying DM using url "{0}"'.format(url))
 
-	print(headers)
-	print(data)
-	print(url)
+	log.debug(headers)
+	log.debug(data)
+	log.debug(url)
 	
 	response = requests.post(url, data = data, headers = headers, verify = False)
 	if response.status_code != 200:
