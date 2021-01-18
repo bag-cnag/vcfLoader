@@ -162,7 +162,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	print(revisions_to_collect)
 
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
-	for ii in enumerate(1, len(revisions_to_collect)):
+	for ii in range(1, len(revisions_to_collect)):
 		print(ii, pack[ ii ])
 		_combine_mt(self.config, pack[ ii-1 ][ 1 ], pack[ ii ][ 1 ], pack[ ii ][ 0 ])
 
