@@ -164,9 +164,9 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
 	for ii in range(1, len(revisions_to_collect)):
 		print(ii, revisions_to_collect[ ii ])
-		_combine_mt(base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'))
+		_combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'))
 
-def _combine_mt(base, ver1, ver2, verD):
+def _combine_mt(hl, base, ver1, ver2, verD):
 	sm1 = path.join(base, ver1)
 	sm2 = path.join(base, ver2)
 	smD = path.join(base, verD)
