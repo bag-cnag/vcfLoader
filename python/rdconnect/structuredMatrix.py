@@ -171,10 +171,11 @@ def _combine_mt(base, ver1, ver2, verD):
 	sm2 = path.join(base, ver2)
 	smD = path.join(base, verD)
 	print( '[_combine_mt]: merging "{}" and "{}" and saving it to "{}"'.format(sm1, sm2, smD))
-	#sm_1 = hl.read_matrix_table( uri_sm_1 )
-	#sm_2 = hl.read_matrix_table( uri_sm_2 )
-	#comb = combine_gvcfs( [ sm_1 ] + [ sm_2 ] )
-	#comb.write( destination_path, overwrite = True )
+	sm_1 = hl.read_matrix_table(sm1)
+	sm_2 = hl.read_matrix_table(sm2)
+	comb = combine_gvcfs([ sm_1 ] + [ sm_2 ])
+	comb.write(smD, overwrite = True)
+
 
 def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, partitions):
 	def transformFile(mt):
