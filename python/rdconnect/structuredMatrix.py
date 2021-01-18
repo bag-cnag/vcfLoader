@@ -150,7 +150,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			print('     > Loading pack #{} of {} gVCF ({})'.format(idx2, len(batch[ 'content' ]), small_batch_path))
 			for f in pack['content']:
 				print(f)
-			#_load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
+			_load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
 			accum = small_batch_path
 
 	# Collect all the small sparse matrix and iteratively accumulate them
@@ -164,10 +164,13 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
 	for ii in range(1, len(revisions_to_collect)):
 		print(ii, revisions_to_collect[ ii ])
-		_combine_mt(self.config, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'))
+		_combine_mt(base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'))
 
-def _combine_mt(config, ver1, ver2, verD):
-    print( '[_combine_mt]: merging "{}" and "{}" and saving it to "{}"'.format(ver1, ver2, verD))
+def _combine_mt(base, ver1, ver2, verD):
+	sm1 = path.join(base, ver1)
+	sm2 = path.join(base, ver2)
+	smD = path.join(base, verD)
+    print( '[_combine_mt]: merging "{}" and "{}" and saving it to "{}"'.format(sm1, sm2, smD))
     #sm_1 = hl.read_matrix_table( uri_sm_1 )
     #sm_2 = hl.read_matrix_table( uri_sm_2 )
     #comb = combine_gvcfs( [ sm_1 ] + [ sm_2 ] )
