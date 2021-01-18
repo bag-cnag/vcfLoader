@@ -99,6 +99,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	all_group = get.experiment_by_group(config, self.log, False)
 	self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
+	print(all_group)
 
 	to_process = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 
@@ -112,59 +113,61 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			'pid': itm['Participant_ID']
 		})
 
-	# Get version of sparse matrix
-	version = path.basename(path.normpath(sparse_path))
-	base = sparse_path.replace(version, '')
-	self.log.debug('> Detected version of sparse matrix {}'.format(version))
+	# # Get version of sparse matrix
+	# version = path.basename(path.normpath(sparse_path))
+	# base = sparse_path.replace(version, '')
+	# self.log.debug('> Detected version of sparse matrix {}'.format(version))
 
-	try:
-		sm = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
-		self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
-		sm_loaded = True
-	except:
-		self.log.info('> Sparse matrix {}/chrom-{} could not be found and will be created'.format(version, chrom))
-		sm_loaded = False
+	# try:
+	# 	sm = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
+	# 	self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
+	# 	sm_loaded = True
+	# except:
+	# 	self.log.info('> Sparse matrix {}/chrom-{} could not be found and will be created'.format(version, chrom))
+	# 	sm_loaded = False
 	
-	# Check for loaded experiments
-	if sm_loaded:
-		x = [ y.get('s') for y in self.data.col.collect() ]
-		self.log.debug('> Loaded sparse matrix contains {} experiments'.format(len(x)))
-		y = [ z for z in clean_to_process if z['id'] in x ]
-		if len(y) != 0:
-			self.log.error('> {} experiments are already loaded'.format(len(y)))
-			clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
+	# # Check for loaded experiments
+	# if sm_loaded:
+	# 	x = [ y.get('s') for y in self.data.col.collect() ]
+	# 	self.log.debug('> Loaded sparse matrix contains {} experiments'.format(len(x)))
+	# 	y = [ z for z in clean_to_process if z['id'] in x ]
+	# 	if len(y) != 0:
+	# 		self.log.error('> {} experiments are already loaded'.format(len(y)))
+	# 		clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
 
-	# Create batches of samples to be loaded
-	self.log.info('> Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
-	batches = _create__batches(clean_to_process, version, largeBatch, smallBatch)
+	# # Create batches of samples to be loaded
+	# self.log.info('> Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
+	# batches = _create__batches(clean_to_process, version, largeBatch, smallBatch)
 		
-	for idx1, batch in enumerate(batches):
-		print('> Processing large batch {}/{} {}'.format(idx1, len(batches), batch[ 'version' ]))
+	# for idx1, batch in enumerate(batches):
+	# 	print('> Processing large batch {}/{} {}'.format(idx1, len(batches), batch[ 'version' ]))
 
-		accum = None
-		for idx2, pack in enumerate(batch[ 'content' ]):
-			vsr = pack[ 'version' ]
-			if idx2 == len(batch[ 'content' ]) - 1:
-				vsr = batch[ 'version' ]
-			small_batch_path = _name_with_chrom(path.join(base, vsr), chrom)
-			print('     > Loading pack #{} of {} gVCF ({})'.format(idx2, len(batch[ 'content' ]), small_batch_path))
-			for f in pack['content']:
-				print(f)
-			_load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
-			accum = small_batch_path
+	# 	accum = None
+	# 	for idx2, pack in enumerate(batch[ 'content' ]):
+	# 		vsr = pack[ 'version' ]
+	# 		if idx2 == len(batch[ 'content' ]) - 1:
+	# 			vsr = batch[ 'version' ]
+	# 		small_batch_path = _name_with_chrom(path.join(base, vsr), chrom)
+	# 		print('     > Loading pack #{} of {} gVCF ({})'.format(idx2, len(batch[ 'content' ]), small_batch_path))
+	# 		for f in pack['content']:
+	# 			print(f)
+	# 		_load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
+	# 		accum = small_batch_path
 
-	# Collect all the small sparse matrix and iteratively accumulate them
-	revisions_to_collect = [ pack[ 'version' ] for pack in batches ]
-	if sm_loaded:
-		revisions_to_collect = [ (None, version) ] + revisions_to_collect
+	# # Collect all the small sparse matrix and iteratively accumulate them
+	# revisions_to_collect = [ pack[ 'version' ] for pack in batches ]
+	# if sm_loaded:
+	# 	revisions_to_collect = [ (None, version) ] + revisions_to_collect
 
-	print('>> SM TO COLLECT <<')
-	print(revisions_to_collect)
+	# print('>> SM TO COLLECT <<')
+	# print(revisions_to_collect)
 
-	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
-	for ii in range(1, len(revisions_to_collect)):
-		print(ii, revisions_to_collect[ ii ])
-		_combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'), chrom)
+	# self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
+	# for ii in range(1, len(revisions_to_collect)):
+	# 	print(ii, revisions_to_collect[ ii ])
+	# 	_combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'), chrom)
+
+	return self
 
 def _name_with_chrom(base, chrom):
 		return path.join(base, 'chrom-{}'.format(chrom))
