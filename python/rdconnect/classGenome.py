@@ -40,7 +40,7 @@ class SparseMatrix():
 		return '<SparseMatrix>'
 
 
-def add_method(function, calling, class_to=GenomicData):
+def add_method(function, calling, class_to = GenomicData):
 	"""Adds a new method to GenomicData
 
 	This functions creates a new method in 'GenomicData' class with the name 
@@ -66,7 +66,7 @@ def add_method(function, calling, class_to=GenomicData):
 	setattr(class_to, calling, function)
 
 
-def add_funcs_from_module(module, class_to=GenomicData):
+def add_funcs_from_module(module, class_to = GenomicData):
 	"""Adds all the public functions of a module as new method to GenomicData
 
 	This functions creates a new method in 'GenomicData' class for each of the 

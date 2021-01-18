@@ -21,7 +21,7 @@ SAMPLES_CNV = 939
 
 def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = GenomicData)
-	self.log.info('Entering loading step "sparse_matrix"')
+	self.log.info('Entering loading step "dense_matrix"')
 
 	if self.config is None:
 		self.log.error('No configuration was provided')
@@ -83,7 +83,6 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 
 def sparse_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
-	print(self, isConfig, isHl, self.config)
 	self.log.info('Entering loading step "sparse_matrix"')
 
 	if self.config is None:

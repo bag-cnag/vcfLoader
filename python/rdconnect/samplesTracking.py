@@ -6,6 +6,28 @@ import rdconnect.utils as utils
 from rdconnect.classException import *
 
 def sample_index(self = None, config = None, hl = None, log = None):
+	""" This function allows to update the index information for a set of 
+	experiments in data-management.
+
+	The function requires of a GenimcData object (as self) or a configuration
+	pointing to a location (aka. HDFS' folder) containing a MatrixTable (HAIL).
+	The experiments in the MatrixTable will be the ones which index information 
+	will be updated.
+	Parameters
+	
+	----------
+	config: ConfigFile, optional
+		Configuration for this step of the pipeline. If not provided or set to
+		None the configuration is looked into the GenomicData in self.
+	hl: context, optional
+		HAIL context. If not provided or set to None the reference to the 
+		module is looked into the GenomicData in self.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process. If not
+		provided or set to None the logger is looked into the GenomicData in 
+		self. If no logger is in the provided nor in the GenomicData, then no
+		log is performed.
+	"""
 	isSelf = True
 	if self is None:
 		isSelf = False

@@ -58,6 +58,8 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
 		'Host': self.config['applications/datamanagement/host'] 
 	}
+	if flag is None:
+		raise Exception('No "flag" was provided.')
 	data = "{\"" + flag + "\": \"" + value + "\"}"
 
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
@@ -73,7 +75,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	return self
 
 
-def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
+def update_dm(initial_vcf, data_ip, data_url, data_token, field):
 	if not field in ("genomicsdb", "hdfs", "es", "in_platform"):
 		raise Exception("[ERROR]: (update_dm + {}) Invalid field to be updated in data data-management.".format(field))
 

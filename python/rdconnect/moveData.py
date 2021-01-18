@@ -59,8 +59,7 @@ def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True):
 	-------
 	A list with the "RD_Connect_ID_Experiment" for moved experiments.
 	"""
-	chrom = config['process/chrom']
-	chrom_str = chrom_str_to_int(str(chrom))
+	chrom = chrom_str_to_int(str(config['process/chrom']))
 	source_path = config['process/moving_from']
 	destination_path = config['process/moving_to']
 	cmd_1 = config['process/moving_s1']
@@ -99,6 +98,15 @@ def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True):
 	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 	
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+
+
+	chrom_str = chrom
+	if chrom_str == '23':
+		chrom_str = 'MT'
+	elif chrom_str == '24':
+		chrom_str = 'X'
+	elif chrom_str == '25':
+		chrom_str = 'Y'
 	
 	for idx, line in enumerate(to_process_group):
 		log.debug('Processing samples #{} "{}"'.format(str(idx), line['RD_Connect_ID_Experiment']))
