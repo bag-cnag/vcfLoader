@@ -45,7 +45,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	smallBatch
 	"""
 	def name_with_chrom(base, chrom):
-		return os.path.join(base, 'chrom-{}'.format(chrom))
+		return path.join(base, 'chrom-{}'.format(chrom))
 
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_sparse_matrix"')
