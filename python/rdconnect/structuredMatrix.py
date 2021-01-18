@@ -150,7 +150,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			accum = small_batch_path
 
 	# Collect all the small sparse matrix and iteratively accumulate them
-	revisions_to_collect = [ pack[ 'version '], pack[ 'content' ][ -1 ][ 'version' ] for pack in batches ]
+	revisions_to_collect = [ (pack[ 'version '], pack[ 'content' ][ -1 ][ 'version' ]) for pack in batches ]
 	if sm_loaded:
 		revisions_to_collect = [ (None, version) ] + revisions_to_collect
 
