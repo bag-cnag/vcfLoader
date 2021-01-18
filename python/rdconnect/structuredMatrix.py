@@ -139,11 +139,14 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	batches = _create__batches(clean_to_process, version, largeBatch, smallBatch)
 		
 	for idx1, batch in enumerate(batches):
-		print('> Processing large batch {}/{}'.format(idx1, len(batches)))
+		print('> Processing large batch {}/{} {}'.format(idx1, len(batches), batch[ 'version' ]))
 
 		accum = None
-		for idx2, pack in enumerate(batch['content']):
-			small_batch_path = path.join(base, pack['version'])
+		for idx2, pack in enumerate(batch[ 'content' ]):
+			vsr = pack[ 'version' ]
+			if idx2 == len(batch[ 'content' ]) - 1:
+				vsr = batch[ 'version' ]
+			small_batch_path = path.join(base, vsr)
 			print('     > Loading pack #{} of {} gVCF ({})'.format(idx, len(pack[ 'content' ]), pack[ 'version' ], small_batch_path))
 			for f in pack['content']:
 				print(f)
