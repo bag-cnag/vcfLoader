@@ -192,9 +192,6 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		self.log.info('> Sparse matrix {}/chrom-{} could not be found and will be created'.format(version, chrom))
 		sm_loaded = False
 
-	import sys
-	sys.exit()
-	
 	# Check for loaded experiments
 	if sm_loaded:
 		x = [ y.get('s') for y in self.data.col.collect() ]
