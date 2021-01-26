@@ -155,22 +155,28 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	print("LEN(to_process):", len(to_process))
 
-	all_group = get.experiment_by_group(config, self.log, False)
-	self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
-	print(all_group)
+	# all_group = get.experiment_by_group(config, self.log, False)
+	# self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 
-	print("LEN(all_group):", len(all_group))
 
-	to_process = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+	# to_process = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+
+	# clean_to_process = []
+	# for idx, itm in enumerate(to_process):
+	# 	clean_to_process.append({
+	# 		'file': source_path.replace('[owner]', itm['Owner'])\
+	# 			.replace('[patient-id]', itm['RD_Connect_ID_Experiment'])\
+	# 			.replace('[chromosome]', str(chrom_str)),
+	# 		'id': itm['RD_Connect_ID_Experiment'],
+	# 		'pid': itm['Participant_ID']
+	# 	})
 
 	clean_to_process = []
-	for idx, itm in enumerate(to_process):
+	for item in to_process:
 		clean_to_process.append({
-			'file': source_path.replace('[owner]', itm['Owner'])\
-				.replace('[patient-id]', itm['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom_str)),
-			'id': itm['RD_Connect_ID_Experiment'],
-			'pid': itm['Participant_ID']
+			'file': 'hdfs://10.1.11.7:27000/test/int-plat/VCPLAT-2260/{}.{}.g.vcf.bgz'.format(item, chrom)
+			'id': item,
+			'pid': item
 		})
 
 	# Get version of sparse matrix
@@ -223,7 +229,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		revisions_to_collect = [ (None, version) ] + revisions_to_collect
 
 	print('>> SM TO COLLECT <<')
-	print(revisions_to_collect)
+	#print(revisions_to_collect)
 
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
 	for ii in range(1, len(revisions_to_collect)):
