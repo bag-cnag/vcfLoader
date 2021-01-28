@@ -278,7 +278,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	experiments_and_families = get.experiments_and_family(full_ids_in_matrix, self.config)
 	print('experiments_and_families', len( experiments_and_families ))
-	print('\t', experiments_and_families[ : 2 ])
+	print('\t', experiments_and_families[ : 10 ])
 
 
 	# # Get all the experiments that have to processed from data-management
