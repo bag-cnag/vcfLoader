@@ -172,7 +172,7 @@ def experiments_and_family(pids, config, sort_output = True):
 	headers = { 'Content-Type': 'application/json', 'Authorization': config['application/kc_token']  }
 	data=[]
 	for i in range(0,(len(pids)//1000)+1) :
-		body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
+		body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
 		resp = requests.post( url, headers = headers, json = body, verify = False )
 		data = data + resp.json()
 	parsed = {}
@@ -183,7 +183,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		else: 
 			fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
 		parsed[ pid ] = fam
-	rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Phenotips_ID' ], parsed[ pak[ 'Phenotips_ID' ] ] ] for pak in pids ]
+	rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Participant_ID' ], parsed[ pak[ 'Participant_ID' ] ] ] for pak in pids ]
 	if sort_output:
 		return sorted( rst, key = lambda x: x[ 2 ] )
 	else:

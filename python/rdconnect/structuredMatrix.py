@@ -274,12 +274,12 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	full_ids_in_matrix = [ x for x in all_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
 	print('full_ids_in_matrix', len( full_ids_in_matrix ))
-	print('\t', full_ids_in_matrix[ : 2 ])
+	print('\t', full_ids_in_matrix[ : 10 ])
 
 	experiments_and_families = get.experiments_and_family(full_ids_in_matrix, self.config)
 	print('experiments_and_families', len( experiments_and_families ))
 	print('\t', experiments_and_families[ : 2 ])
-	
+
 
 	# # Get all the experiments that have to processed from data-management
 	# experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
