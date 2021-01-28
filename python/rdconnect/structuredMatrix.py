@@ -262,7 +262,7 @@ def create_dense_matrices(self = None, config = None, hl = None, log = VoidLog()
 	sparse_matrix_path = self.config['applications/combine/sparse_matrix_path']
 	sz_large_batch = self.config['applications/combine/sz_large_batch']
 
-	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom))
+	self.log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
 	self.log.debug('> Argument "dense_matrix_path" filled with "{}"'.format(dense_matrix_path))
 	self.log.debug('> Argument "sparse_matrix_path" filled with "{}"'.format(sparse_matrix_path))
 
@@ -284,14 +284,9 @@ def create_dense_matrices(self = None, config = None, hl = None, log = VoidLog()
 		#	self.log..debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
 		#	sam = hl.literal([ x[ 0 ] for x in batch ], 'array<str>')
 		sam = hl.literal(experiments_in_matrix, 'array<str>')
-		print('1.', hl.len(sam), sam)
-		print('2.', sam.contains(sparse_matrix['s']))
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
-		print('after filter - cols')
 		small_matrix = hl.experimental.densify(small_matrix)
-		print('after densify')
 		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.LGT.is_non_ref()))
-		print('after filter - rows')
 		path = '{0}/chrom-{1}-mtx-{2}'.format(dense_matrix_path, chrom, idx)
 		self.log.info('Writing dense matrix {} to disk ({})'.format(idx, path))
 		small_matrix.write(path, overwrite = True)

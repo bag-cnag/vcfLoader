@@ -52,8 +52,8 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self.data = self.data.transmute_entries(
 		sample = hl.struct(
 			sample = self.data.s,
-			ad = utils.truncateAt( hl,self.data.AD[ 1 ] / hl.sum( self.data.AD ),"2" ),
-			dp = self.data.DP,
+			ad = utils.truncateAt( hl,self.data.AD[ 1 ] / hl.sum( self.data.LAD ),"2" ), # hl.sum( self.data.AD ),"2" ),
+			dp = self.data.LDP,
 			gtInt = self.data.GT,
 			gt = hl.str( self.data.GT ),
 			gq = self.data.GQ

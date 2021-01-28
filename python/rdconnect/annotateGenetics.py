@@ -94,7 +94,7 @@ def vep(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
-	destination_file = utils.destination_vep(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
+	destination_file = utils.destination_vep(os.path.join(destination_path, self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	vep_config = self.config['annotation/clean/vep']
 	autosave = self.config['process/autosave']
