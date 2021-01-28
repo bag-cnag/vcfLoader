@@ -267,10 +267,10 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	sparse_matrix = hl.read_matrix_table(sparse_path)
 
 	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
-	lgr.debug('Total of {0} experiments'.format(len(experiments_in_matrix)))
+	self.log..debug('> Obtained a total of {} experiments from sparse matrix (chrom 21)'.format(len(experiments_in_matrix)))
 
 	all_group = get.experiment_by_group(config, self.log, False)
-	self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
+	self.log.debug('> Obtained a total of {} experiments for the group'.format(len(all_group)))
 
 	full_ids_in_matrix = [ x for x in all_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
 	print('full_ids_in_matrix', len( full_ids_in_matrix ))
