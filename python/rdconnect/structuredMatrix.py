@@ -264,7 +264,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	chrom = 21
 	sparse_path = path.join(self.config['applications/combine/sparse_matrix_path'], 'chrom-{}'.format(chrom))
-	sparse_matrix = hl.read_matrix_table( path_matrix )
+	sparse_matrix = hl.read_matrix_table(sparse_path)
 
 	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
 	lgr.debug('Total of {0} experiments'.format(len(experiments_in_matrix)))
