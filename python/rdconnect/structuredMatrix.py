@@ -244,7 +244,6 @@ def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
 
 	return rst
 
-def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
 def create_dense_matrices(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "create_dense_matrices"')
