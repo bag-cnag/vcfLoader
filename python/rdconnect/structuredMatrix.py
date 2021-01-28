@@ -262,7 +262,7 @@ def create_dense_matrices(self = None, config = None, hl = None, log = VoidLog()
 	sparse_matrix_path = self.config['applications/combine/sparse_matrix_path']
 	sz_large_batch = self.config['applications/combine/sz_large_batch']
 
-	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
+	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom))
 	self.log.debug('> Argument "dense_matrix_path" filled with "{}"'.format(dense_matrix_path))
 	self.log.debug('> Argument "sparse_matrix_path" filled with "{}"'.format(sparse_matrix_path))
 
