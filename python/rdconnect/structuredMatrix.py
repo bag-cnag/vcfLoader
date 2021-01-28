@@ -248,7 +248,7 @@ def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
 
 
 #def create_family_groups(sc, sq, chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, dense_matrix_path, is_playground):
-def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog(), queryBatch = 500, largeBatch = 500, smallBatch = 100):
+def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_sparse_matrix"')
 
@@ -268,6 +268,13 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
 	lgr.debug('Total of {0} experiments'.format(len(experiments_in_matrix)))
+
+	all_group = get.experiment_by_group(config, self.log, False)
+	self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
+
+	full_ids_in_matrix = [ x for x in all_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+	print('full_ids_in_matrix', len( full_ids_in_matrix ))
+	print('\t', full_ids_in_matrix[ : 2 ])
 
 	# # Get all the experiments that have to processed from data-management
 	# experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
