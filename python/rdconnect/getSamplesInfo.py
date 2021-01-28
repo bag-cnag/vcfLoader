@@ -171,7 +171,7 @@ def experiments_and_family(pids, config, sort_output = True):
 	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
 	headers = { 'Content-Type': 'application/json', 
 		'Authorization': config['application/kc_token'], 
-		'host': 'Host': config['applications/datamanagement/host'] 
+		'Host': config['applications/datamanagement/host'] 
 	}
 	data=[]
 	for i in range(0,(len(pids)//1000)+1) :
