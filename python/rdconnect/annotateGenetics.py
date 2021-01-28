@@ -505,7 +505,7 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	destination_file = utils.destination_gnomadex(os.path.join(destination_path, self.config['resources/elasticsearch/version']), destination_file)
-	#source_path = os.path.join(source_path, source_file)
+	source_path = os.path.join(source_path, source_file)
 	gnomeAdEx_path = utils.create_chrom_filename(self.config['annotation/clean/exomesGnomad'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
