@@ -94,7 +94,7 @@ def vep(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
-	destination_file = utils.destination_vep(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
+	destination_file = utils.destination_vep(os.path.join(destination_path, self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	vep_config = self.config['annotation/clean/vep']
 	autosave = self.config['process/autosave']
@@ -504,13 +504,14 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
-	destination_file = utils.destination_gnomadex(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
+	destination_file = utils.destination_gnomadex(os.path.join(destination_path, self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	gnomeAdEx_path = utils.create_chrom_filename(self.config['annotation/clean/exomesGnomad'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "gnomeAdEx_path" filled with "{}"'.format(gnomeAdEx_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
