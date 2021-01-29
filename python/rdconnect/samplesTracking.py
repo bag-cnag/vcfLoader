@@ -39,9 +39,9 @@ def sample_index(self = None, config = None, hl = None, log = None):
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if not 'process/chrom' in config.keys():
+	if not 'process/chrom' in self.config.keys():
 		log.warning('Provided configuration with no chromosome attached ("process/chrom"). Chromosome 21 will be used.')
-		config['process/chrom'] = 21
+		self.config['process/chrom'] = 21
 
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
@@ -51,12 +51,12 @@ def sample_index(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "index_name" filled with "{}"'.format(config['resources/elasticsearch/index_name']))
 
-	url = 'https://' + config['applications/datamanagement/api_exp_status'].format(config['applications/datamanagement/ip'], config['applications/datamanagement/api_group'])
+	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/datamanagement/api_group'])
 	headers = { 'accept': 'application/json', 
 		'Content-Type': 'application/json', 
-		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
-		'Host': config['applications/datamanagement/host'] }
-	data = "{\"dataset\":\"" + config['resources/elasticsearch/index_name'] + "\"}"
+		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
+		'Host': self.config['applications/datamanagement/host'] }
+	data = "{\"dataset\":\"" + self.config['resources/elasticsearch/index_name'] + "\"}"
 	
 	# vcf = self.hl.split_multi_hts(self.hl.import_vcf(str(source_path), array_elements_required = False, force_bgz = True, min_partitions = 2))
 	# full_samples = [y.get('s') for y in vcf.col.collect()]
