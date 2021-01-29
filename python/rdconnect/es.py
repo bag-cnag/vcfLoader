@@ -45,7 +45,7 @@ def transform(self = None, config = None, hl = None, log = None):
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
-	self.log.info('Entering transform step')
+	self.log.info('Entering "transform" step')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
@@ -136,7 +136,7 @@ def create_index_snv(self = None, config = None, hl = None, log = None):
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
-	self.log.info('Entering transform step')
+	self.log.info('Entering "create_index_snv" step')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
@@ -250,7 +250,7 @@ def create_index_snv(self = None, config = None, hl = None, log = None):
 						,"nprogs":{"type":"integer","index":"true"}
 						,"progs":{"type":"keyword"}}}}}}}
 	"""
-	sts = index_exists(config)
+	sts = index_exists(self.config)
 	if sts != 200:
 		sts = _create_index(host, port, index_name, data, user, pwd)
 
