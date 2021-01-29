@@ -74,51 +74,107 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
 
-	# Get experiments to load from DM
-	url = config['applications/datamanagement/ip']
-	if not url.startswith('http://') and not url.startswith('https://'):
-		url = 'https://{0}'.format(url)
+	# # Get experiments to load from DM
+	# url = config['applications/datamanagement/ip']
+	# if not url.startswith('http://') and not url.startswith('https://'):
+	# 	url = 'https://{0}'.format(url)
 
-	url = config['applications/datamanagement/api_exp_status_list'].format(url)
+	# url = config['applications/datamanagement/api_exp_status_list'].format(url)
 
-	headers = { 
-		'accept': 'application/json', 'Content-Type': 'application/json',
-		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
-		'Host': config['applications/datamanagement/host'] 
-	}
-	data = "{\"page\": 1, \"pageSize\": " + str(queryBatch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
-	self.log.debug('> Querying DM using url "{0}"'.format(url))
+	# headers = { 
+	# 	'accept': 'application/json', 'Content-Type': 'application/json',
+	# 	'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+	# 	'Host': config['applications/datamanagement/host'] 
+	# }
+	# data = "{\"page\": 1, \"pageSize\": " + str(queryBatch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
+	# self.log.debug('> Querying DM using url "{0}"'.format(url))
 
-	response = requests.post(url, data = data, headers = headers, verify = False)
-	if response.status_code != 200:
-		self.log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
-		sys.exit(2)
+	# response = requests.post(url, data = data, headers = headers, verify = False)
+	# if response.status_code != 200:
+	# 	self.log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+	# 	sys.exit(2)
 
-	to_process = [ x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items'] ]
-	self.log.debug('> Obtained a total of "{}" samples to move'.format(len(to_process)))
+	# to_process = [ x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items'] ]
+	# self.log.debug('> Obtained a total of "{}" samples to move'.format(len(to_process)))
 
-	all_group = get.experiment_by_group(config, self.log, False)
-	self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
+	# all_group = get.experiment_by_group(config, self.log, False)
+	# self.log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 
-	to_process = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
-
-	clean_to_process = []
-	for idx, itm in enumerate(to_process):
-		clean_to_process.append({
-			'file': source_path.replace('[owner]', itm['Owner'])\
-				.replace('[patient-id]', itm['RD_Connect_ID_Experiment'])\
-				.replace('[chromosome]', str(chrom_str)),
-			'id': itm['RD_Connect_ID_Experiment'],
-			'pid': itm['Participant_ID']
-		})
+	# to_process = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 
 	# clean_to_process = []
-	# for item in to_process:
+	# for idx, itm in enumerate(to_process):
 	# 	clean_to_process.append({
-	# 		'file': 'hdfs://10.1.11.7:27000/test/int-plat/VCPLAT-2260/{}.{}.g.vcf.bgz'.format(item, chrom),
-	# 		'id': item,
-	# 		'pid': item
+	# 		'file': source_path.replace('[owner]', itm['Owner'])\
+	# 			.replace('[patient-id]', itm['RD_Connect_ID_Experiment'])\
+	# 			.replace('[chromosome]', str(chrom_str)),
+	# 		'id': itm['RD_Connect_ID_Experiment'],
+	# 		'pid': itm['Participant_ID']
 	# 	})
+
+	to_process = [ 
+		"EPR002042", "EPR003231", "EPR018136", "EPR029251", "EPR029678", 
+		"EPR044671", "EPR049573", "EPR051965", "EPR063942", "EPR079103", 
+		"EPR084663", "EPR107689", "EPR113523", "EPR121024", "EPR153765", 
+		"EPR167258", "EPR181750", "EPR182917", "EPR183701", "EPR184661", 
+		"EPR185405", "EPR193852", "EPR216658", "EPR223743", "EPR263520", 
+		"EPR285612", "EPR291990", "EPR305671", "EPR325618", "EPR360408", 
+		"EPR370044", "EPR388888", "EPR400684", "EPR422220", "EPR422766", 
+		"EPR430999", "EPR441186", "EPR441415", "EPR445201", "EPR457507", 
+		"EPR462646", "EPR462953", "EPR465551", "EPR465945", "EPR468980", 
+		"EPR483682", "EPR490261", "EPR491136", "EPR491842", "EPR495233", 
+		"EPR503930", "EPR515435", "EPR517291", "EPR519505", "EPR520853", 
+		"EPR526553", "EPR532501", "EPR543983", "EPR550773", "EPR555002", 
+		"EPR567596", "EPR585246", "EPR604034", "EPR623120", "EPR662811", 
+		"EPR683873", "EPR684728", "EPR688979", "EPR693989", "EPR695731", 
+		"EPR702761", "EPR713819", "EPR727555", "EPR729299", "EPR754736", 
+		"EPR756268", "EPR770222", "EPR770868", "EPR791504", "EPR799473", 
+		"EPR815683", "EPR843651", "EPR846508", "EPR858967", "EPR870253", 
+		"EPR872915", "EPR884145", "EPR889407", "EPR889571", "EPR900812", 
+		"EPR905200", "EPR907717", "EPR934213", "EPR949683", "EPR988173", 
+		"EPR988650", "EPR023120", "EPR167786", "EPR248369", "EPR342942", 
+		"EPR363044", "EPR494310", "EPR802952", "EPR825915", "EPR857658", 
+		"EPR895006", "EPR940330", "EPR970855", "EPR021681", "EPR148347", 
+		"EPR356647", "EPR445362", "EPR681606", "EPR032694", "EPR033734", 
+		"EPR068469", "EPR106784", "EPR120649", "EPR166943", "EPR435419", 
+		"EPR456985", "EPR462421", "EPR506987", "EPR523069", "EPR559975", 
+		"EPR641688", "EPR707076", "EPR748165", "EPR770552", "EPR889610", 
+		"EPR935190", "EPR964066", "EPR995111", "EPR085535", "EPR090109", 
+		"EPR136882", "EPR154786", "EPR234746", "EPR260721", "EPR280622", 
+		"EPR315325", "EPR480495", "EPR486307", "EPR489688", "EPR546495", 
+		"EPR590092", "EPR610827", "EPR617819", "EPR637054", "EPR649884", 
+		"EPR776038", "EPR808798", "EPR833081", "EPR848660", "EPR892053", 
+		"EPR910408", "EPR944574", "EPR024394", "EPR067643", "EPR085015", 
+		"EPR109239", "EPR147621", "EPR152012", "EPR161836", "EPR189569", 
+		"EPR222952", "EPR252773", "EPR269709", "EPR305820", "EPR321343", 
+		"EPR375407", "EPR376132", "EPR414849", "EPR439346", "EPR439465", 
+		"EPR441224", "EPR463296", "EPR475366", "EPR520858", "EPR529818", 
+		"EPR535504", "EPR550639", "EPR568653", "EPR656841", "EPR733768", 
+		"EPR737855", "EPR739383", "EPR739964", "EPR813110", "EPR821311", 
+		"EPR843849", "EPR859838", "EPR869234", "EPR876626", "EPR932584", 
+		"EPR006055", "EPR018999", "EPR048609", "EPR054525", "EPR055665", 
+		"EPR087793", "EPR107163", "EPR121715", "EPR178912", "EPR188243",
+		"EPR195073", "EPR200531", "EPR204507", "EPR229625", "EPR232859", 
+		"EPR274814", "EPR275423", "EPR287449", "EPR318865", "EPR320033", 
+		"EPR322524", "EPR356115", "EPR367652", "EPR367855", "EPR406645", 
+		"EPR415517", "EPR438363", "EPR443196", "EPR451668", "EPR460913", 
+		"EPR471772", "EPR484768", "EPR512820", "EPR545077", "EPR548213", 
+		"EPR554926", "EPR562014", "EPR578337", "EPR590166", "EPR599137", 
+		"EPR599897", "EPR626267", "EPR653593", "EPR670672", "EPR685442", 
+		"EPR687508", "EPR687753", "EPR710404", "EPR719414", "EPR728793", 
+		"EPR752649", "EPR757415", "EPR761353", "EPR774721", "EPR790594", 
+		"EPR791050", "EPR807751", "EPR825019", "EPR829970", "EPR844841", 
+		"EPR856363", "EPR864354", "EPR874182", "EPR884301", "EPR886748", 
+		"EPR908949", "EPR909998", "EPR927666", "EPR945135", "EPR960265", 
+		"EPR963250", "EPR966103", "EPR989096" ]
+
+	clean_to_process = []
+	for item in to_process:
+		clean_to_process.append({
+			'file': 'hdfs://10.1.11.7:27000/test/int-plat/VCPLAT-2260/{}.{}.g.vcf.bgz'.format(item, chrom),
+			'id': item,
+			'pid': item
+		})
 
 	# Get version of sparse matrix
 	version = path.basename(path.normpath(sparse_path))
