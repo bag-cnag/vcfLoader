@@ -49,7 +49,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "index_name" filled with "{}"'.format(config['resources/elasticsearch/index_name']))
+	self.log.debug('> Argument "index_name" filled with "{}"'.format(self.config['resources/elasticsearch/index_name']))
 
 	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/datamanagement/api_group'])
 	headers = { 'accept': 'application/json', 
