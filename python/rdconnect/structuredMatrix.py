@@ -112,6 +112,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	# 		'pid': itm['Participant_ID']
 	# 	})
 
+	
 	to_process = [ 
 		"EPR002042", "EPR003231", "EPR018136", "EPR029251", "EPR029678", 
 		"EPR044671", "EPR049573", "EPR051965", "EPR063942", "EPR079103", 
@@ -153,7 +154,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		"EPR737855", "EPR739383", "EPR739964", "EPR813110", "EPR821311", 
 		"EPR843849", "EPR859838", "EPR869234", "EPR876626", "EPR932584", 
 		"EPR006055", "EPR018999", "EPR048609", "EPR054525", "EPR055665", 
-		"EPR087793", "EPR107163", "EPR121715", "EPR178912", "EPR188243",
+		"EPR087793", "EPR107163", "EPR121715", "EPR178912", "EPR188243", 
 		"EPR195073", "EPR200531", "EPR204507", "EPR229625", "EPR232859", 
 		"EPR274814", "EPR275423", "EPR287449", "EPR318865", "EPR320033", 
 		"EPR322524", "EPR356115", "EPR367652", "EPR367855", "EPR406645", 
@@ -171,7 +172,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	clean_to_process = []
 	for item in to_process:
 		clean_to_process.append({
-			'file': 'hdfs://10.1.11.7:27000/test/int-plat/VCPLAT-2260/{}.{}.g.vcf.bgz'.format(item, chrom_str),
+			'file': 'hdfs://10.1.11.7:27000/test/rdconnect/2545/{}.{}.g.vcf.bgz'.format(item, chrom_str),
 			'id': item,
 			'pid': item
 		})

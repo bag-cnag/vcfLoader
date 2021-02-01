@@ -80,6 +80,10 @@ def transform(self = None, config = None, hl = None, log = None):
 		.drop('locus.contig', 'locus.position', 'alleles') \
 		.write.mode('overwrite').save(destination_file)
 
+	print("*" * 100)
+	print(vcf.describe())
+	print("*" * 100)
+
 	if 'flags' not in vars(self):
 		self.flags = {'transform': (True, destination_file)}
 
