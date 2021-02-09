@@ -198,7 +198,6 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			info = mt.info.annotate(MQ_DP = hl.null(hl.tint32), VarDP = hl.null(hl.tint32), QUALapprox = hl.null(hl.tint32))
 		))
 	def importFiles(files):
-		print("importFiles", files)
 		x = hl.import_vcfs(
 			files,
 			partitions = interval[ 'interval' ], 
@@ -208,6 +207,17 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		print('end import')
 		return x
 
+	print("individual loading")
+	for x in experiments:
+		print("----->", x)
+		x = hl.import_vcf(
+			x[ 'file' ],
+			partitions = interval[ 'interval' ], 
+			reference_genome = interval[ 'reference_genome' ], 
+			array_elements_required = interval[ 'array_elements_required' ]
+		)
+	print("end individual loading")
+
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
 	vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
 
@@ -216,11 +226,6 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 	else:
 		previous = hl.read_matrix_table(previous_version_path)
 		comb = combine_gvcfs([ previous ] + vcfs)
-	print("comb" + "=" * 25)
-	print(comb.count())
-	print("comb" + "=" * 25)
-	print(comb.describe())
-	print("comb" + "=" * 25)
 	comb.write(version_path, overwrite = True)
 
 
