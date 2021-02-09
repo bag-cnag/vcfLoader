@@ -233,7 +233,9 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		previous = hl.read_matrix_table(previous_version_path)
 		print('previous was loaded')
 		comb = combine_gvcfs([ previous ] + vcfs)
+	print("end of combine - starting writing '{}'".format(version_path))
 	comb.write(version_path, overwrite = True)
+	print('end writing - end _load_gvcf')
 
 
 def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
