@@ -215,6 +215,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		previous = hl.read_matrix_table(previous_version_path)
 		comb = combine_gvcfs([ previous ] + vcfs)
 	print("comb" + "=" * 25)
+	print(comb.count())
 	print(comb.describe())
 	print("comb" + "=" * 25)
 	comb.write(version_path, overwrite = True)
