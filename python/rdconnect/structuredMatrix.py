@@ -198,6 +198,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			info = mt.info.annotate(MQ_DP = hl.null(hl.tint32), VarDP = hl.null(hl.tint32), QUALapprox = hl.null(hl.tint32))
 		))
 		print('end transformFile')
+		x.describe()
 		return x
 	def importFiles(files):
 		x = hl.import_vcfs(
