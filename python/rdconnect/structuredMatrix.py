@@ -207,6 +207,8 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		print('end import')
 		return x
 
+	interval = utils.get_chrom_intervals(chrom, partitions, hl)
+
 	print("individual loading")
 	for x in experiments:
 		print("----->", x)
@@ -218,7 +220,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		)
 	print("end individual loading")
 
-	interval = utils.get_chrom_intervals(chrom, partitions, hl)
+	
 	vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
 
 	if previous_version_path == None:
