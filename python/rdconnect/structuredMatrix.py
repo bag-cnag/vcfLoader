@@ -220,6 +220,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			#reference_genome = interval[ 'reference_genome' ], 
 			#array_elements_required = interval[ 'array_elements_required' ]
 		)
+		x.describe()
 	print("end individual loading")
 
 	
@@ -233,6 +234,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		previous = hl.read_matrix_table(previous_version_path)
 		print('previous was loaded')
 		comb = combine_gvcfs([ previous ] + vcfs)
+	print(" ----------> ", comb.count())
 	print("end of combine - starting writing '{}'".format(version_path))
 	comb.write(version_path, overwrite = True)
 	print('end writing - end _load_gvcf')
