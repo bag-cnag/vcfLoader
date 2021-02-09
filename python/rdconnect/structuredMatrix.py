@@ -228,7 +228,9 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 
 	if previous_version_path == None:
 		print('combine_gvcfs with None')
+		print(vcfs.describe())
 		comb = combine_gvcfs(vcfs)
+		print(" ----------> ", comb.describe())
 	else:
 		print('combine_gvcfs with previous')
 		previous = hl.read_matrix_table(previous_version_path)
