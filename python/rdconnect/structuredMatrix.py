@@ -213,10 +213,10 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 	for x in experiments:
 		print("----->", x)
 		x = hl.import_vcf(
-			x[ 'file' ],
-			_partitions = interval[ 'interval' ], 
-			reference_genome = interval[ 'reference_genome' ], 
-			array_elements_required = interval[ 'array_elements_required' ]
+			x[ 'file' ]#,
+			#partitions = interval[ 'interval' ], 
+			#reference_genome = interval[ 'reference_genome' ], 
+			#array_elements_required = interval[ 'array_elements_required' ]
 		)
 	print("end individual loading")
 
