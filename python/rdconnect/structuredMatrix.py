@@ -214,7 +214,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		print("----->", x)
 		x = hl.import_vcf(
 			x[ 'file' ],
-			partitions = interval[ 'interval' ], 
+			_partitions = interval[ 'interval' ], 
 			reference_genome = interval[ 'reference_genome' ], 
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
