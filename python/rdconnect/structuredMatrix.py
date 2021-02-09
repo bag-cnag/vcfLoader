@@ -197,8 +197,6 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		x = transform_gvcf(mt.annotate_rows(
 			info = mt.info.annotate(MQ_DP = hl.null(hl.tint32), VarDP = hl.null(hl.tint32), QUALapprox = hl.null(hl.tint32))
 		))
-		print('end transformFile')
-		x.describe()
 		return x
 	def importFiles(files):
 		x = hl.import_vcfs(
@@ -207,40 +205,17 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			reference_genome = interval[ 'reference_genome' ], 
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
-		print('end importFiles')
 		return x
 
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
-
-	# print("individual loading")
-	# for x in experiments:
-	# 	print("----->", x)
-	# 	x = hl.import_vcf(
-	# 		x[ 'file' ]#,
-	# 		#partitions = interval[ 'interval' ], 
-	# 		#reference_genome = interval[ 'reference_genome' ], 
-	# 		#array_elements_required = interval[ 'array_elements_required' ]
-	# 	)
-	# 	x.describe()
-	# print("end individual loading")
-
-	
 	vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
 
 	if previous_version_path == None:
-		print('combine_gvcfs with None')
-		print(len(vcfs))
 		comb = combine_gvcfs(vcfs)
 	else:
-		print('combine_gvcfs with previous')
 		previous = hl.read_matrix_table(previous_version_path)
-		print('previous was loaded')
 		comb = combine_gvcfs([ previous ] + vcfs)
-	print('end of combine')
-	print(" ----------> cols {} rows {}".format(comb.count_cols(), comb.count_rows()), " -> ", comb.count() )
-	print("starting writing '{}'".format(version_path))
 	comb.write(version_path, overwrite = True)
-	print('end writing - end _load_gvcf')
 
 
 def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
