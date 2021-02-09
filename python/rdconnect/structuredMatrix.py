@@ -214,6 +214,9 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 	else:
 		previous = hl.read_matrix_table(previous_version_path)
 		comb = combine_gvcfs([ previous ] + vcfs)
+	print("comb" + "=" * 25)
+	print(comb.describe())
+	print("comb" + "=" * 25)
 	comb.write(version_path, overwrite = True)
 
 
@@ -286,7 +289,7 @@ def create_dense_matrices(self = None, config = None, hl = None, log = VoidLog()
 	idx = 0
 	try:
 		#for idx, batch in enumerate( mapping ):
-		#	self.log..debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
+		#	self.log.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
 		#	sam = hl.literal([ x[ 0 ] for x in batch ], 'array<str>')
 		sam = hl.literal(experiments_in_matrix, 'array<str>')
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
