@@ -194,9 +194,11 @@ def _combine_mt(hl, base, ver1, ver2, verD, chrom):
 
 def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, partitions):
 	def transformFile(mt):
-		return transform_gvcf(mt.annotate_rows(
+		x = transform_gvcf(mt.annotate_rows(
 			info = mt.info.annotate(MQ_DP = hl.null(hl.tint32), VarDP = hl.null(hl.tint32), QUALapprox = hl.null(hl.tint32))
 		))
+		print('end transformFile')
+		return x
 	def importFiles(files):
 		x = hl.import_vcfs(
 			files,
@@ -204,7 +206,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			reference_genome = interval[ 'reference_genome' ], 
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
-		print('end import')
+		print('end importFiles')
 		return x
 
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
@@ -224,9 +226,12 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 	vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
 
 	if previous_version_path == None:
+		print('combine_gvcfs with None')
 		comb = combine_gvcfs(vcfs)
 	else:
+		print('combine_gvcfs with previous')
 		previous = hl.read_matrix_table(previous_version_path)
+		print('previous was loaded')
 		comb = combine_gvcfs([ previous ] + vcfs)
 	comb.write(version_path, overwrite = True)
 
