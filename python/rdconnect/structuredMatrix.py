@@ -198,12 +198,14 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			info = mt.info.annotate(MQ_DP = hl.null(hl.tint32), VarDP = hl.null(hl.tint32), QUALapprox = hl.null(hl.tint32))
 		))
 	def importFiles(files):
+		print("importFiles", files)
 		x = hl.import_vcfs(
 			files,
 			partitions = interval[ 'interval' ], 
 			reference_genome = interval[ 'reference_genome' ], 
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
+		print('end import')
 		return x
 
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
