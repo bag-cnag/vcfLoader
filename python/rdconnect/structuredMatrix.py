@@ -236,7 +236,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		print('previous was loaded')
 		comb = combine_gvcfs([ previous ] + vcfs)
 	print('end of combine')
-	print(" ----------> ", comb.count(), comb.count_cols(), comb.count_rows())
+	print(" ----------> cols {} rows {}".format(comb.count_cols(), comb.count_rows()), " -> ", comb.count() )
 	print("starting writing '{}'".format(version_path))
 	comb.write(version_path, overwrite = True)
 	print('end writing - end _load_gvcf')
