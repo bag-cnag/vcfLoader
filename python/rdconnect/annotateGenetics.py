@@ -645,7 +645,7 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
 		self.log = log
 
 	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
-	self.log.info('Entering loading step "germline"')
+	self.log.info('Entering loading step "extract_internal_freq_germline"')
 
 	if config is None:
 		self.log.error('No configuration was provided')
@@ -671,18 +671,7 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
 		self.state = []
 		self.file = []
 
-	vcf = self.hl.split_multi_hts(self.data)
-	vcf = vcf.annotate(
-		samples_germline = hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf.sample))
-	)
-	vcf = vcf.annotate(
-		freqIntGermline = hl.cond(
-			(hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline)) > 0),
-			hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf.samples_germline)) / hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline))), 0.0
-		),
-		num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf.samples_germline)),
-		dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline)))
-	)
-	vcf.write(destinationPath, overwrite = True)
+	print(self.data.count())
+	print(self.data.describe())
 
 	return self
