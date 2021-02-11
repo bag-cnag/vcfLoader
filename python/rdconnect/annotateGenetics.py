@@ -683,6 +683,6 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
     
 	print(vcf_2.describe())
 
-	vcf_2.write(destinationPath, overwrite = True)
+	vcf_2.write(destination_path, overwrite = True)
 
 	return self
