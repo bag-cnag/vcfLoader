@@ -131,7 +131,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.debug('> Detected version of sparse matrix {}'.format(version))
 
 	try:
-		sm = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
+		self.data = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
 		self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
 		sm_loaded = True
 	except:
