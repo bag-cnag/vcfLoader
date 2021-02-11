@@ -660,7 +660,7 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
 	source_path = os.path.join(source_path, source_file)
 	destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
 	destination_path = config['process/destination_path']
-	source_path = os.path.join(destination_path, destination_file)
+	destination_path = os.path.join(destination_path, destination_file)
 
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
