@@ -679,13 +679,10 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
 		num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), self.data.samples_germline)),
 		dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, self.data.samples_germline)))
 	)
-
-	print(vcf_2.describe())
-
-	vcf_2 = vcf_2.select('samples_germline', 'num', 'dem')
+	vcf_2 = vcf_2.select('was_split', 'ref', 'alt', 'pos', 'freqIntGermline', 'samples_germline', 'num', 'dem')
     
-
-	
 	print(vcf_2.describe())
+
+	vcf_2.write(destinationPath, overwrite = True)
 
 	return self
