@@ -671,7 +671,7 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
 		self.state = []
 		self.file = []
 
-	vcf_2 = self.data.annotate_rows(
+	vcf_2 = self.data.annotate(
 		num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf_2.samples_germline)),
 		dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline)))
 	)
