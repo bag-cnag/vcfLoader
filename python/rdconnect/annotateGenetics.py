@@ -5,6 +5,10 @@ from rdconnect.classGenome import GenomicData
 from rdconnect.classException import *
 from rdconnect.utils import check_class_and_config
 
+MIN_DP = 7
+MIN_GQ = 19
+SAMPLES_CNV = 939
+
 def _transcript_annotations(hl, annotations):
 	""" Transcript level annotations for VEP 
 		:param Hailcontext hl: The Hail context
