@@ -612,3 +612,77 @@ def internal_freq(self = None, config = None, hl = None, log = None):
 		self.data.write(destination_file, overwrite = True)
 		self.file = [destination_file] + self.file
 	return self
+
+
+
+def extract_internal_freq_germline(self = None, config = None, hl = None, log = None):
+	"""Function to load a VCF from POSIX and extract its internal frequencies.
+
+	Parameters
+	----------
+	self: GenomicData, mandatory
+		Set it to None to load the dataset from 'source_path'. If a GenomicData
+		is assigned to this argument, no set is loaded from 'source_path' and
+		the argument is ignored.
+	config: ConfigFile, optional
+		Configuration for this step of the pipeline.
+	hl: context, optional
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
+
+	Returns
+	-------
+	The function returns a 'GenomicData' object with the loaded data.
+	"""
+
+	self = GenomicData()
+	self.state = []
+	self.file = []
+	if log is None:
+		self.log = VoidLog()
+	else:
+		self.log = log
+
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
+	self.log.info('Entering loading step "germline"')
+
+	if config is None:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if hl is None:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
+
+	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
+	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_path = os.path.join(source_path, source_file)
+	destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
+	destination_path = config['process/destination_path']
+	source_path = os.path.join(destination_path, destination_file)
+
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+
+	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
+		self.data = self.hl.read_table(source_path)
+		self.state = []
+		self.file = []
+
+	vcf = self.hl.split_multi_hts(self.data)
+	vcf = vcf.annotate_rows(
+		samples_germline = hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf.sample))
+	)
+	vcf = vcf.annotate_rows(
+		freqIntGermline = hl.cond(
+			(hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline)) > 0),
+			hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf.samples_germline)) / hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline))), 0.0
+		),
+		num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf.samples_germline)),
+		dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline)))
+	)
+	vcf.write(destinationPath, overwrite = True)
+
+	return self
