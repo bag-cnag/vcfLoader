@@ -667,7 +667,7 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
 
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
-		self.data = self.hl.read_table(source_path)
+		self.data = self.hl.read_matrix_table(source_path)
 		self.state = []
 		self.file = []
 
