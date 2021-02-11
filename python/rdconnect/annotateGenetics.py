@@ -667,15 +667,15 @@ def extract_internal_freq_germline(self = None, config = None, hl = None, log = 
 
 	if 'data' not in vars(self):
 		self.log.info('Loading genomic data from "source_path"')
-		self.data = self.hl.read_matrix_table(source_path)
+		self.data = self.hl.read_table(source_path)
 		self.state = []
 		self.file = []
 
 	vcf = self.hl.split_multi_hts(self.data)
-	vcf = vcf.annotate_rows(
+	vcf = vcf.annotate(
 		samples_germline = hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf.sample))
 	)
-	vcf = vcf.annotate_rows(
+	vcf = vcf.annotate(
 		freqIntGermline = hl.cond(
 			(hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline)) > 0),
 			hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf.samples_germline)) / hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf.samples_germline))), 0.0
