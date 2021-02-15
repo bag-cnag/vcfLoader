@@ -120,7 +120,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	clean_to_process = []
 	for item in to_process:
 		clean_to_process.append({
-			'file': 'hdfs://10.1.11.7:27000/test/rdconnect/2545/{}.{}.g.vcf.bgz'.format(item, chrom_str),
+			'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2626{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
 			'id': item,
 			'pid': item
 		})
