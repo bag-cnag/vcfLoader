@@ -15,9 +15,58 @@ from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 This module contains the functions used to move data from main cluster to HDFS.
 """
 
+def get_experiments_prepared(config, log = VoidLog(), batch = 500, include_tbi = True, is_playground = False):
+	chrom = chrom_str_to_int(str(config['process/chrom']))
+	source_path = config['process/moving_from']
+	destination_path = config['process/moving_to']
+	
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
+	if is_playground:
+		url = config['applications/datamanagement/api_exp_status_list_playground'].format(url)
+	else:
+		url = config['applications/datamanagement/api_exp_status_list'].format(url)
+
+	log.info('Entering step "gvcf"')
+	log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
+	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	#log.debug('> Argument "cmd_1" filled with "{}"'.format(cmd_1))
+	#log.debug('> Argument "cmd_2" filled with "{}"'.format(cmd_2))
+
+	headers = { 
+		'accept': 'application/json', 'Content-Type': 'application/json',
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}
+	data = "{\"page\": 1, \"pageSize\": " + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
+	log.debug('> Querying DM using url "{0}"'.format(url))
+
+	log.debug(headers)
+	log.debug(data)
+	log.debug(url)
+	
+	response = requests.post(url, data = data, headers = headers, verify = False)
+	if response.status_code != 200:
+		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+		sys.exit(2)
+
+	to_process = [ x['RD_Connect_ID_Experiment'] for x in json.loads(response.content)['items'] ]
+	log.debug('> Obtained a total of "{}" samples to move'.format(len(to_process)))
+	
+	all_group = get.experiment_by_group(config, log, is_playground)
+	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
+	
+	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+	for ii, xx in enumerate(to_process_group):
+		print(ii, " --> ", xx)
 
 
-def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True, is_playground = False):
+
+
+def gvcf_to_hdfs(config, log = VoidLog(), batch = 500, include_tbi = True, is_playground = False):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
@@ -146,7 +195,7 @@ def gvcf(config, log = VoidLog(), batch = 500, include_tbi = True, is_playground
 	
 
 
-def gvcf_from_file(config, log = VoidLog()):
+def gvcf_to_hdfs_from_file(config, log = VoidLog()):
 	"""Function used to move (g)VCF files from a POSIX to HADOOP (HDFS) file 
 	system.
 
