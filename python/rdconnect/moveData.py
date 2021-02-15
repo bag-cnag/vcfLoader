@@ -15,11 +15,11 @@ from rdconnect.utils import chrom_str_to_int, create_chrom_filename
 This module contains the functions used to move data from main cluster to HDFS.
 """
 
-def get_experiments_prepared(config, log = VoidLog(), batch = 500, include_tbi = True, is_playground = False):
+def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground = False):
 	chrom = chrom_str_to_int(str(config['process/chrom']))
 	source_path = config['process/moving_from']
 	destination_path = config['process/moving_to']
-	
+
 	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
