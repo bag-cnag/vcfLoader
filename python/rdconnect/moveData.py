@@ -41,8 +41,9 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
 	}
-	data = "{\"page\": 1, \"pageSize\": " + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
-	log.debug('> Querying DM using url "{0}"'.format(url))
+	#data = "{\"page\": 1, \"pageSize\": " + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
+	data = "{\"page\": 1, \"pageSize\": "  + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"],\"sorted\": [{\"id\": \"RD_Connect_ID_Experiment\",\"desc\": false}],\"filtered\": [{\"id\": \"variantCalling\",\"value\": \"pass\"},{\"id\": \"hdfs\",\"value\": \"waiting\"},{\"id\": \"genomicsdb\",\"value\": \"waiting\"},{\"id\": \"es\",\"value\": \"waiting\"}]}"
+	log.debug('> Querying DM using URL "{0}"'.format(url))
 
 	log.debug(headers)
 	log.debug(data)
