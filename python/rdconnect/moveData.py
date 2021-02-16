@@ -16,9 +16,11 @@ This module contains the functions used to move data from main cluster to HDFS.
 """
 
 def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground = False):
-	chrom = chrom_str_to_int(str(config['process/chrom']))
+	chrm_str = str(config['process/chrom'])
+	chrom = chrom_str_to_int(str(chrm_str))
 	source_path = config['process/moving_from']
-	destination_path = config['process/moving_to']
+	destination_hdfs = config['process/moving_to_hdfs']
+	destination_ceph = config['process/moving_to_ceph']
 
 	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
@@ -32,7 +34,8 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	log.info('Entering step "gvcf"')
 	log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
 	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
+	log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
 	#log.debug('> Argument "cmd_1" filled with "{}"'.format(cmd_1))
 	#log.debug('> Argument "cmd_2" filled with "{}"'.format(cmd_2))
 
@@ -63,9 +66,11 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 	with open('transfer_files.txt', 'w') as fw:
 		for ii, xx in enumerate(to_process_group):
-			xx = path.join(source_path, xx['RD_Connect_ID_Experiment'])
+			c1 = source_path.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm_str)
+			c2 = destination_ceph.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm_str)
+			c3 = destination_hdfs.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm_str)
 			print(ii, " --> ", xx)
-			fw.write(xx + '\n')
+			fw.write(c1 + '\t' + c2 + '\t' + c3 + '\n')
 
 
 
