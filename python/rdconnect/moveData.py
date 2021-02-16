@@ -17,7 +17,10 @@ This module contains the functions used to move data from main cluster to HDFS.
 
 def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground = False):
 	chrm_str = str(config['process/chrom'])
-	chrom = chrom_str_to_int(str(chrm_str))
+	if chrm_str is None
+		chrm_str = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT'.split(',')
+	else:
+		chrm_str = chrm_str.split(',')
 	source_path = config['process/moving_from']
 	destination_hdfs = config['process/moving_to_hdfs']
 	destination_ceph = config['process/moving_to_ceph']
@@ -66,11 +69,12 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
 	with open('transfer_files.txt', 'w') as fw:
 		for ii, xx in enumerate(to_process_group):
-			c1 = source_path.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm_str)
-			c2 = destination_ceph.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm_str)
-			c3 = destination_hdfs.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm_str)
-			print(ii, " --> ", xx)
-			fw.write(c1 + '\t' + c2 + '\t' + c3 + '\n')
+			for chrm in chrm_str:
+				c1 = source_path.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm)
+				c2 = destination_ceph.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm)
+				c3 = destination_hdfs.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm)
+				print(ii, " --> ", xx)
+				fw.write(c1 + '\t' + c2 + '\t' + c3 + '\n')
 
 
 
