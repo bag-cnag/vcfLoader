@@ -61,8 +61,11 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 	
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
-	for ii, xx in enumerate(to_process_group):
-		print(ii, " --> ", xx)
+	with open('transfer_files.txt', 'w') as fw:
+		for ii, xx in enumerate(to_process_group):
+			xx = path.join(source_path, xx['RD_Connect_ID_Experiment'])
+			print(ii, " --> ", xx)
+			fw.write(xx + '\n')
 
 
 
