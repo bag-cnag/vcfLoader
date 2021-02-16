@@ -16,7 +16,7 @@ This module contains the functions used to move data from main cluster to HDFS.
 """
 
 def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground = False):
-	chrm_str = str(config['process/chrom'])
+	chrm_str = config['process/chrom']
 	if chrm_str is None:
 		chrm_str = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT'.split(',')
 	else:
