@@ -35,7 +35,7 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 		url = config['applications/datamanagement/api_exp_status_list'].format(url)
 
 	log.info('Entering step "gvcf"')
-	log.debug('> Argument "chrom" filled with "{}"'.format(chrom))
+	log.debug('> Argument "chrom" filled with "{}"'.format(chrm_str))
 	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
 	log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
