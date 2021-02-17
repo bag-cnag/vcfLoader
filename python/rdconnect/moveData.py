@@ -16,6 +16,37 @@ This module contains the functions used to move data from main cluster to HDFS.
 """
 
 def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground = False):
+	"""Function to create a list of experiments that have to be moved to HDFS or
+	CEPH.
+
+	This function calls the data manager to get a batch of files ready to be
+	processed, starting to be moved to the distributed file system. The call
+	relies on the following filtering criteria:
+
+		variantCalling: pass
+		hdfs: waiting
+		genomicsdb: waiting
+		es: waiting
+
+	Parameters
+	----------
+	config: ConfigFile, mandatory
+		Configuration for the job that must include the keys 'process/chrom',
+		'process/moving_from', 'process/moving_to',
+		'process/moving_s1', and 'process/moving_s2'.
+	log: logger, optional
+		Used to track the moving process
+	batch: numeric, optional
+		Number of files to be moved as a batch. Once this limit is reached 
+		the function ends (default: 500).
+	
+	Returns
+	-------
+	Nothing. The list of files is written to disk as "transfer_files.txt".
+	"""
+	if config is None:
+		raise Exception('Started "get_experiments_prepared" and no "config" was provided.')
+
 	chrm_str = config['process/chrom']
 	if chrm_str is None:
 		chrm_str = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT'.split(',')
@@ -34,20 +65,18 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	else:
 		url = config['applications/datamanagement/api_exp_status_list'].format(url)
 
-	log.info('Entering step "gvcf"')
+	log.info('Entering step "get_experiments_prepared"')
 	log.debug('> Argument "chrom" filled with "{}"'.format(chrm_str))
 	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
 	log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
-	#log.debug('> Argument "cmd_1" filled with "{}"'.format(cmd_1))
-	#log.debug('> Argument "cmd_2" filled with "{}"'.format(cmd_2))
 
 	headers = { 
 		'accept': 'application/json', 'Content-Type': 'application/json',
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
 	}
-	#data = "{\"page\": 1, \"pageSize\": " + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"], \"sorted\":[{\"id\":\"RD_Connect_ID_Experiment\",\"desc\":false}], \"filtered\":[{\"id\":\"variantCalling\",\"value\":\"pass\"},{\"id\":\"rohs\",\"value\":\"pass\"},{\"id\":\"in_platform\",\"value\":\"waiting\"}]}"
+	
 	data = "{\"page\": 1, \"pageSize\": "  + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"],\"sorted\": [{\"id\": \"RD_Connect_ID_Experiment\",\"desc\": false}],\"filtered\": [{\"id\": \"variantCalling\",\"value\": \"pass\"},{\"id\": \"hdfs\",\"value\": \"waiting\"},{\"id\": \"genomicsdb\",\"value\": \"waiting\"},{\"id\": \"es\",\"value\": \"waiting\"}]}"
 	log.debug('> Querying DM using URL "{0}"'.format(url))
 
@@ -73,8 +102,8 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 				c1 = source_path.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm)
 				c2 = destination_ceph.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm)
 				c3 = destination_hdfs.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm)
-				print(ii, " --> ", xx)
-				fw.write(c1 + '\t' + c2 + '\t' + c3 + '\n')
+				c4 = xx['RD_Connect_ID_Experiment']
+				fw.write(c1 + '\t' + c2 + '\t' + c3 + '\t' + c4 + '\n')
 
 
 
