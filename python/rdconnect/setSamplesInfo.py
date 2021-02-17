@@ -87,9 +87,9 @@ def update_dm_by_experiment(config, log = VoidLog(), experiments = [], flag = No
 		url = 'https://{0}'.format(url)
 
 	if is_playground:
-		url = config['applications/datamanagement/api_exp_status_list_playground'].format(url)
+		url = config['applications/datamanagement/api_exp_status_playground'].format(url)
 	else:
-		url = config['applications/datamanagement/api_exp_status_list'].format(url)
+		url = config['applications/datamanagement/api_exp_status'].format(url)
 
 	log.info('Entering step "update_dm_by_experiment"')
 	log.debug('> Argument "flag" filled with "{}"'.format(str(flag)))
