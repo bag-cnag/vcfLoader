@@ -65,7 +65,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
 	for ii, sam in enumerate(samples):
-		q_url = url + '&experiment=' + sam
+		q_url = url + '?experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			self.log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), sam, str(response.status_code)))
@@ -107,9 +107,7 @@ def update_dm_by_experiment(config, log = VoidLog(), experiments = [], flag = No
 	data = "{\"" + flag + "\": \"" + value + "\"}"
 
 	for ii, sam in enumerate(experiments):
-		q_url = url + '?experiment=' + sam
-		print(q_url)
-		print(data)
+		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), sam, str(response.status_code)))
