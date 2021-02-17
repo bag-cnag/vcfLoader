@@ -19,7 +19,7 @@ This module contains the functions used to create a sparse matrix and to append
 experiments to an already existing sparse matrix.
 """
 
-def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), queryBatch = 500, largeBatch = 500, smallBatch = 100):
+def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), experiments = [], queryBatch = 500, largeBatch = 500, smallBatch = 100):
 	""" [...]
 	
 	process/moving_to
@@ -56,7 +56,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
 	chrom = utils.chrom_str_to_int(str(config['process/chrom']))
-	source_path = self.config['process/moving_to']
+	destination_hdfs = config['process/moving_to_hdfs']
+	destination_ceph = config['process/moving_to_ceph']
 	sparse_path = self.config['applications/combine/sparse_matrix_path']
 
 	chrom_str = chrom
@@ -68,8 +69,10 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		chrom_str = 'Y'
 
 	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
-	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "queryBatch" filled with "{}"'.format(queryBatch))
+	self.log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
+	self.log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
+	self.log.debug('> Argument "experiments" filled with "{}"'.format(experiments))
+	#self.log.debug('> Argument "queryBatch" filled with "{}"'.format(queryBatch))
 	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
@@ -112,17 +115,13 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	# 		'pid': itm['Participant_ID']
 	# 	})
 
-	
-	to_process = [ 
-		'AS5120', 'AS5122'
-	]
 
 	clean_to_process = []
-	for item in to_process:
+	for item in experiments:
 		clean_to_process.append({
-			'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2626/{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
-			'id': item,
-			'pid': item
+			#'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2626/{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
+			'file': item[1]
+			'id': item[3]
 		})
 
 	# Get version of sparse matrix
