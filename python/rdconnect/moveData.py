@@ -104,7 +104,8 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 				c3 = destination_hdfs.replace('[patient-id]', xx['RD_Connect_ID_Experiment']).replace('[owner]', xx['Owner']).replace('[chromosome]', chrm)
 				c4 = xx['RD_Connect_ID_Experiment']
 				c5 = chrm
-				fw.write(c1 + '\t' + c2 + '\t' + c3 + '\t' + c4 + '\t' + c5 + '\n')
+				fw.write(c1 + '\t' + c2 + '\t' + c3 + '\t' + c4 + '\t' + c5 + '\tvcf\n')
+				fw.write(c1 + '.tbi' + '\t' + c2 + '.tbi' + '\t' + c3 + '.tbi' + '\t' + c4 + '\t' + c5 + '\ttbi\n')
 
 
 
