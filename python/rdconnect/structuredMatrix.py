@@ -139,13 +139,13 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		sm_loaded = False
 
 	# Check for loaded experiments
-	if sm_loaded:
-		x = [ y.get('s') for y in self.data.col.collect() ]
-		self.log.debug('> Loaded sparse matrix contains {} experiments'.format(len(x)))
-		y = [ z for z in clean_to_process if z['id'] in x ]
-		if len(y) != 0:
-			self.log.error('> {} experiments are already loaded'.format(len(y)))
-			clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
+	#if sm_loaded:
+	#	x = [ y.get('s') for y in self.data.col.collect() ]
+	#	self.log.debug('> Loaded sparse matrix contains {} experiments'.format(len(x)))
+	#	y = [ z for z in clean_to_process if z['id'] in x ]
+	#	if len(y) != 0:
+	#		self.log.error('> {} experiments are already loaded'.format(len(y)))
+	#		clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
 
 	# Create batches of samples to be loaded
 	self.log.info('> Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
