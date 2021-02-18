@@ -115,13 +115,14 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	# 		'pid': itm['Participant_ID']
 	# 	})
 
-
+	experiments = ['AS5120', 'AS5121', 'AS5122']
 	clean_to_process = []
 	for item in experiments:
 		clean_to_process.append({
-			#'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2626/{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
-			'file': 's3a://cnag/' + item[1],
-			'id': item[3]
+			'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2626/{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
+			#'file': 's3a://cnag/' + item[1],
+			#'id': item[3]
+			'id': item
 		})
 
 	# Get version of sparse matrix
@@ -249,9 +250,9 @@ def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
 
 	return rst
 
-def create_dense_matrices(self = None, config = None, hl = None, log = VoidLog()):
+def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
-	self.log.info('Entering step "create_dense_matrices"')
+	self.log.info('Entering step "append_to_dense_matrices"')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
