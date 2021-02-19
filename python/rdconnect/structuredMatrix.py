@@ -205,6 +205,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			reference_genome = interval[ 'reference_genome' ], 
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
+		x = hl.split_multi_hts(x, keep_star = False)
 		return x
 
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
