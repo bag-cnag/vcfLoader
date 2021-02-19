@@ -216,8 +216,9 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		previous = hl.read_matrix_table(previous_version_path)
 		comb = combine_gvcfs([ previous ] + vcfs)
 
-	
-	comb = hl.split_multi_hts(comb.key_rows_by('locus','alleles'), keep_star = False)
+	comb.key_rows_by('locus','alleles')
+	comb.describe()
+	comb = hl.split_multi_hts(comb, keep_star = False)
 	comb.write(version_path, overwrite = True)
 
 
