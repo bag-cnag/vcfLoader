@@ -205,6 +205,9 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			reference_genome = interval[ 'reference_genome' ], 
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
+		for ii in range(len(x)):
+			x[ii] = x[ii].key_rows_by('locus', 'alleles')
+			x[ii] = hl.split_multi_hts(x[ii], keep_star = False)
 		return x
 
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
@@ -216,8 +219,8 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		previous = hl.read_matrix_table(previous_version_path)
 		comb = combine_gvcfs([ previous ] + vcfs)
 
-	comb = comb.key_rows_by('locus', 'alleles')
-	comb = hl.split_multi_hts(comb, keep_star = False)
+	#comb = comb.key_rows_by('locus', 'alleles')
+	#comb = hl.split_multi_hts(comb, keep_star = False)
 	comb.write(version_path, overwrite = True)
 
 
