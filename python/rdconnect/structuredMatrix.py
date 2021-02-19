@@ -297,7 +297,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		sam = hl.literal(experiments_in_matrix, 'array<str>')
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
 		small_matrix = hl.experimental.densify(small_matrix)
-		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.LGT.is_non_ref()))
+		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.GT.is_non_ref()))
 		path = '{0}/chrom-{1}-mtx-{2}'.format(dense_matrix_path, chrom, idx)
 		self.log.info('Writing dense matrix {} to disk ({})'.format(idx, path))
 		small_matrix.write(path, overwrite = True)
