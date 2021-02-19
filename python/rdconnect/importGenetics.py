@@ -54,8 +54,8 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 			sample = self.data.s,
 			ad = utils.truncateAt( hl,self.data.AD[ 1 ] / hl.sum( self.data.AD ),"2" ), # hl.sum( self.data.AD ),"2" ),
 			dp = self.data.DP,
-			gtInt = self.data.LGT,
-			gt = hl.str( self.data.LGT ),
+			gtInt = self.data.GT,
+			gt = hl.str( self.data.GT ),
 			gq = self.data.GQ
 		)
 	)
