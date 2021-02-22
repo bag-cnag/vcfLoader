@@ -220,6 +220,10 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 	comb = comb.key_rows_by('locus', 'alleles')
 	#comb = hl.split_multi_hts(comb, keep_star = False)
 	comb = sparse_split_multi(comb)
+	print("=" * 25)
+	print(comb.describe())
+	print(comb.alleles.show())
+	print("=" * 25)
 	comb = comb.filter_rows(comb.alleles[1] != '*')
 	comb.write(version_path, overwrite = True)
 
