@@ -116,11 +116,11 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	# 		'pid': itm['Participant_ID']
 	# 	})
 
-	experiments = ['AS5120', 'AS5121', 'AS5122', 'AS5123', 'AS5124', 'AS5125', 'AS5126', 'AS5128'] # 'AS5127'
+	experiments = ['AS5120', 'AS5121', 'AS5122', 'AS5123', 'AS5124', 'AS5125', 'AS5126', 'AS5127', 'AS5128']
 	clean_to_process = []
 	for item in experiments:
 		clean_to_process.append({
-			'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2626/{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
+			'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2655/{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
 			#'file': 's3a://cnag/' + item[1],
 			#'id': item[3]
 			'id': item
