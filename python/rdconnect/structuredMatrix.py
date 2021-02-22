@@ -218,7 +218,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		comb = combine_gvcfs([ previous ] + vcfs)
 
 	comb = comb.key_rows_by('locus', 'alleles')
-	comb2.write(version_path, overwrite = True)
+	comb.write(version_path, overwrite = True)
 
 
 def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
@@ -296,7 +296,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
 		small_matrix = hl.experimental.densify(small_matrix)
 		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.LGT.is_non_ref()))
-		small_matrix = hl.split_multi_hts(small_matrix, keep_star = False)
+		small_matrix = hl.split_multi_hts(small_matrix, keep_star = False)	
 		path = '{0}/chrom-{1}-mtx-{2}'.format(dense_matrix_path, chrom, idx)
 		self.log.info('Writing dense matrix {} to disk ({})'.format(idx, path))
 		small_matrix.write(path, overwrite = True)
