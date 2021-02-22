@@ -218,17 +218,6 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		comb = combine_gvcfs([ previous ] + vcfs)
 
 	comb = comb.key_rows_by('locus', 'alleles')
-	comb2 = hl.split_multi_hts(comb, keep_star = False)
-	comb2 = comb2.filter_rows(comb2.alleles[1] != '*')
-	print("=" * 25)
-	print(comb.count())
-	print(comb2.count())
-	print("=" * 25)
-	#comb3 = sparse_split_multi(comb)
-	#print("=" * 25)
-	#print(comb3.describe())
-	#print(comb3.alleles.show())
-	#print("=" * 25)
 	comb2.write(version_path, overwrite = True)
 
 
@@ -307,6 +296,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
 		small_matrix = hl.experimental.densify(small_matrix)
 		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.LGT.is_non_ref()))
+		small_matrix = hl.split_multi_hts(small_matrix, keep_star = False)
 		path = '{0}/chrom-{1}-mtx-{2}'.format(dense_matrix_path, chrom, idx)
 		self.log.info('Writing dense matrix {} to disk ({})'.format(idx, path))
 		small_matrix.write(path, overwrite = True)
