@@ -167,7 +167,7 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 			if response2.status_code != 200:
 				self.log.error('> Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
 			else:
-				self.log.warning('> Query for "{}" resulted in {}. Forced update was successful with {}'.format(sa, response.status_code, response2.status_code))
+				self.log.warning('> Query for "{}" resulted in {}. Forced update was successful with {}'.format(sam, response.status_code, response2.status_code))
 				
 				# data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
 				# 	\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
