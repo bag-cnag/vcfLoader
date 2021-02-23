@@ -39,7 +39,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if not 'process/chrom' in self.config.keys() ot str(self.config['process/chrom']) != '21':
+	if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
 		log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
 		self.config['process/chrom'] = '21'
 
@@ -129,7 +129,7 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if not 'process/chrom' in self.config.keys() ot str(self.config['process/chrom']) != '21':
+	if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
 		log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
 		self.config['process/chrom'] = '21'
 
