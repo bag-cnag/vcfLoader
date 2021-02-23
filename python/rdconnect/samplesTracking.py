@@ -130,7 +130,7 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 		raise NoConfigurationException('No configuration was provided')
 
 	if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
-		log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
+		self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
 		self.config['process/chrom'] = '21'
 
 	if self is None:
