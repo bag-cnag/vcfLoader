@@ -72,7 +72,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			q_url = url + 'forceupdate=true&experiment=' + sam
+			q_url = url + '&forceupdate=true&experiment=' + sam
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
 				self.log.error('> Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
@@ -162,10 +162,10 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			q_url = url + 'forceupdate=true&experiment=' + sam
+			q_url = url + '&forceupdate=true&experiment=' + sam
 			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
 			if response2.status_code != 200:
-				self.log.error('> Query for "{}" resulted in {}. Forced update failed with {}'.format(sam, response.status_code, response2.status_code))
+				self.log.error('> Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
 			else:
 				self.log.warning('> Query for "{}" resulted in {}. Forced update was successful with {}'.format(sa, response.status_code, response2.status_code))
 				
