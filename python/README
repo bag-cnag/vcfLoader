@@ -1,0 +1,6 @@
+# vcfLoader
+
+The vcfLoader is an internal python package from the Bioinformatic Unit at the
+Centre Nacional d'Anàlisi Genòmica (CNAG-CRG) used to re-format `VCF` and 
+`gVCF` files, store them in [Spark](https://spark.apache.org/) format over a [HDFS](https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html), annotate the 
+variants in the, and upload into an [ElasticSearch](https://www.elastic.co/elasticsearch/) database.
