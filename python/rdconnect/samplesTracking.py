@@ -51,7 +51,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
 	self.log.debug('> Argument "index_name" filled with "{}"'.format(self.config['resources/elasticsearch/index_name']))
 
-	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/datamanagement/api_group'])
+	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/api_group'])
 	headers = { 'accept': 'application/json', 
 		'Content-Type': 'application/json', 
 		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
@@ -144,7 +144,7 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 
 		self.data = self.hl.methods.read_matrix_table(source_path)
 
-	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/datamanagement/api_group'])
+	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/api_group'])
 	headers = { 'accept': 'application/json', 
 		'Content-Type': 'application/json', 
 		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
