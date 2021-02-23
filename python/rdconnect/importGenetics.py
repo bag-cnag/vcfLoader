@@ -33,8 +33,8 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 
 	#chrom-chromosome-mtx-nmatrix
 	source_path = '{}/{}'.format(config['applications/combine/dense_matrix_path'], 'chrom-chromosome-mtx-nmatrix')
-	source_path = source_path.replace('nmatrix', config['applications/combine/nmatrix'])
-	source_path = utils.create_chrom_filename(source_path, config['process/chrom'])
+	source_path = source_path.replace('nmatrix', str)config['applications/combine/nmatrix']))
+	source_path = utils.create_chrom_filename(source_path, str(config['process/chrom']))
 	#source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
 	#source_path = os.path.join(source_path, source_file)
 	#destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
