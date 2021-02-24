@@ -256,6 +256,7 @@ def create_index_snv(self = None, config = None, hl = None, log = None):
 	"""
 	sts = index_exists(self.config)
 	if sts != 200:
+		self.log.debug('Index ("{}") was not found'.format(index_name, str(sts)))
 		sts = _create_index(host, port, index_name, data, user, pwd)
 
 	if self is not None:
@@ -333,4 +334,3 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 		.save('{}/{}'.format(index_name, self.config['resources/elasticsearch/type']), mode = 'append')
 
 	return self
-

@@ -20,7 +20,7 @@ This module contains the functions used to create a sparse matrix and to append
 experiments to an already existing sparse matrix.
 """
 
-def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), experiments = [], queryBatch = 500, largeBatch = 500, smallBatch = 100):
+def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), experiments = [], largeBatch = 500, smallBatch = 100):
 	""" [...]
 	
 	process/moving_to
@@ -56,10 +56,14 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	chrom = utils.chrom_str_to_int(str(config['process/chrom']))
-	destination_hdfs = config['process/moving_to_hdfs']
-	destination_ceph = config['process/moving_to_ceph']
+	chrom = utils.chrom_str_to_int(str(self.config['process/chrom']))
+	destination_hdfs = self.config['process/moving_to_hdfs']
+	destination_ceph = self.config['process/moving_to_ceph']
 	sparse_path = self.config['applications/combine/sparse_matrix_path']
+
+	smallBatch = self.config['applications/combine/sz_small_batch']
+	largeBatch = self.config['applications/combine/sz_large_batch']
+
 
 	chrom_str = chrom
 	if chrom_str == '23':
