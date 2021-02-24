@@ -403,7 +403,7 @@ def intergenic_annotations(hl, annotations):
                transcript_biotype='',
                gene_coding=''),annotations)
 
-def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions, return_matrix=False):
+def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions, return_matrix=False, matrix=True):
     """ Adds VEP annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate 
@@ -415,10 +415,12 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions, return_matr
     print("origin is ", variants, vepPath)
     print("destination is", destinationPath)
     varAnnotated = hl.vep(variants, vepPath)
-    # varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
+    if not matrix:
+       varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
     #                                      rs = varAnnotated.vep.colocated_variants[0].id)
-    varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
-                                         rs = varAnnotated.vep.colocated_variants[0].id)
+    else:
+       varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
+    rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated = varAnnotated.drop("vep")
 
     if return_matrix:
