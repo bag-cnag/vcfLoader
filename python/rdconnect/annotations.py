@@ -504,7 +504,7 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath, return_matrix=Fals
             sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
             cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID)
     else:
-        variants = variants.(
+        variants = variants.annotate(
             gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
             gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
             gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
