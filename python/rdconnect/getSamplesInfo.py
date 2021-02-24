@@ -165,3 +165,29 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	experiment_available_2 = [ x[ 'RD_Connect_ID_Experiment' ] for x in experiment_available ]
 	selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
 	return experiment_available
+	
+
+def experiments_and_family(pids, config, sort_output = True):
+	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
+	headers = { 'Content-Type': 'application/json', 
+		'Authorization': config['application/kc_token'], 
+		'Host': config['applications/datamanagement/host'] 
+	}
+	data=[]
+	for i in range(0,(len(pids)//1000)+1) :
+		body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
+		resp = requests.post( url, headers = headers, json = body, verify = False )
+		data = data + resp.json()
+	parsed = {}
+	for elm in data:
+		pid = list( elm.keys() )[ 0 ]
+		if type( elm[ pid ] ) == str:
+			fam = '---'
+		else: 
+			fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
+		parsed[ pid ] = fam
+	rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Participant_ID' ], parsed[ pak[ 'Participant_ID' ] ] ] for pak in pids ]
+	if sort_output:
+		return sorted( rst, key = lambda x: x[ 2 ] )
+	else:
+		return rst

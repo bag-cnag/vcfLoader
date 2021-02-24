@@ -75,6 +75,46 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	return self
 
 
+def update_dm_by_experiment(config, log = VoidLog(), experiments = [], flag = None, value = 'pass', is_playground = False):
+	"""Function to update the data management' status of a list of experiment.
+	"""
+
+	if config is None:
+		raise Exception('Started "update_dm_by_experiment" and no "config" was provided.')
+
+	group = config['applications/datamanagement/api_group']
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
+	if is_playground:
+		url = config['applications/datamanagement/api_exp_status_playground'].format(url, group)
+	else:
+		url = config['applications/datamanagement/api_exp_status'].format(url, group)
+
+	log.info('Entering step "update_dm_by_experiment"')
+	log.debug('> Argument "flag" filled with "{}"'.format(str(flag)))
+	log.debug('> Argument "value" filled with "{}"'.format(str(value)))
+
+	if flag is None:
+		raise Exception('Called "update_dm_by_experiment" and no flag was provided. Use "hdfs", "genomicsdb", "es", or "in_platform".')
+
+	headers = { 
+		'accept': 'application/json', 'Content-Type': 'application/json',
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}
+	data = "{\"" + flag + "\": \"" + value + "\"}"
+
+	for ii, sam in enumerate(experiments):
+		q_url = url + '&experiment=' + sam
+		response = requests.post(q_url, data = data, headers = headers, verify = False)
+		if response.status_code != 200:
+			log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), sam, str(response.status_code)))
+			print('--> Query #{} for experiment {} resulted in a {} status with content "{}"'.format(str(ii), sam, str(response.status_code), str(response.content)))
+
+
+
 def update_dm(initial_vcf, data_ip, data_url, data_token, field):
 	if not field in ("genomicsdb", "hdfs", "es", "in_platform"):
 		raise Exception("[ERROR]: (update_dm + {}) Invalid field to be updated in data data-management.".format(field))

@@ -31,16 +31,19 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
-	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
-	source_path = os.path.join(source_path, source_file)
-	destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
-	destination_path = config['process/destination_path']
+	#chrom-chromosome-mtx-nmatrix
+	source_path = '{}/{}'.format(config['applications/combine/dense_matrix_path'], 'chrom-chromosome-mtx-nmatrix')
+	source_path = source_path.replace('nmatrix', str(config['applications/combine/nmatrix']))
+	source_path = utils.create_chrom_filename(source_path, str(config['process/chrom']))
+	#source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	#source_path = os.path.join(source_path, source_file)
+	#destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
+	#destination_path = config['process/destination_path']
 	autosave = config['process/autosave']
 
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
-	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+	#self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
+	#self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
 
 	
@@ -52,10 +55,10 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self.data = self.data.transmute_entries(
 		sample = hl.struct(
 			sample = self.data.s,
-			ad = utils.truncateAt( hl,self.data.AD[ 1 ] / hl.sum( self.data.AD ),"2" ),
+			ad = utils.truncateAt( hl,self.data.LAD[ 1 ] / hl.sum( self.data.LAD ),"2" ), # hl.sum( self.data.AD ),"2" ),
 			dp = self.data.DP,
-			gtInt = self.data.GT,
-			gt = hl.str( self.data.GT ),
+			gtInt = self.data.LGT,
+			gt = hl.str( self.data.LGT ),
 			gq = self.data.GQ
 		)
 	)
@@ -74,10 +77,13 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	self.data = self.data.key_rows_by( self.data.locus, self.data.alleles )
 
 	self.state = ['dense_matrix']
-	if autosave and destination_path != '':
-		filename = utils.destination_germline(destination_path, destination_file)
-		self.data.distinct_by_row().write(filename, overwrite = True )
-		self.file = [destination_path]
+	#if autosave and destination_path != '':
+	#	filename = utils.destination_germline(destination_path, destination_file)
+	#	self.data.distinct_by_row().write(filename, overwrite = True )
+	#	self.file = [destination_path]
+	x = [ y.get('s') for y in self.data.col.collect() ]
+	self.log.info('> 	. Experiments in loaded VCF: {}'.format(len(x)))
+	self.log.info('> 	. First and last sample: {} // {}'.format(x[ 0 ], x[len(x) - 1]))
 	return self
 
 

@@ -45,7 +45,7 @@ def transform(self = None, config = None, hl = None, log = None):
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
-	self.log.info('Entering transform step')
+	self.log.info('Entering "transform" step')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
@@ -79,6 +79,10 @@ def transform(self = None, config = None, hl = None, log = None):
 	vcf.to_spark() \
 		.drop('locus.contig', 'locus.position', 'alleles') \
 		.write.mode('overwrite').save(destination_file)
+
+	print("*" * 100)
+	print(vcf.describe())
+	print("*" * 100)
 
 	if 'flags' not in vars(self):
 		self.flags = {'transform': (True, destination_file)}
@@ -136,7 +140,7 @@ def create_index_snv(self = None, config = None, hl = None, log = None):
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
-	self.log.info('Entering transform step')
+	self.log.info('Entering "create_index_snv" step')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
@@ -250,8 +254,9 @@ def create_index_snv(self = None, config = None, hl = None, log = None):
 						,"nprogs":{"type":"integer","index":"true"}
 						,"progs":{"type":"keyword"}}}}}}}
 	"""
-	sts = index_exists(config)
+	sts = index_exists(self.config)
 	if sts != 200:
+		self.log.debug('Index ("{}") was not found'.format(index_name, str(sts)))
 		sts = _create_index(host, port, index_name, data, user, pwd)
 
 	if self is not None:
@@ -329,4 +334,3 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 		.save('{}/{}'.format(index_name, self.config['resources/elasticsearch/type']), mode = 'append')
 
 	return self
-

@@ -5,6 +5,10 @@ from rdconnect.classGenome import GenomicData
 from rdconnect.classException import *
 from rdconnect.utils import check_class_and_config
 
+MIN_DP = 7
+MIN_GQ = 19
+SAMPLES_CNV = 939
+
 def _transcript_annotations(hl, annotations):
 	""" Transcript level annotations for VEP 
 		:param Hailcontext hl: The Hail context
@@ -94,7 +98,7 @@ def vep(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
-	destination_file = utils.destination_vep(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
+	destination_file = utils.destination_vep(os.path.join(destination_path, self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	vep_config = self.config['annotation/clean/vep']
 	autosave = self.config['process/autosave']
@@ -504,13 +508,14 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
-	destination_file = utils.destination_gnomadex(os.path.join(destination_path,self.config['resources/elasticsearch/version']), destination_file)
+	destination_file = utils.destination_gnomadex(os.path.join(destination_path, self.config['resources/elasticsearch/version']), destination_file)
 	source_path = os.path.join(source_path, source_file)
 	gnomeAdEx_path = utils.create_chrom_filename(self.config['annotation/clean/exomesGnomad'], self.config['process/chrom'])
 	autosave = self.config['process/autosave']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
 	self.log.debug('> Argument "destination_file" filled with "{}"'.format(destination_file))
 	self.log.debug('> Argument "gnomeAdEx_path" filled with "{}"'.format(gnomeAdEx_path))
 	self.log.debug('> Argument "autosave" was set' if autosave else '> Argument "autosave" was not set')
@@ -610,4 +615,71 @@ def internal_freq(self = None, config = None, hl = None, log = None):
 	if autosave and destination_path != '':
 		self.data.write(destination_file, overwrite = True)
 		self.file = [destination_file] + self.file
+	return self
+
+
+
+def extract_internal_freq_germline(self = None, config = None, hl = None, log = None):
+	"""Function to load a VCF from POSIX and extract its internal frequencies.
+
+	Parameters
+	----------
+	self: GenomicData, mandatory
+		Set it to None to load the dataset from 'source_path'. If a GenomicData
+		is assigned to this argument, no set is loaded from 'source_path' and
+		the argument is ignored.
+	config: ConfigFile, optional
+		Configuration for this step of the pipeline.
+	hl: context, optional
+		HAIL context.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process.
+
+	Returns
+	-------
+	The function returns a 'GenomicData' object with the loaded data.
+	"""
+
+	self = GenomicData()
+	self.state = []
+	self.file = []
+	if log is None:
+		self.log = VoidLog()
+	else:
+		self.log = log
+
+	self, isConfig, isHl = check_class_and_config(self, config, hl, log)
+	self.log.info('Entering loading step "extract_internal_freq_germline"')
+
+	if config is None:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if hl is None:
+		self.log.error('No pointer to HAIL module was provided')
+		raise NoHailContextException('No pointer to HAIL module was provided')
+
+	source_file = utils.create_chrom_filename(config['process/source_file'], config['process/chrom'])
+	source_path = utils.create_chrom_filename(config['process/source_path'], config['process/chrom'])
+	source_path = os.path.join(source_path, source_file)
+	destination_file = utils.create_chrom_filename(config['process/destination_file'], config['process/chrom'])
+	destination_path = config['process/destination_path']
+	destination_path = os.path.join(destination_path, destination_file)
+
+	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	self.log.debug('> Argument "destination_path" filled with "{}"'.format(destination_path))
+
+	if 'data' not in vars(self):
+		self.log.info('Loading genomic data from "source_path"')
+		self.data = self.hl.read_table(source_path)
+		self.state = []
+		self.file = []
+
+	vcf_2 = self.data.annotate(
+		num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), self.data.samples_germline)),
+		dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, self.data.samples_germline)))
+	)
+	vcf_2 = vcf_2.select('was_split', 'ref', 'alt', 'pos', 'freqIntGermline', 'samples_germline', 'num', 'dem')
+	vcf_2.write(destination_path, overwrite = True)
+
 	return self
