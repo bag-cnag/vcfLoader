@@ -613,7 +613,7 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath, return_m
         print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
         variants.write(destinationPath, overwrite = True)
     
-def annotateClinvar(hl, variants, annotationPath, destinationPath, return_matrix=False,amtrix=True):
+def annotateClinvar(hl, variants, annotationPath, destinationPath, return_matrix=False,matrix=True):
     """ Adds Clinvar annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
