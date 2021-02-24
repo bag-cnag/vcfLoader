@@ -416,11 +416,9 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions, return_matr
     print("destination is", destinationPath)
     varAnnotated = hl.vep(variants, vepPath)
     if not matrix:
-       varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
-    #                                      rs = varAnnotated.vep.colocated_variants[0].id)
+       varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),rs = varAnnotated.vep.colocated_variants[0].id)
     else:
-       varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
-    rs = varAnnotated.vep.colocated_variants[0].id)
+       varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated = varAnnotated.drop("vep")
 
     if return_matrix:
