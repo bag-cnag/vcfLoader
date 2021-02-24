@@ -52,7 +52,7 @@ def buildDestinationVEP(destination, fileName, somatic = False):
     else:
         return destination+"/annotatedVEP_somatic/"+fileName
 
-def buildDestinationNSFP(destination, fileName, somatic = False):
+def buildDestinationdbNSFP(destination, fileName, somatic = False):
     if not somatic:
         return destination+"/annotatedVEPdbnSFP/"+fileName
     else:
