@@ -479,7 +479,7 @@ def removeDot(hl, n, precision):
     """
     return hl.cond(n.startswith('.'),0.0,truncateAt(hl,hl.float(n),precision))
 
-def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath, return_matrix=False):
+def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath, return_matrix=False, matrix=True):
     """ Adds dbNSFP annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -488,27 +488,43 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath, return_matrix=Fals
     """
     dbnsfp = hl.read_table(dbnsfpPath)
     # variants.annotate(
-    variants = variants.annotate_rows(
-        gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
-        gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
-        gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
-        gp1_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AF1000,"6"), 0.0),
-        gerp_rs=dbnsfp[variants.locus, variants.alleles].GERP_RS,
-        mt=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].MutationTaster_score.split(";").map(lambda x:removeDot(hl,x,"4"))),0.0),
-        mutationtaster_pred=mt_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
-        phyloP46way_placental=removeDot(hl,dbnsfp[variants.locus, variants.alleles].phyloP46way_placental,"4"),
-        polyphen2_hvar_pred=polyphen_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
-        polyphen2_hvar_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].Polyphen2_HVAR_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
-        sift_pred=sift_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
-        sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
-        cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID)
+    if matrix:
+        variants = variants.annotate_rows(
+            gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
+            gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
+            gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
+            gp1_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AF1000,"6"), 0.0),
+            gerp_rs=dbnsfp[variants.locus, variants.alleles].GERP_RS,
+            mt=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].MutationTaster_score.split(";").map(lambda x:removeDot(hl,x,"4"))),0.0),
+            mutationtaster_pred=mt_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+            phyloP46way_placental=removeDot(hl,dbnsfp[variants.locus, variants.alleles].phyloP46way_placental,"4"),
+            polyphen2_hvar_pred=polyphen_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+            polyphen2_hvar_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].Polyphen2_HVAR_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
+            sift_pred=sift_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+            sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
+            cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID)
+    else:
+        variants = variants.(
+            gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
+            gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
+            gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
+            gp1_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AF1000,"6"), 0.0),
+            gerp_rs=dbnsfp[variants.locus, variants.alleles].GERP_RS,
+            mt=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].MutationTaster_score.split(";").map(lambda x:removeDot(hl,x,"4"))),0.0),
+            mutationtaster_pred=mt_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+            phyloP46way_placental=removeDot(hl,dbnsfp[variants.locus, variants.alleles].phyloP46way_placental,"4"),
+            polyphen2_hvar_pred=polyphen_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+            polyphen2_hvar_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].Polyphen2_HVAR_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
+            sift_pred=sift_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+            sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
+            cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID)
 
     if return_matrix:
         return variants
     else:
         variants.write(destinationPath, overwrite=True)
 
-def annotateCADD(hl, variants, annotationPath, destinationPath, return_matrix=False):
+def annotateCADD(hl, variants, annotationPath, destinationPath, return_matrix=False,matrix=True):
     """ Adds CADD annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -518,9 +534,11 @@ def annotateCADD(hl, variants, annotationPath, destinationPath, return_matrix=Fa
     cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .rows() \
              .key_by("locus","alleles")
-    # variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
-    #        .write(destinationPath,overwrite=True)
-    variants = variants.annotate_rows(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1])
+    
+    if matrix:
+           variants = variants.annotate_rows(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1])
+    else:
+           variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
 
     if return_matrix:
         return variants
@@ -595,7 +613,7 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath, return_m
         print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
         variants.write(destinationPath, overwrite = True)
     
-def annotateClinvar(hl, variants, annotationPath, destinationPath, return_matrix=False):
+def annotateClinvar(hl, variants, annotationPath, destinationPath, return_matrix=False,amtrix=True):
     """ Adds Clinvar annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -606,19 +624,26 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath, return_matrix
                 .rows() \
                 .key_by("locus","alleles")
     # variants.annotate(
-    variants = variants.annotate_rows(
+    if matrix:
+      variants = variants.annotate_rows(
         clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
         clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
         clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False),"|"), hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False),"|")),
         clinvar_filter=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,True))
     )
-
+    else:
+       variants = variants.annotate(
+        clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
+        clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
+        clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False),"|"), hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False),"|")),
+        clinvar_filter=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,True))
+    )       
     if return_matrix:
         return variants
     else:
         variants.write(destinationPath, overwrite=True)
     
-def annotateGnomADEx(hl, variants, annotationPath, destinationPath, return_matrix=False):
+def annotateGnomADEx(hl, variants, annotationPath, destinationPath, return_matrix=False,matrix=True):
     """ Adds gnomAD Ex annotations to a dataset. 
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -629,7 +654,8 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath, return_matri
                .rows() \
                .key_by("locus","alleles")
     #variants.annotate(
-    variants = variants.annotate_rows(
+    if matrix:
+      variants = variants.annotate_rows(
         gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_an=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
@@ -638,6 +664,16 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath, return_matri
         gnomad_an_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_filter=hl.cond(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
     )
+    else:
+      variants = variants.annotate(
+        gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_an=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
+        gnomad_af_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_an_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_filter=hl.cond(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
+    )        
     if return_matrix:
         return variants
     else:
