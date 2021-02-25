@@ -5,7 +5,7 @@ import requests
 import rdconnect.utils as utils
 from rdconnect.classException import *
 from rdconnect.classGenome import SparseMatrix
-import rdconnect.setSamplesInfo as sample
+import rdconnect.setSamplesInfo as samples
 
 
 # hdfs <- abans / llista de experimetns a moyure
@@ -161,7 +161,7 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 			gnomeADEx_annotated_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 			gnomeADEx_annotated_file = utils.destination_gnomadex(os.path.join(gnomeADEx_annotated_path, self.config['resources/elasticsearch/version']), gnomeADEx_annotated_file)
 
-			self.log.info('Since no data was provided gnomeADEx annotated set will be loaded (set: "{}"")'.format(gnomeADEx_annotated_file))
+			self.log.info('Since no data was provided gnomeADEx annotated set will be loaded (set: "{}")'.format(gnomeADEx_annotated_file))
 			self.data = hl.read_matrix_table(gnomeADEx_annotated_file)
 
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
