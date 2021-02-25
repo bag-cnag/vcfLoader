@@ -72,7 +72,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			self.log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), sam, str(response.status_code)))
+			self.log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), q_url, str(response.status_code)))
 
 	return self
 
