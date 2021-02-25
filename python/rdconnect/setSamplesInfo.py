@@ -66,6 +66,9 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		raise Exception('No "flag" was provided.')
 	data = "{\"" + flag + "\": \"" + value + "\"}"
 
+	print("headers", headers)
+	print("data", data)
+
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
 	for ii, sam in enumerate(samples):
