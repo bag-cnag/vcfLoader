@@ -75,7 +75,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			self.log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), q_url, str(response.status_code)))
+			self.log.error('Query #{} for experiment {} resulted in a {} code with message "{}"'.format(str(ii), q_url, str(response.status_code), response.text))
 
 	return self
 
@@ -115,7 +115,7 @@ def update_dm_by_experiment(config, log = VoidLog(), experiments = [], flag = No
 		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), sam, str(response.status_code)))
+			self.log.error('Query #{} for experiment {} resulted in a {} code with message "{}"'.format(str(ii), q_url, str(response.status_code), response.text))
 			print('--> Query #{} for experiment {} resulted in a {} status with content "{}"'.format(str(ii), sam, str(response.status_code), str(response.content)))
 
 
