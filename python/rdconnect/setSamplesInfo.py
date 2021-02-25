@@ -75,9 +75,50 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			self.log.error('Query #{} for experiment {} resulted in a {} code with message "{}"'.format(str(ii), q_url, str(response.status_code), response.text))
-
+			q_url = url + '&forceupdate=true&experiment=' + sam
+			data2 = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
+				\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
+				\"qc\": \"waiting\",					\"coverage\": \"pass\", \
+				\"cnv\": \"waiting\",				\"variantCalling\": \"pass\", \
+				\"rohs\": \"pass\",					\"genomicsdb\": \"waiting\", \
+				\"multivcf\": \"waiting\",				\"hdfs\": \"pass\", \
+				\"es\": \"waiting\",					\"in_platform\": \"waiting\", \
+				\"dataset\":\"\" \
+			}"
+			response2 = requests.post(q_url, data = data2, headers = headers, verify = False)
+			if response2.status_code != 200:
+				self.log.error('Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
+			else:
+				q_url = url + '&experiment=' + sam
+				response = requests.post(q_url, data = data, headers = headers, verify = False)
+				if response.status_code != 200:
+					self.log.error('After query with "forceupdate", next standard query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
 	return self
+
+
+	# for sam in full_samples:
+	# 	q_url = url + '&experiment=' + sam
+	# 	response = requests.post(q_url, data = data, headers = headers, verify = False)
+	# 	if response.status_code != 200:
+	# 		q_url = url + '&forceupdate=true&experiment=' + sam
+	# 		response2 = requests.post(q_url, data = data, headers = headers, verify = False)
+	# 		if response2.status_code != 200:
+	# 			self.log.error('> Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
+	# 		else:
+	# 			self.log.warning('> Query for "{}" resulted in {}. Forced update was successful with {}'.format(sam, response.status_code, response2.status_code))
+				
+	# 			# data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
+	# 			# 	\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
+	# 			# 	\"qc\": \"pass\",					\"coverage\": \"pass\", \
+	# 			# 	\"cnv\": \"waiting\",				\"variantCalling\": \"pass\", \
+	# 			# 	\"rohs\": \"pass\",					\"genomicsdb\": \"pass\", \
+	# 			# 	\"multivcf\": \"pass\",				\"hdfs\": \"pass\", \
+	# 			# 	\"es\": \"pass\",					\"in_platform\": \"pass\", \
+	# 			# 	\"dataset\":\"" + index_name + "\" \
+	# 			# }"
+	# 			# response2 = requests.post(q_url, data = data, headers = headers, verify = False)
+	# 			# if response2.status_code != 200:
+	# 			# 	accum.append((sam, response, response2))
 
 
 def update_dm_by_experiment(config, log = VoidLog(), experiments = [], flag = None, value = 'pass', is_playground = False):
