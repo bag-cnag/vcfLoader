@@ -20,7 +20,7 @@ This module contains the functions used to create a sparse matrix and to append
 experiments to an already existing sparse matrix.
 """
 
-def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), experiments = [], largeBatch = 500, smallBatch = 100):
+def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), experiments = [],):
 	""" [...]
 	
 	process/moving_to
@@ -42,8 +42,6 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		provided or set to None the logger is looked into the GenomicData in 
 		self. If no logger is in the provided nor in the GenomicData, then no
 	log is performed.
-	largeBatch
-	smallBatch
 	"""
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_sparse_matrix"')

@@ -10,6 +10,10 @@ from rdconnect.utils import check_class_and_config
 from rdconnect.classLog import VoidLog
 
 def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_playground = False, samples = [], flag = None, value = 'pass'):
+	"""
+	Check guidelines on (POST :: /api/statusbyexperiment/):
+		https://platform.rd-connect.eu/datamanagement/api-docs/
+	"""
 	isSelf = True
 	if self is None:
 		isSelf = False
@@ -69,8 +73,6 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			self.log.error('Query #{} for experiment {} resulted in a {} message'.format(str(ii), sam, str(response.status_code)))
-			#raise Exception('Query #{} for experiment {} resulted in a {} status with content "{}"'.format(str(ii), sam, str(response.status_code), str(response.content)))
-			print('--> Query #{} for experiment {} resulted in a {} status with content "{}"'.format(str(ii), sam, str(response.status_code), str(response.content)))
 
 	return self
 
