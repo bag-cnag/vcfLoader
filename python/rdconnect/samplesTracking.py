@@ -68,7 +68,7 @@ def sample_index(self = None, config = None, hl = None, log = None):
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
 	self.log.debug('Total of {0} experiments were loaded'.format(len(full_samples)))
 
-	samples.set_experiment(config = self.config, log = self.log, samples = full_samples, flag = 'dataset', value = self.config['resources/elasticsearch/index_name'])
+	samples.set_experiment(config = self.config, hl = self.hl, log = self.log, samples = full_samples, flag = 'dataset', value = self.config['resources/elasticsearch/index_name'])
 
 	# url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/api_group'])
 	# headers = { 'accept': 'application/json', 
@@ -167,7 +167,7 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
 	self.log.debug('Total of {0} experiments were loaded'.format(len(full_samples)))
 
-	samples.set_experiment(config = self.config, log = self.log, samples = full_samples, flag = 'in_platform', value = 'pass')
+	samples.set_experiment(config = self.config, hl = self.hl, log = self.log, samples = full_samples, flag = 'in_platform', value = 'pass')
 
 	# url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/api_group'])
 	# headers = { 'accept': 'application/json', 
