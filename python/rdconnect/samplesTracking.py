@@ -273,7 +273,7 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 	packs = []
 	n = 200
 	for ii in range(0, len(full_samples), n):  
-		packs = ','.join(full_samples[ii:ii + n])
+		packs.append(','.join(full_samples[ii:ii + n]))
 
 	self.log.debug('> Data-management will be queried {} times, each time with {} experiments maximum'.format(len(packs), n))
 
