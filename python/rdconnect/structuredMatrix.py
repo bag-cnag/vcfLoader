@@ -58,7 +58,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	destination_hdfs = self.config['process/moving_to_hdfs']
 	destination_ceph = self.config['process/moving_to_ceph']
 	sparse_path = self.config['applications/combine/sparse_matrix_path']
-	fylesystem = self.config['process/filesystem']
+	filesystem = self.config['process/filesystem']
 
 	smallBatch = self.config['applications/combine/sz_small_batch']
 	largeBatch = self.config['applications/combine/sz_large_batch']
@@ -74,7 +74,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	
 	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
-	if fylesystem == 'hdfs':
+	if filesystem == 'hdfs':
 		self.log.debug('> Argument "destination_hdfs" filled with "{}" it will be used'.format(destination_hdfs))
 		self.log.debug('> Argument "destination_ceph" filled with "{}" it will not be used'.format(destination_ceph))
 		destination_path = destination_hdfds
@@ -135,7 +135,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			})
 		else:
 			clean_to_process.append({
-				'file': item[1],
+				'file': item[2],
 				'id': item[3]
 			})
 
@@ -194,6 +194,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	self.data = last
 	return self
+
 
 def _name_with_chrom(base, chrom):
 		return path.join(base, 'chrom-{}'.format(chrom))
