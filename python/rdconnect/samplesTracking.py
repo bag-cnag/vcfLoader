@@ -287,7 +287,7 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 	table = {}
 	for ii, samlist in enumerate(packs):
 		q_url = url + '?experiment=' + samlist
-		response = requests.post(q_url, data = data, headers = headers, verify = False)
+		response = requests.post(q_url, headers = headers, verify = False)
 		if response.status_code != 200:
 			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
 			return 

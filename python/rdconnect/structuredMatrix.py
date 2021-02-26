@@ -193,7 +193,6 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		last = _combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ][ 0 ], 'version'), chrom)
 
 	self.data = last
-	print(type(last), type(self.data))
 	return self
 
 
