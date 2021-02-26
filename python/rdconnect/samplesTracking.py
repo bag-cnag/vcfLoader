@@ -267,14 +267,15 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 			return 
 
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
-	self.log.debug('> Number of samples in sparse matrix: {} ({}/{})'.format(len(full_samples), full_samples[ 0 ], full_samples[ -1 ]))
+	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(full_samples)))
 	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
 
-	packs, n = [], 200
+	packs = []
+	n = 200
 	for ii in range(0, len(full_samples), n):  
 		packs = ','.join(full_samples[ii:ii + n])
 
-	self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
+	self.log.debug('> Data-management will be queried {} times, each time with {} experiments maximum'.format(len(packs), n))
 
 	url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
 	headers = { 'accept': 'application/json', 
@@ -288,6 +289,8 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 	for ii, samlist in enumerate(packs):
 		q_url = url + '?experiment=' + samlist
 		response = requests.post(q_url, headers = headers, verify = False)
+		print(q_url)
+		print(headers)
 		if response.status_code != 200:
 			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
 			return 
