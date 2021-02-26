@@ -165,7 +165,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	# Create batches of samples to be loaded
 	self.log.info('> Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
 	batches = _create_batches(clean_to_process, version, largeBatch, smallBatch)
-		
+	
+	last = None
 	for idx1, batch in enumerate(batches):
 		self.log.info('> Processing large batch {}/{} {}'.format(idx1, len(batches), batch[ 'version' ]))
 
@@ -178,7 +179,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			self.log.info('     > Loading pack #{} of {} gVCF ({})'.format(idx2, len(pack[ 'content' ]), small_batch_path))
 			for f in pack['content']:
 				print(f)
-			_load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
+			last = _load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
 			accum = small_batch_path
 
 	# Collect all the small sparse matrix and iteratively accumulate them
@@ -187,14 +188,12 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		revisions_to_collect = [ version ] + revisions_to_collect
 
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
-	last = None
+	
 	for ii in range(1, len(revisions_to_collect)):
-		print(ii, revisions_to_collect[ ii ])
 		last = _combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ][ 0 ], 'version'), chrom)
 
 	self.data = last
 	print(type(last), type(self.data))
-
 	return self
 
 
@@ -241,6 +240,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 
 	comb = comb.key_rows_by('locus', 'alleles')
 	comb.write(version_path, overwrite = True)
+	return comb
 
 
 def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
