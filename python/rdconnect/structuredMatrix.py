@@ -146,11 +146,11 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	try:
 		self.data = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
-		self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
+		self.log.info('Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
 		sm_loaded = True
 	except:
 		self.data = None
-		self.log.info('> Sparse matrix {}/chrom-{} could not be found and will be created'.format(version, chrom))
+		self.log.info('Sparse matrix {}/chrom-{} could not be found and will be created'.format(version, chrom))
 		sm_loaded = False
 
 	# Check for loaded experiments
@@ -163,12 +163,12 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	#		clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
 
 	# Create batches of samples to be loaded
-	self.log.info('> Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
+	self.log.info('Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
 	batches = _create_batches(clean_to_process, version, largeBatch, smallBatch)
 	
 	last = None
 	for idx1, batch in enumerate(batches):
-		self.log.info('> Processing large batch {}/{} {}'.format(idx1, len(batches), batch[ 'version' ]))
+		self.log.info('Processing large batch {}/{} {}'.format(idx1, len(batches), batch[ 'version' ]))
 
 		accum = None
 		for idx2, pack in enumerate(batch[ 'content' ]):
@@ -176,7 +176,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 			if idx2 == len(batch[ 'content' ]) - 1:
 				vsr = batch[ 'version' ]
 			small_batch_path = _name_with_chrom(path.join(base, vsr), chrom)
-			self.log.info('     > Loading pack #{} of {} gVCF ({})'.format(idx2, len(pack[ 'content' ]), small_batch_path))
+			self.log.info('     . Loading pack #{} of {} gVCF ({})'.format(idx2, len(pack[ 'content' ]), small_batch_path))
 			for f in pack['content']:
 				print(f)
 			last = _load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
@@ -187,13 +187,12 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	if sm_loaded:
 		revisions_to_collect = [ version ] + revisions_to_collect
 
-	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
+	self.log.info('Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
 	
 	for ii in range(1, len(revisions_to_collect)):
 		last = _combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ][ 0 ], 'version'), chrom)
 
 	self.data = last
-	print("--last--> ", last)
 	return self
 
 
@@ -330,37 +329,37 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 
 
 
-def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()):
-	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
-	self.log.info('Entering step "dense_matrix_grouping"')
+def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog(), experiments = []):
+	# self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
+	# self.log.info('Entering step "dense_matrix_grouping"')
 
-	if not isConfig:
-		self.log.error('No configuration was provided')
-		raise NoConfigurationException('No configuration was provided')
+	# if not isConfig:
+	# 	self.log.error('No configuration was provided')
+	# 	raise NoConfigurationException('No configuration was provided')
 
-	if not isHl:
-		self.log.error('No pointer to HAIL module was provided')
-		raise NoHailContextException('No pointer to HAIL module was provided')
+	# if not isHl:
+	# 	self.log.error('No pointer to HAIL module was provided')
+	# 	raise NoHailContextException('No pointer to HAIL module was provided')
 
-	self.log.debug('OVERWRITING chrom to chrom-21')
+	# self.log.debug('OVERWRITING chrom to chrom-21')
 
-	chrom = 21
-	sparse_path = path.join(self.config['applications/combine/sparse_matrix_path'], 'chrom-{}'.format(chrom))
-	sparse_matrix = hl.read_matrix_table(sparse_path)
+	# chrom = 21
+	# sparse_path = path.join(self.config['applications/combine/sparse_matrix_path'], 'chrom-{}'.format(chrom))
+	# sparse_matrix = hl.read_matrix_table(sparse_path)
 
-	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
-	self.log.debug('Obtained a total of {} experiments from sparse matrix (chrom 21)'.format(len(experiments_in_matrix)))
+	# experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
+	# self.log.debug('Obtained a total of {} experiments from sparse matrix (chrom 21)'.format(len(experiments_in_matrix)))
 
-	all_group = get.experiment_by_group(config, self.log, False)
-	self.log.debug('Obtained a total of {} experiments for the group'.format(len(all_group)))
+	# all_group = get.experiment_by_group(config, self.log, False)
+	# self.log.debug('Obtained a total of {} experiments for the group'.format(len(all_group)))
 
-	full_ids_in_matrix = [ x for x in all_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-	print('full_ids_in_matrix', len( full_ids_in_matrix ))
-	print('\t', full_ids_in_matrix[ : 10 ])
+	# full_ids_in_matrix = [ x for x in all_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+	# print('full_ids_in_matrix', len( full_ids_in_matrix ))
+	# print('\t', full_ids_in_matrix[ : 10 ])
 
-	experiments_and_families = get.experiments_and_family(full_ids_in_matrix, self.config)
-	print('experiments_and_families', len( experiments_and_families ))
-	print('\t', experiments_and_families[ : 10 ])
+	# experiments_and_families = get.experiments_and_family(full_ids_in_matrix, self.config)
+	# print('experiments_and_families', len( experiments_and_families ))
+	# print('\t', experiments_and_families[ : 10 ])
 
 
 
@@ -380,10 +379,13 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	smallBatch = self.config['applications/combine/sz_small_batch']
 	largeBatch = self.config['applications/combine/sz_large_batch']
+	sparse_path = self.config['applications/combine/sparse_matrix_path']
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
+	self.log.debug('> Argument "experiments" filled with "{}"'.format(experiments))
+	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
 
 
 	if self is None:
@@ -391,7 +393,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 			self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
 			self.config['process/chrom'] = '21'
 
-		sparse_path = self.config['applications/combine/sparse_matrix_path']
+		
 		chrom = self.config['process/chrom']
 
 		# Get version of sparse matrix
@@ -403,9 +405,9 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 		# Load sparse matrix
 		try:
 			self.data = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
-			self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
+			self.log.info('Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
 		except:
-			self.log.error('> Sparse matrix {}/chrom-{} could not be found'.format(version, chrom))
+			self.log.error('Sparse matrix {}/chrom-{} could not be found'.format(version, chrom))
 			return 
 
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
