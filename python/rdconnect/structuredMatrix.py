@@ -193,6 +193,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		last = _combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ][ 0 ], 'version'), chrom)
 
 	self.data = last
+	print(type(last), type(self.data))
+	
 	return self
 
 
@@ -359,37 +361,78 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	print('\t', experiments_and_families[ : 10 ])
 
 
-	# # Get all the experiments that have to processed from data-management
-	# experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
-	# print('experiments_in_group', len( experiments_in_group ))
-	# print('\t', experiments_in_group[ : 2 ])
-	# full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-	# print('full_ids_in_matrix', len( full_ids_in_matrix ))
-	# print('\t', full_ids_in_matrix[ : 2 ])
-	# experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
-	# print('experiments_and_families', len( experiments_and_families ))
 
-	# # Relocate experiments with no family
-	# none_detected = False
-	# x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-	# for ii in range( len( experiments_and_families ) ):
-	#     if experiments_and_families[ ii ][ 2 ] == '---':
-	#         none_detected = True
-	#         experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
-	# y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-	# if none_detected:
-	#     warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
-	# experiments_and_families.sort(key=lambda x: x[ 0 ])
 
-	# batches = create_batches_by_family( experiments_and_families, 1000 )
-	# lgr.debug( 'Created {} batches'.format( len( batches ) ) )
-	# #for ii, bat in enumerate(batches):
-	# #    print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
-	# for sam in batches:
-	#     print(sam[0], "\t", sam[1], "\t", sam[2], "\t", sam[3])
 
-	# log_path = '{0}/mapping'.format(dense_matrix_path)
-	# rdd = sc.parallelize(batches)
-	# experiments = rdd.map(lambda x: Row( RD_Connect_ID = x[ 0 ], PhenoTips = x[ 1 ], Family = x[ 2 ], DMatrix = x[ 3 ]))
-	# df = sq.createDataFrame(experiments)
-	# df.repartition(1).write.format('csv').mode('overwrite').save(log_path, header = 'true')
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to=SparseMatrix)
+	self.log.info('Entering updating step "DM - samples_in_dm"')
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+
+	smallBatch = self.config['applications/combine/sz_small_batch']
+	largeBatch = self.config['applications/combine/sz_large_batch']
+
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
+	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
+
+
+	if self is None:
+		if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
+			self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
+			self.config['process/chrom'] = '21'
+
+		sparse_path = self.config['applications/combine/sparse_matrix_path']
+		chrom = self.config['process/chrom']
+
+		# Get version of sparse matrix
+		version = path.basename(path.normpath(sparse_path))
+		base = sparse_path.replace(version, '')
+		self.log.debug('> Detected version of sparse matrix {}'.format(version))
+		self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
+
+		# Load sparse matrix
+		try:
+			self.data = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
+			self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
+		except:
+			self.log.error('> Sparse matrix {}/chrom-{} could not be found'.format(version, chrom))
+			return 
+
+	full_samples = [ y.get('s') for y in self.data.col.collect() ]
+	self.log.debug('> Number of samples in sparse matrix: {} ({}/{})'.format(len(full_samples), full_samples[ 0 ], full_samples[ -1 ]))
+	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
+
+	packs, n = [], 200
+	for ii in range(0, len(full_samples), n):  
+		packs = ','.join(full_samples[ii:ii + n])
+
+	self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
+
+	url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
+	headers = { 'accept': 'application/json', 
+		'Content-Type': 'application/json', 
+		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
+		'Host': self.config['applications/datamanagement/host'] }
+
+	self.log.debug('> Created query URL for data-management: {}'.format(url))
+
+	table = {}
+	for ii, samlist in enumerate(packs):
+		q_url = url + '?experiment=' + samlist
+		response = requests.post(q_url, data = data, headers = headers, verify = False)
+		if response.status_code != 200:
+			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
+			return 
+		else:
+			data = json.loads(resp.content)
+			table.update(data)
+	print(table)
+	return self
