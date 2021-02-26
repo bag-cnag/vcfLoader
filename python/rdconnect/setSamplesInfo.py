@@ -66,9 +66,6 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 		raise Exception('No "flag" was provided.')
 	data = "{\"" + flag + "\": \"" + value + "\"}"
 
-	print("headers", headers)
-	print("data", data)
-
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
 	for ii, sam in enumerate(samples):
@@ -78,11 +75,11 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 			q_url = url + '&forceupdate=true&experiment=' + sam
 			data2 = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
 				\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
-				\"qc\": \"waiting\",					\"coverage\": \"pass\", \
+				\"qc\": \"waiting\",				\"coverage\": \"pass\", \
 				\"cnv\": \"waiting\",				\"variantCalling\": \"pass\", \
 				\"rohs\": \"pass\",					\"genomicsdb\": \"waiting\", \
-				\"multivcf\": \"waiting\",				\"hdfs\": \"pass\", \
-				\"es\": \"waiting\",					\"in_platform\": \"waiting\", \
+				\"multivcf\": \"waiting\",			\"hdfs\": \"pass\", \
+				\"es\": \"waiting\",				\"in_platform\": \"waiting\", \
 				\"dataset\":\"\" \
 			}"
 			response2 = requests.post(q_url, data = data2, headers = headers, verify = False)
@@ -92,7 +89,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 				q_url = url + '&experiment=' + sam
 				response = requests.post(q_url, data = data, headers = headers, verify = False)
 				if response.status_code != 200:
-					self.log.error('After query with "forceupdate", next standard query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
+					self.log.error('After query with "forceupdate", next query for "{}" resulted in {} ({}). Forced update resulted in {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
 	return self
 
 

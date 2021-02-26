@@ -20,7 +20,7 @@ This module contains the functions used to create a sparse matrix and to append
 experiments to an already existing sparse matrix.
 """
 
-def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), experiments = [],):
+def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog(), experiments = []):
 	""" [...]
 	
 	process/moving_to
@@ -58,6 +58,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	destination_hdfs = self.config['process/moving_to_hdfs']
 	destination_ceph = self.config['process/moving_to_ceph']
 	sparse_path = self.config['applications/combine/sparse_matrix_path']
+	fylesystem = self.config['process/filesystem']
 
 	smallBatch = self.config['applications/combine/sz_small_batch']
 	largeBatch = self.config['applications/combine/sz_large_batch']
@@ -71,11 +72,17 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	elif chrom_str == '25':
 		chrom_str = 'Y'
 
+	
 	self.log.debug('> Argument "chrom" filled with "{}/{}"'.format(chrom, chrom_str))
-	self.log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
-	self.log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
+	if fylesystem == 'hdfs':
+		self.log.debug('> Argument "destination_hdfs" filled with "{}" it will be used'.format(destination_hdfs))
+		self.log.debug('> Argument "destination_ceph" filled with "{}" it will not be used'.format(destination_ceph))
+		destination_path = destination_hdfds
+	else:
+		self.log.debug('> Argument "destination_hdfs" filled with "{}" it will not be used'.format(destination_hdfs))
+		self.log.debug('> Argument "destination_ceph" filled with "{}" it will be used'.format(destination_ceph))
+		destination_path = destination_ceph
 	self.log.debug('> Argument "experiments" filled with "{}"'.format(experiments))
-	#self.log.debug('> Argument "queryBatch" filled with "{}"'.format(queryBatch))
 	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
@@ -121,12 +128,16 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	#experiments = ['AS5120', 'AS5121', 'AS5122', 'AS5123', 'AS5124', 'AS5125', 'AS5126', 'AS5127', 'AS5128']
 	clean_to_process = []
 	for item in experiments:
-		clean_to_process.append({
-			'file': 'hdfs://10.1.11.7:27000/test/Navbiomed/2655/{}.bqsr.bam.{}.g.vcf.bgz'.format(item, chrom_str),
-			#'file': 's3a://cnag/' + item[1],
-			#'id': item[3]
-			'id': item
-		})
+		if filesystem == 'chep':
+			clean_to_process.append({
+				'file': 's3a://cnag/' + item[1],
+				'id': item[3]
+			})
+		else:
+			clean_to_process.append({
+				'file': item[1],
+				'id': item[3]
+			})
 
 	# Get version of sparse matrix
 	version = path.basename(path.normpath(sparse_path))
@@ -138,6 +149,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
 		sm_loaded = True
 	except:
+		self.data = None
 		self.log.info('> Sparse matrix {}/chrom-{} could not be found and will be created'.format(version, chrom))
 		sm_loaded = False
 
@@ -171,14 +183,16 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	# Collect all the small sparse matrix and iteratively accumulate them
 	revisions_to_collect = [ pack[ 'version' ] for pack in batches ]
-	if sm_loaded:
-		revisions_to_collect = [ (None, version) ] + revisions_to_collect
+	revisions_to_collect = [ (self.data, version) ] + revisions_to_collect
+
 
 	self.log.info('> Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
+	last = None
 	for ii in range(1, len(revisions_to_collect)):
 		print(ii, revisions_to_collect[ ii ])
-		_combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'), chrom)
+		last = _combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'), chrom)
 
+	self.data = last
 	return self
 
 def _name_with_chrom(base, chrom):
@@ -193,6 +207,7 @@ def _combine_mt(hl, base, ver1, ver2, verD, chrom):
 	sm_2 = hl.read_matrix_table(sm2)
 	comb = combine_gvcfs([ sm_1 ] + [ sm_2 ])
 	comb.write(smD, overwrite = True)
+	return comb
 
 
 def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, partitions):

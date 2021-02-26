@@ -45,6 +45,7 @@ def experiments(config, log = VoidLog(), is_playground = False):
 	data = json.loads(resp.content)
 	return data
 
+
 def experiment_by_group(config, log = VoidLog(), is_playground = False):
 	"""Function used to query data-management and get a list of experiments
 	that belongs to a specific group of users.
