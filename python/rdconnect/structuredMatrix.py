@@ -194,7 +194,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	self.data = last
 	print(type(last), type(self.data))
-	
+
 	return self
 
 
@@ -209,7 +209,9 @@ def _combine_mt(hl, base, ver1, ver2, verD, chrom):
 	sm_1 = hl.read_matrix_table(sm1)
 	sm_2 = hl.read_matrix_table(sm2)
 	comb = combine_gvcfs([ sm_1 ] + [ sm_2 ])
+	print(type(comb))
 	comb.write(smD, overwrite = True)
+	print(type(comb))
 	return comb
 
 
