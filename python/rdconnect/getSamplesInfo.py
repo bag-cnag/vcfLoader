@@ -196,11 +196,10 @@ def experiments_and_family(pids, config, sort_output = True):
 
 
 
-def experiments_with_dm_traking(pids, config, log):
+def experiments_with_dm_traking(pids, config, log, n = 200):
 	packs = []
-	n = 200
-	for ii in range(0, len(full_samples), n):  
-		packs.append(','.join(full_samples[ii:ii + n]))
+	for ii in range(0, len(pids), n):  
+		packs.append(','.join(pids[ii:ii + n]))
 	log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
 
 	url = 'https://' + config['applications/datamanagement/api_sm'].format(config['applications/datamanagement/ip'])
