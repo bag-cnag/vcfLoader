@@ -372,6 +372,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to=SparseMatrix)
 	self.log.info('Entering gathering step "DM - dense_matrix_grouping"')
+	print(isSelf, self, isConfig, isHl)
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
@@ -381,6 +382,8 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	smallBatch = self.config['applications/combine/sz_small_batch']
 	largeBatch = self.config['applications/combine/sz_large_batch']
 	sparse_path = self.config['applications/combine/sparse_matrix_path']
+
+	print(smallBatch, largeBatch, sparse_path)
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
@@ -412,12 +415,16 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 			return 
 
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
-	self.log.debug('> Number of samples in sparse matrix: {} ({}/{})'.format(len(full_samples), full_samples[ 0 ], full_samples[ -1 ]))
+	print(full_samples)
+	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(full_samples)))
 	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
 
-	packs, n = [], 200
+	packs = []
+	n = 200
 	for ii in range(0, len(full_samples), n):  
 		packs.append(','.join(full_samples[ii:ii + n]))
+
+	print(packs)
 
 	self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
 
@@ -431,6 +438,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	table = {}
 	for ii, samlist in enumerate(packs):
+		print(ii, samlist)
 		q_url = url + '?experiment=' + samlist
 		response = requests.post(q_url, headers = headers, verify = False)
 		if response.status_code != 200:
