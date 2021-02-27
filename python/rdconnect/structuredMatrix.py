@@ -361,20 +361,12 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	# print('experiments_and_families', len( experiments_and_families ))
 	# print('\t', experiments_and_families[ : 10 ])
 
-	print("--self-->", self)
-	print("--self.log-->", self.log)
-	print("--self.config-->", self.config)
-
-
-
-
 	isSelf = True
 	if self is None:
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to=SparseMatrix)
 	self.log.info('Entering gathering step "DM - dense_matrix_grouping"')
-	print(isSelf, self, isConfig, isHl)
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
@@ -384,8 +376,6 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	smallBatch = self.config['applications/combine/sz_small_batch']
 	largeBatch = self.config['applications/combine/sz_large_batch']
 	sparse_path = self.config['applications/combine/sparse_matrix_path']
-
-	print(smallBatch, largeBatch, sparse_path)
 
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
 	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
@@ -417,7 +407,6 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 			return 
 
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
-	print(full_samples)
 	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(full_samples)))
 	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
 
@@ -425,9 +414,6 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	n = 200
 	for ii in range(0, len(full_samples), n):  
 		packs.append(','.join(full_samples[ii:ii + n]))
-
-	print(packs)
-
 	self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
 
 	url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
@@ -441,17 +427,12 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	table = {}
 	for ii, samlist in enumerate(packs):
 		q_url = url + '?experiments=' + samlist
-		print(ii, samlist)
-		print(q_url)
-		print(headers)
 		response = requests.get(q_url, headers = headers, verify = False)
-		print(response.status_code)
 		if response.status_code != 200:
 			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
 			return 
 		else:
-			data = json.loads(resp.content)
-			print(">", data)
+			data = json.loads(response.content)
 			table.update(data)
 	print(table)
 	return self
