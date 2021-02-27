@@ -362,6 +362,8 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	# print('\t', experiments_and_families[ : 10 ])
 
 	print("--self-->", self)
+	print("--self.log-->", self.log)
+	print("--self.config-->", self.config)
 
 
 
@@ -438,14 +440,18 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	table = {}
 	for ii, samlist in enumerate(packs):
-		print(ii, samlist)
 		q_url = url + '?experiment=' + samlist
+		print(ii, samlist)
+		print(q_url)
+		print(header)
 		response = requests.post(q_url, headers = headers, verify = False)
+		print(response.status_code)
 		if response.status_code != 200:
 			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
 			return 
 		else:
 			data = json.loads(resp.content)
+			print(">", data)
 			table.update(data)
 	print(table)
 	return self
