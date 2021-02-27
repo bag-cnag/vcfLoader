@@ -431,8 +431,8 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
 
 	url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
-	headers = { 'accept': 'application/json', 
-		'Content-Type': 'application/json', 
+	headers = { #'accept': 'application/json', 
+		#'Content-Type': 'application/json', 
 		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
 		'Host': self.config['applications/datamanagement/host'] }
 
