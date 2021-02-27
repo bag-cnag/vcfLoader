@@ -410,29 +410,36 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(full_samples)))
 	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
 
-	packs = []
-	n = 200
-	for ii in range(0, len(full_samples), n):  
-		packs.append(','.join(full_samples[ii:ii + n]))
-	self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
+	# packs = []
+	# n = 200
+	# for ii in range(0, len(full_samples), n):  
+	# 	packs.append(','.join(full_samples[ii:ii + n]))
+	# self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
 
-	url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
-	headers = { #'accept': 'application/json', 
-		#'Content-Type': 'application/json', 
-		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
-		'Host': self.config['applications/datamanagement/host'] }
+	# url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
+	# headers = { #'accept': 'application/json', 
+	# 	#'Content-Type': 'application/json', 
+	# 	'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
+	# 	'Host': self.config['applications/datamanagement/host'] }
 
-	self.log.debug('> Created query URL for data-management: {}'.format(url))
+	# self.log.debug('> Created query URL for data-management: {}'.format(url))
 
-	table = {}
-	for ii, samlist in enumerate(packs):
-		q_url = url + '?experiments=' + samlist
-		response = requests.get(q_url, headers = headers, verify = False)
-		if response.status_code != 200:
-			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
-			return 
-		else:
-			data = json.loads(response.content)
-			table.update(data)
+	# table = {}
+	# for ii, samlist in enumerate(packs):
+	# 	q_url = url + '?experiments=' + samlist
+	# 	response = requests.get(q_url, headers = headers, verify = False)
+	# 	if response.status_code != 200:
+	# 		self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
+	# 		return 
+	# 	else:
+	# 		data = json.loads(response.content)
+	# 		table.update(data)
+	
+
+	exp_dm = get.experiments_with_dm_traking(full_samples, self.config, self.log)
+	exp_fam = get.experiments_and_family(full_samples, self.config)
+
 	print(table)
+	print(exp_fam)
+
 	return self

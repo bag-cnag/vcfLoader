@@ -192,3 +192,33 @@ def experiments_and_family(pids, config, sort_output = True):
 		return sorted( rst, key = lambda x: x[ 2 ] )
 	else:
 		return rst
+
+
+
+
+def experiments_with_dm_traking(pids, config, log):
+	packs = []
+	n = 200
+	for ii in range(0, len(full_samples), n):  
+		packs.append(','.join(full_samples[ii:ii + n]))
+	log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
+
+	url = 'https://' + config['applications/datamanagement/api_sm'].format(config['applications/datamanagement/ip'])
+	headers = { 'accept': 'application/json', 
+		'Content-Type': 'application/json', 
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] }
+
+	log.debug('> Created query URL for data-management: {}'.format(url))
+
+	table = {}
+	for ii, samlist in enumerate(packs):
+		q_url = url + '?experiments=' + samlist
+		response = requests.get(q_url, headers = headers, verify = False)
+		if response.status_code != 200:
+			log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
+			return 
+		else:
+			data = json.loads(response.content)
+			table.update(data)
+	return table

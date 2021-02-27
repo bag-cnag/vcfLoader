@@ -96,6 +96,8 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 	
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+
+	log.debug('> Obtained a total of "{}" samples for the group to be processed and mapped'.format(len(to_process_group)))
 	with open('transfer_files.txt', 'w') as fw:
 		for ii, xx in enumerate(to_process_group):
 			for chrm in chrm_str:

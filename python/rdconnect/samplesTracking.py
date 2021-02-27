@@ -228,7 +228,7 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 	if self is None:
 		isSelf = False
 
-	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to=SparseMatrix)
+	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering updating step "DM - samples_in_dm"')
 
 	if not isConfig:
@@ -270,32 +270,32 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(full_samples)))
 	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
 
-	packs = []
-	n = 200
-	for ii in range(0, len(full_samples), n):  
-		packs.append(','.join(full_samples[ii:ii + n]))
+	# packs = []
+	# n = 200
+	# for ii in range(0, len(full_samples), n):  
+	# 	packs.append(','.join(full_samples[ii:ii + n]))
 
-	self.log.debug('> Data-management will be queried {} times, each time with {} experiments maximum'.format(len(packs), n))
+	# self.log.debug('> Data-management will be queried {} times, each time with {} experiments maximum'.format(len(packs), n))
 
-	url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
-	headers = { 'accept': 'application/json', 
-		'Content-Type': 'application/json', 
-		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
-		'Host': self.config['applications/datamanagement/host'] }
+	# url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
+	# headers = { 'accept': 'application/json', 
+	# 	'Content-Type': 'application/json', 
+	# 	'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
+	# 	'Host': self.config['applications/datamanagement/host'] }
 
-	self.log.debug('> Created query URL for data-management: {}'.format(url))
+	# self.log.debug('> Created query URL for data-management: {}'.format(url))
 
-	table = {}
-	for ii, samlist in enumerate(packs):
-		q_url = url + '?experiment=' + samlist
-		response = requests.post(q_url, headers = headers, verify = False)
-		print(q_url)
-		print(headers)
-		if response.status_code != 200:
-			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
-			return 
-		else:
-			data = json.loads(resp.content)
-			table.update(data)
-	print(table)
+	# table = {}
+	# for ii, samlist in enumerate(packs):
+	# 	q_url = url + '?experiment=' + samlist
+	# 	response = requests.post(q_url, headers = headers, verify = False)
+	# 	print(q_url)
+	# 	print(headers)
+	# 	if response.status_code != 200:
+	# 		self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
+	# 		return 
+	# 	else:
+	# 		data = json.loads(resp.content)
+	# 		table.update(data)
+	# print(table)
 	return self
