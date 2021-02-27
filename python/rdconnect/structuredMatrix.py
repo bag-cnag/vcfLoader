@@ -443,7 +443,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 		q_url = url + '?experiment=' + samlist
 		print(ii, samlist)
 		print(q_url)
-		print(header)
+		print(headers)
 		response = requests.post(q_url, headers = headers, verify = False)
 		print(response.status_code)
 		if response.status_code != 200:
