@@ -58,7 +58,6 @@ def transform(self = None, config = None, hl = None, log = None):
 	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
 	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
 	source_path = os.path.join(source_path, source_file)
-	#destination_path = utils.destination_transform(self.config['process/destination_path'], self.config['resources/elasticsearch/version'], 'chrom=' + str(self.config['process/chrom']))
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
 	destination_file = utils.destination_transform(destination_path, destination_file, self.config['resources/elasticsearch/type'])
@@ -79,10 +78,6 @@ def transform(self = None, config = None, hl = None, log = None):
 	vcf.to_spark() \
 		.drop('locus.contig', 'locus.position', 'alleles') \
 		.write.mode('overwrite').save(destination_file)
-
-	print("*" * 100)
-	print(vcf.describe())
-	print("*" * 100)
 
 	if 'flags' not in vars(self):
 		self.flags = {'transform': (True, destination_file)}

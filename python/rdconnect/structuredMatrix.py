@@ -361,6 +361,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	# print('experiments_and_families', len( experiments_and_families ))
 	# print('\t', experiments_and_families[ : 10 ])
 
+	print("--self-->", self)
 
 
 
