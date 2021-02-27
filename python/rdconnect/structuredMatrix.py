@@ -370,7 +370,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to=SparseMatrix)
-	self.log.info('Entering updating step "DM - samples_in_dm"')
+	self.log.info('Entering gathering step "DM - dense_matrix_grouping"')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
