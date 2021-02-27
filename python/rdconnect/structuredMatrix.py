@@ -440,7 +440,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	table = {}
 	for ii, samlist in enumerate(packs):
-		q_url = url + '?experiment=' + samlist
+		q_url = url + '?experiments=' + samlist
 		print(ii, samlist)
 		print(q_url)
 		print(headers)
