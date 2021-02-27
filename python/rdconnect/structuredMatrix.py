@@ -444,7 +444,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 		print(ii, samlist)
 		print(q_url)
 		print(headers)
-		response = requests.post(q_url, headers = headers, verify = False)
+		response = requests.get(q_url, headers = headers, verify = False)
 		print(response.status_code)
 		if response.status_code != 200:
 			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
