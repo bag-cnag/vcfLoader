@@ -177,7 +177,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		'Authorization': config['application/kc_token'], 
 		'Host': config['applications/phenostore/host'] 
 	}
-	data=[]
+	data = {}
 	for i in range(0,(len(pids)//1000)+1) :
 		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
 		body = { 'patients': [ { 'id': x } for x in pids[(i*1000):((i+1)*1000)] ] }
