@@ -1203,7 +1203,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	# 		table.update(data)
 
 	test = get.experiment_status(self.config)
-	print(test)
+	print("test:", test)
 	
 
 	exp_dm = get.experiments_with_dm_traking(full_samples, self.config, self.log)
