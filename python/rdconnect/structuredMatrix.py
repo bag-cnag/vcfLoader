@@ -1066,6 +1066,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		#	sam = hl.literal([ x[ 0 ] for x in batch ], 'array<str>')
 		sam = hl.literal(experiments_in_matrix, 'array<str>')
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
+		small_matrix = small_matrix.key_rows_by('locus', 'alleles')
 		small_matrix = hl.experimental.sparse_split_multi(small_matrix, filter_changed_loci = True)
 		small_matrix = hl.experimental.densify(small_matrix)
 		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.LGT.is_non_ref()))
