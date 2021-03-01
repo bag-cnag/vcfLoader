@@ -1176,7 +1176,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	else:
 		self.log.info('> Since "self" is not provided "experiments" will be used.')
 		self.log.debug('> Total of {0} experiments where read from file'.format(len(experiments)))
-		experiments_to_proc = experiments
+		experiments_to_proc = [ x[3] for x in experiments ]
 
 	
 	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(experiments)))
