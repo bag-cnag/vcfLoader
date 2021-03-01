@@ -169,7 +169,10 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	
 
 def experiments_and_family(pids, config, sort_output = True):
-	url = "https://" + config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
+	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+	
 	headers = { 'Content-Type': 'application/json', 
 		'Authorization': config['application/kc_token'], 
 		'Host': config['applications/phenostore/host'] 
@@ -205,7 +208,10 @@ def experiments_with_dm_traking(pids, config, log, n = 200):
 		packs.append(','.join(pids[ii:ii + n]))
 	log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
 
-	url = 'https://' + config['applications/datamanagement/api_sm'].format(config['applications/datamanagement/ip'])
+	url = config['applications/datamanagement/api_sm'].format(config['applications/datamanagement/ip'])
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
 	headers = { 'accept': 'application/json', 
 		'Content-Type': 'application/json', 
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
