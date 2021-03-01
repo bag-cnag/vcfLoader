@@ -437,6 +437,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	
 
 	exp_dm = get.experiments_with_dm_traking(full_samples, self.config, self.log)
+	print(exp_dm)
 	exp_fam = get.experiments_and_family(full_samples, self.config)
 
 	print(table)
