@@ -274,7 +274,7 @@ def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
 
 	return rst
 
-def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog()):
+def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog(), experiments = []):
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_dense_matrices"')
 
@@ -307,6 +307,8 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 
 	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
 	self.log.debug('Total of {0} experiments in sparse matrix'.format( len( experiments_in_matrix ) ))
+	self.log.debug('Total of {0} experiments where read from file'.format(len(experiments)))
+	print(experiments)
 
 	idx = 0
 	try:
@@ -314,6 +316,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		#	self.log.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
 		#	sam = hl.literal([ x[ 0 ] for x in batch ], 'array<str>')
 		sam = hl.literal(experiments_in_matrix, 'array<str>')
+		small_matrix = hl.experimental.sparse_split_multi(small_matrix, filter_changed_loci = True)
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
 		small_matrix = hl.experimental.densify(small_matrix)
 		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.LGT.is_non_ref()))
