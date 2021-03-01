@@ -169,7 +169,7 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	
 
 def experiments_and_family(pids, config, sort_output = True):
-	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
+	url = "https:" + config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
 	headers = { 'Content-Type': 'application/json', 
 		'Authorization': config['application/kc_token'], 
 		'Host': config['applications/phenostore/host'] 
@@ -180,7 +180,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		body = { 'patients': [ { 'id': x } for x in pids[(i*1000):((i+1)*1000)] ] }
 		print("--->", url)
 		print("---with-->", body)
-		resp = requests.post(url, headers = headers, data = body, verify = False)
+		resp = requests.post(url, headers = headers, json = body, verify = False)
 		data = data + resp.json()
 	parsed = {}
 	for elm in data:
