@@ -186,12 +186,11 @@ def experiments_and_family(pids, config, sort_output = True):
 		resp = requests.post(url, headers = headers, json = body, verify = False)
 		data.update(resp.json())
 	parsed = {}
-	for elm in data:
-		pid = list( elm.keys() )[ 0 ]
-		if type( elm[ pid ] ) == str:
+	for key in data.keys():
+		if 'family' in data[ key ].keys() and data[ key ][ 'family' ] != 'none':
+			fam = data[ key ][ 'family' ]
+		else:
 			fam = '---'
-		else: 
-			fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
 		parsed[ pid ] = fam
 	rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Participant_ID' ], parsed[ pak[ 'Participant_ID' ] ] ] for pak in pids ]
 	if sort_output:
