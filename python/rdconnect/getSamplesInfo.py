@@ -179,7 +179,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
 		body = { 'patients': [ { 'id': x } for x in pids[(i*1000):((i+1)*1000)] ] }
 		print(body)
-		resp = requests.post( url, headers = headers, json = body, verify = False )
+		resp = requests.post(url, headers = headers, data = body, verify = False)
 		data = data + resp.json()
 	parsed = {}
 	for elm in data:
