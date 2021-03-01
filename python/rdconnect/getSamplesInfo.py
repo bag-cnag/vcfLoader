@@ -169,6 +169,7 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	
 
 def experiments_and_family(pids, config, sort_output = True):
+	print("in: ", pids)
 	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)

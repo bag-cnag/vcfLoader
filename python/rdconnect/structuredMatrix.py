@@ -1171,11 +1171,12 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 			self.log.error('Sparse matrix {}/chrom-{} could not be found'.format(version, chrom))
 			return 
 
-		experiments = [ y.get('s') for y in self.data.col.collect() ]
+		experiments_to_proc = [ y.get('s') for y in self.data.col.collect() ]
 
 	else:
 		self.log.info('> Since "self" is not provided "experiments" will be used.')
 		self.log.debug('> Total of {0} experiments where read from file'.format(len(experiments)))
+		experiments_to_proc = experiments
 
 	
 	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(experiments)))
@@ -1208,8 +1209,9 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	self.log.debug('> Query DM to gather PhenoStore ids.')
 	full_experiments = get.experiment_by_group(self.config, self.log)
+	print(experiments_to_proc)
 
-	exp_for_ps = [ (x['RD_Connect_ID_Experiment'], x['Participant_ID']) for x in full_experiments if x['RD_Connect_ID_Experiment'] in experiments ]
+	exp_for_ps = [ (x['RD_Connect_ID_Experiment'], x['Participant_ID']) for x in full_experiments if x['RD_Connect_ID_Experiment'] in experiments_to_proc ]
 	print(exp_for_ps)
 
 
