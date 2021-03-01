@@ -1209,13 +1209,14 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	self.log.debug('> Query DM to gather PhenoStore ids.')
 	full_experiments = get.experiment_by_group(self.config, self.log)
-	print(experiments_to_proc)
+	print("experiments_to_proc:", experiments_to_proc)
+	print("full_experiments\n", full_experiments)
 
 	exp_for_ps = [ (x['RD_Connect_ID_Experiment'], x['Participant_ID']) for x in full_experiments if x['RD_Connect_ID_Experiment'] in experiments_to_proc ]
-	print(exp_for_ps)
+	print("exp_for_ps:", exp_for_ps)
 
 
 	exp_and_fam = get.experiments_and_family([ x[1] for x in exp_for_ps ], self.config)
-	print(exp_and_fam)
+	print("exp_and_fam:", exp_and_fam)
 
 	return self
