@@ -177,8 +177,7 @@ def experiments_and_family(pids, config, sort_output = True):
 	data=[]
 	for i in range(0,(len(pids)//1000)+1) :
 		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
-		#body = { 'patients': [ { 'id': x } for x in pids[(i*1000):((i+1)*1000)] ] }
-		body = "{\"patients\": [" + ",".join([ "{\"id\": \"{}\"}".format(x) for x in pids[(i*1000):((i+1)*1000)] ]) + "]}"
+		body = { 'patients': [ { 'id': x } for x in pids[(i*1000):((i+1)*1000)] ] }
 		print("--->", url)
 		print("---with-->", body)
 		resp = requests.post(url, headers = headers, data = body, verify = False)
