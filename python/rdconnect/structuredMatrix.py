@@ -1069,7 +1069,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		small_matrix = small_matrix.key_rows_by('locus', 'alleles')
 		small_matrix = hl.experimental.sparse_split_multi(small_matrix, filter_changed_loci = True)
 		small_matrix = hl.experimental.densify(small_matrix)
-		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.LGT.is_non_ref()))
+		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.GT.is_non_ref()))
 		small_matrix = hl.split_multi_hts(small_matrix, keep_star = False)	
 		path = '{0}/chrom-{1}-mtx-{2}'.format(dense_matrix_path, chrom, idx)
 		self.log.info('Writing dense matrix {} to disk ({})'.format(idx, path))
