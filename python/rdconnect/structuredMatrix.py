@@ -1146,7 +1146,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "experiments" filled with "{}"'.format(experiments))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
-	self.log.debug('Total of {0} experiments where read from file'.format(len(experiments)))
+	self.log.debug('> Total of {0} experiments where read from file'.format(len(experiments)))
 	
 	print(experiments)
 
@@ -1201,6 +1201,9 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	# 	else:
 	# 		data = json.loads(response.content)
 	# 		table.update(data)
+
+	test = get.experiment_status(self.config)
+	print(test)
 	
 
 	exp_dm = get.experiments_with_dm_traking(full_samples, self.config, self.log)
