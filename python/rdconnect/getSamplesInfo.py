@@ -179,7 +179,7 @@ def experiments_and_family(pids, config, sort_output = True):
 	data = []
 	for ii in range(0,(len(pids)//1000)+1) :
 		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
-		body = { 'patients': [ { 'id': x } for x in pids[(ii*1000):((ii+1)*1000)] ] }
+		body = { 'patients': [ { 'id': x[ 1 ] } for x in pids[(ii*1000):((ii+1)*1000)] ] }
 		print("--->", url)
 		print("---with-->", body)
 		resp = requests.post(url, headers = headers, json = body, verify = False)
@@ -187,7 +187,8 @@ def experiments_and_family(pids, config, sort_output = True):
 		x = resp.json()
 		if x is dict:
 			raise Exception("Communication with PhenosTore giving \"{}\" returned 'dict' instead of 'list' with content \"{}\"".format(str(body), str(x)))
-		data += resp.json()
+		for kk in x.keys():
+			data += { kk: x[kk] }
 	print(data)
 	parsed = {}
 	for elm in data:
@@ -196,7 +197,8 @@ def experiments_and_family(pids, config, sort_output = True):
 			fam = '---'
 		else: 
 			fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
-	rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Participant_ID' ], parsed[ pak[ 'Participant_ID' ] ] ] for pak in pids ]
+		parsed[ pid ] = fam
+	rst = [ [ pak[ 0 ], pak[ 1 ], parsed[ pak[ 1 ] ] ] for pak in pids ]
 	if sort_output:
 		return sorted( rst, key = lambda x: x[ 2 ] )
 	else:
