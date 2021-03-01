@@ -1202,7 +1202,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	# 		data = json.loads(response.content)
 	# 		table.update(data)
 
-	test = get.experiment_status(self.config)
+	test = get.experiment_by_group(self.config, self.log)
 	print("test:", test)
 	
 
