@@ -1210,9 +1210,10 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	full_experiments = get.experiment_by_group(self.config, self.log)
 
 	exp_for_ps = [ (x['RD_Connect_ID_Experiment'], x['Participant_ID']) for x in full_experiments if x['RD_Connect_ID_Experiment'] in experiments ]
-	exp_and_fam = get.experiments_and_family([ x[1] for x in exp_for_ps ], self.config)
-
 	print(exp_for_ps)
+
+
+	exp_and_fam = get.experiments_and_family([ x[1] for x in exp_for_ps ], self.config)
 	print(exp_and_fam)
 
 	return self
