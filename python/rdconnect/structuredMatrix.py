@@ -1146,17 +1146,15 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "experiments" filled with "{}"'.format(experiments))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
-	self.log.debug('> Total of {0} experiments where read from file'.format(len(experiments)))
 	
-	print(experiments)
 
 
 	if self is None:
+		self.log.info('> Since "self" is provided "experiments" will not be used.')
+
 		if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
 			self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
 			self.config['process/chrom'] = '21'
-
-		
 		chrom = self.config['process/chrom']
 
 		# Get version of sparse matrix
@@ -1173,9 +1171,15 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 			self.log.error('Sparse matrix {}/chrom-{} could not be found'.format(version, chrom))
 			return 
 
-	full_samples = [ y.get('s') for y in self.data.col.collect() ]
-	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(full_samples)))
-	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
+		experiments = [ y.get('s') for y in self.data.col.collect() ]
+
+	else:
+		self.log.info('> Since "self" is not provided "experiments" will be used.')
+		self.log.debug('> Total of {0} experiments where read from file'.format(len(experiments)))
+
+	
+	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(experiments)))
+	self.log.debug('> First and last sample: {} // {}'.format(experiments[0], experiments[len(experiments) - 1]))
 
 	# packs = []
 	# n = 200
@@ -1202,15 +1206,13 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	# 		data = json.loads(response.content)
 	# 		table.update(data)
 
-	test = get.experiment_by_group(self.config, self.log)
-	print("test:", test)
-	
+	self.log.debug('> Query DM to gather PhenoStore ids.')
+	full_experiments = get.experiment_by_group(self.config, self.log)
 
-	exp_dm = get.experiments_with_dm_traking(full_samples, self.config, self.log)
-	print(exp_dm)
-	exp_fam = get.experiments_and_family(full_samples, self.config)
+	exp_for_ps = [ (x['RD_Connect_ID_Experiment'], x['Participant_ID']) for x in full_experiments if x['RD_Connect_ID_Experiment'] in experiments ]
+	exp_and_fam = get.experiments_and_family([ x[1] for x in exp_for_ps ], self.config)
 
-	print(table)
-	print(exp_fam)
+	print(exp_for_ps)
+	print(exp_and_fam)
 
 	return self
