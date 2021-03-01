@@ -184,7 +184,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		print("--->", url)
 		print("---with-->", body)
 		resp = requests.post(url, headers = headers, json = body, verify = False)
-		data = data + resp.json()
+		data.update(resp.json())
 	parsed = {}
 	for elm in data:
 		pid = list( elm.keys() )[ 0 ]
