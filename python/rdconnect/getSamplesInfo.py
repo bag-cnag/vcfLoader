@@ -178,12 +178,13 @@ def experiments_and_family(pids, config, sort_output = True):
 		'Host': config['applications/phenostore/host'] 
 	}
 	data = {}
-	for i in range(0,(len(pids)//1000)+1) :
+	for ii in range(0,(len(pids)//1000)+1) :
 		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
-		body = { 'patients': [ { 'id': x } for x in pids[(i*1000):((i+1)*1000)] ] }
+		body = { 'patients': [ { 'id': x } for x in pids[(ii*1000):((ii+1)*1000)] ] }
 		print("--->", url)
 		print("---with-->", body)
 		resp = requests.post(url, headers = headers, json = body, verify = False)
+		print(resp.text)
 		data.update(resp.json())
 	print(data)
 	parsed = {}
