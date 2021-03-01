@@ -190,12 +190,12 @@ def experiments_and_family(pids, config, sort_output = True):
 		data += resp.json()
 	print(data)
 	parsed = {}
-	for key in data.keys():
-		if 'family' in data[ key ].keys() and data[ key ][ 'family' ] != 'none':
-			fam = data[ key ][ 'family' ]
-		else:
+	for elm in data:
+		pid = list( elm.keys() )[ 0 ]
+		if type( elm[ pid ] ) == str:
 			fam = '---'
-		parsed[ pid ] = fam
+		else: 
+			fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
 	rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Participant_ID' ], parsed[ pak[ 'Participant_ID' ] ] ] for pak in pids ]
 	if sort_output:
 		return sorted( rst, key = lambda x: x[ 2 ] )
