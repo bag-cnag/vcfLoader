@@ -1023,7 +1023,7 @@ def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
 
 	return rst
 
-def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog(), experiments = []):
+def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog()):
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_dense_matrices"')
 
@@ -1056,8 +1056,6 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 
 	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
 	self.log.debug('Total of {0} experiments in sparse matrix'.format( len( experiments_in_matrix ) ))
-	self.log.debug('Total of {0} experiments where read from file'.format(len(experiments)))
-	print(experiments)
 
 	idx = 0
 	try:
@@ -1135,6 +1133,9 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "experiments" filled with "{}"'.format(experiments))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
+	self.log.debug('Total of {0} experiments where read from file'.format(len(experiments)))
+	
+	print(experiments)
 
 
 	if self is None:
