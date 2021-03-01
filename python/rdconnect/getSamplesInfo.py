@@ -187,8 +187,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		x = resp.json()
 		if x is dict:
 			raise Exception("Communication with PhenosTore giving \"{}\" returned 'dict' instead of 'list' with content \"{}\"".format(str(body), str(x)))
-		for kk in x.keys():
-			data += { kk: x[kk] }
+		data.append(x)
 	print(data)
 	parsed = {}
 	for elm in data:
