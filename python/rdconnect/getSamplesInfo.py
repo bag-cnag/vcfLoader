@@ -169,7 +169,6 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	
 
 def experiments_and_family(pids, config, sort_output = True):
-	print("in: ", pids)
 	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
@@ -177,7 +176,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		'Authorization': config['application/kc_token'], 
 		'Host': config['applications/phenostore/host'] 
 	}
-	data = {}
+	data = []
 	for ii in range(0,(len(pids)//1000)+1) :
 		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
 		body = { 'patients': [ { 'id': x } for x in pids[(ii*1000):((ii+1)*1000)] ] }
@@ -185,7 +184,10 @@ def experiments_and_family(pids, config, sort_output = True):
 		print("---with-->", body)
 		resp = requests.post(url, headers = headers, json = body, verify = False)
 		print(resp.text)
-		data.update(resp.json())
+		x = resp.json()
+		if x is dict:
+			raise Exception("Communication with PhenosTore giving \"{}\" returned 'dict' instead of 'list' with content \"{}\"".format(str(body), str(x)))
+		data += resp.json()
 	print(data)
 	parsed = {}
 	for key in data.keys():
