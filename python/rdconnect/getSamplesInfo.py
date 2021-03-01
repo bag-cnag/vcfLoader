@@ -172,7 +172,6 @@ def experiments_and_family(pids, config, sort_output = True):
 	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
-	
 	headers = { 'Content-Type': 'application/json', 
 		'Authorization': config['application/kc_token'], 
 		'Host': config['applications/phenostore/host'] 
