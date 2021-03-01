@@ -169,7 +169,7 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	
 
 def experiments_and_family(pids, config, sort_output = True):
-	url = "https:" + config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
+	url = "https://" + config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
 	headers = { 'Content-Type': 'application/json', 
 		'Authorization': config['application/kc_token'], 
 		'Host': config['applications/phenostore/host'] 
