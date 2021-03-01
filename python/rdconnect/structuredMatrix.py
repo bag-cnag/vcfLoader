@@ -1216,7 +1216,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	print("exp_for_ps:", exp_for_ps)
 
 
-	exp_and_fam = get.experiments_and_family([ x[1] for x in exp_for_ps ], self.config)
+	exp_and_fam = get.experiments_and_family(exp_for_ps, self.config)
 	print("exp_and_fam:", exp_and_fam)
 
 	return self
