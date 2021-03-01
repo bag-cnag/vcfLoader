@@ -185,6 +185,7 @@ def experiments_and_family(pids, config, sort_output = True):
 		print("---with-->", body)
 		resp = requests.post(url, headers = headers, json = body, verify = False)
 		data.update(resp.json())
+	print(data)
 	parsed = {}
 	for key in data.keys():
 		if 'family' in data[ key ].keys() and data[ key ][ 'family' ] != 'none':
