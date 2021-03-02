@@ -217,12 +217,7 @@ def experiments_in_dm_traking(pids, config, log, n = 1000):
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
-	if is_playground:
-		url = config['applications/datamanagement/api_sm_playground'].format(
-			url, config['applications/api_group'])
-	else:
-		url = config['applications/datamanagement/api_sm'].format(
-			url, config['applications/api_group'])
+	url = config['applications/datamanagement/api_sm'].format(url, config['applications/api_group'])
 	headers = { 
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
 		'Host': config['applications/datamanagement/host'] 
