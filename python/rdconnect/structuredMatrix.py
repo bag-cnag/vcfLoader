@@ -397,7 +397,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	exp_and_fam = get.experiments_and_family(exp_for_ps, self.config)
 	exp_in_dm = get.experiments_in_dm_traking(exp_for_ps, self.config, self.log)
 	print("exp_in_dm:", exp_in_dm)
-	org_dm = _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N = N, self.config, self.log)
+	org_dm = _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, self.config, self.log)
 	print("org_dm:", org_dm)
 
 	with open('dense_matrix_assignation', 'w') as fw:
