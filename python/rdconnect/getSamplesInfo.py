@@ -169,6 +169,11 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	
 
 def experiments_and_family(pids, config, sort_output = True):
+	"""
+	pids: A list of tuples. Position 0 is RD-Connect Experiment ID, position 1
+	is PhentoStore Id.
+
+	"""
 	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
@@ -177,20 +182,15 @@ def experiments_and_family(pids, config, sort_output = True):
 		'Host': config['applications/phenostore/host'] 
 	}
 	data = []
-	print('pids', pids)
 	for ii in range(0,(len(pids)//1000)+1) :
 		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
 		body = { 'patients': [ { 'id': x[ 1 ] } for x in pids[(ii*1000):((ii+1)*1000)] ] }
-		print("--->", url)
-		print("---with-->", body)
 		resp = requests.post(url, headers = headers, json = body, verify = False)
-		print(resp.text)
 		x = resp.json()
 		if x is dict:
 			raise Exception("Communication with PhenosTore giving \"{}\" returned 'dict' instead of 'list' with content \"{}\"".format(str(body), str(x)))
 		for y in x:
 			data += x
-	print(data)
 	parsed = {}
 	for elm in data:
 		pid = list( elm.keys() )[ 0 ]
@@ -207,32 +207,39 @@ def experiments_and_family(pids, config, sort_output = True):
 
 
 
+def experiments_in_dm_traking(pids, config, log, n = 1000):
+	"""
+	pids: A list of tuples. Position 0 is RD-Connect Experiment ID, position 1
+	is PhentoStore Id.
 
-def experiments_with_dm_traking(pids, config, log, n = 200):
-	packs = []
-	for ii in range(0, len(pids), n):  
-		packs.append(','.join(pids[ii:ii + n]))
-	log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
-
-	url = config['applications/datamanagement/api_sm'].format(config['applications/datamanagement/ip'])
+	"""
+	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
-	headers = { 'accept': 'application/json', 
-		'Content-Type': 'application/json', 
+	if is_playground:
+		url = config['applications/datamanagement/api_sm_playground'].format(
+			url, config['applications/api_group'])
+	else:
+		url = config['applications/datamanagement/api_sm'].format(
+			url, config['applications/api_group'])
+	headers = { 
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
-		'Host': config['applications/datamanagement/host'] }
+		'Host': config['applications/datamanagement/host'] 
+	}	
+	log.debug('Querying experiment\'s dm annotation using url "{}"'.format(url))
 
-	log.debug('> Created query URL for data-management: {}'.format(url))
+	packs = []
+	for ii in range(0, len(pids), n):
+		packs.append(','.join(pids[ii:ii+n]))
 
-	table = {}
-	for ii, samlist in enumerate(packs):
+	data = {}
+	for samlist in packs:
 		q_url = url + '?experiments=' + samlist
-		response = requests.get(q_url, headers = headers, verify = False)
-		if response.status_code != 200:
-			log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
-			return 
-		else:
-			data = json.loads(response.content)
-			table.update(data)
-	return table
+		resp = requests.get(url, headers = headers, verify = False)
+		x = json.loads(resp.content)
+		for k in x.keys():
+			data[ k ] = x[ k ]
+	return data
+
+	

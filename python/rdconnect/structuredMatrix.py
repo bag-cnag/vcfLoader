@@ -3,7 +3,9 @@ import json
 import requests
 import rdconnect.utils as utils
 import rdconnect.getSamplesInfo as get
-from os import path
+
+from os import path, system
+from collections import Counter
 from rdconnect.classException import *
 from rdconnect.classLog import VoidLog
 from rdconnect.classGenome import SparseMatrix
@@ -124,770 +126,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	# 		'id': itm['RD_Connect_ID_Experiment'],
 	# 		'pid': itm['Participant_ID']
 	# 	})
-	# experiments = ["E266728", 
-	# 	"E695592", 
-	# 	"E200125", 
-	# 	"E126992", 
-	# 	"E994789", 
-	# 	"E450955", 
-	# 	"E168211", 
-	# 	"E361148", 
-	# 	"E556777", 
-	# 	"E721161", 
-	# 	"E681340", 
-	# 	"E624770", 
-	# 	"E569305", 
-	# 	"E409646", 
-	# 	"E458620", 
-	# 	"E038082", 
-	# 	"E418033", 
-	# 	"E268295", 
-	# 	"E798212", 
-	# 	"E102231", 
-	# 	"E465324", 
-	# 	"E639597", 
-	# 	"E391859", 
-	# 	"E539071", 
-	# 	"E199064", 
-	# 	"E224456", 
-	# 	"E975451", 
-	# 	"E555485", 
-	# 	"E421857", 
-	# 	"E760631", 
-	# 	"E475295", 
-	# 	"E833307", 
-	# 	"E513714", 
-	# 	"E891378", 
-	# 	"E656412", 
-	# 	"E013667", 
-	# 	"E167937", 
-	# 	"E564491", 
-	# 	"E838803", 
-	# 	"E852852", 
-	# 	"E499287", 
-	# 	"E023124", 
-	# 	"E468551", 
-	# 	"E940848", 
-	# 	"E978419", 
-	# 	"E216835", 
-	# 	"E976219", 
-	# 	"E095595", 
-	# 	"E013810", 
-	# 	"E547462", 
-	# 	"E665526", 
-	# 	"E649555", 
-	# 	"E697785", 
-	# 	"E391396", 
-	# 	"E701314", 
-	# 	"E407103", 
-	# 	"E732369", 
-	# 	"E110248", 
-	# 	"E555470", 
-	# 	"E535275", 
-	# 	"E828989", 
-	# 	"E990887", 
-	# 	"E132073", 
-	# 	"E398838", 
-	# 	"E807156", 
-	# 	"E622571", 
-	# 	"E938693", 
-	# 	"E986975", 
-	# 	"E524798", 
-	# 	"E875496", 
-	# 	"E901505", 
-	# 	"E458866", 
-	# 	"E717835", 
-	# 	"E213123", 
-	# 	"E752474", 
-	# 	"E891911", 
-	# 	"E536984", 
-	# 	"E595785", 
-	# 	"E795741", 
-	# 	"E793493", 
-	# 	"E166593", 
-	# 	"E780021", 
-	# 	"E184978", 
-	# 	"E655971", 
-	# 	"E353725", 
-	# 	"E714666", 
-	# 	"E046090", 
-	# 	"E816335", 
-	# 	"E640640", 
-	# 	"E428318", 
-	# 	"E693681", 
-	# 	"E065787", 
-	# 	"E916101", 
-	# 	"E011892", 
-	# 	"E546599", 
-	# 	"E638904", 
-	# 	"E492844", 
-	# 	"E276404", 
-	# 	"E756790", 
-	# 	"E643318", 
-	# 	"E951644", 
-	# 	"E065444", 
-	# 	"E023742", 
-	# 	"E539389", 
-	# 	"E713810", 
-	# 	"E856191", 
-	# 	"E133853", 
-	# 	"E256145", 
-	# 	"E853071", 
-	# 	"E238807", 
-	# 	"E483708", 
-	# 	"E447484", 
-	# 	"E445814", 
-	# 	"E928419", 
-	# 	"E549240", 
-	# 	"E686717", 
-	# 	"E303680", 
-	# 	"E103285", 
-	# 	"E453103", 
-	# 	"E648846", 
-	# 	"E707461", 
-	# 	"E718607", 
-	# 	"E066469", 
-	# 	"E546671", 
-	# 	"E913046", 
-	# 	"E593387", 
-	# 	"E743504", 
-	# 	"E639042", 
-	# 	"E702891", 
-	# 	"E766258", 
-	# 	"E204573", 
-	# 	"E404450", 
-	# 	"E377072", 
-	# 	"E211313", 
-	# 	"E638901", 
-	# 	"E567058", 
-	# 	"E322164", 
-	# 	"E023116", 
-	# 	"E615073", 
-	# 	"E877195", 
-	# 	"E667934", 
-	# 	"E382378", 
-	# 	"E724485", 
-	# 	"E746298", 
-	# 	"E235233", 
-	# 	"E150791", 
-	# 	"E580380", 
-	# 	"E815826", 
-	# 	"E974162", 
-	# 	"E141859", 
-	# 	"E642566", 
-	# 	"E977199", 
-	# 	"E333091", 
-	# 	"E683023", 
-	# 	"E540661", 
-	# 	"E307836", 
-	# 	"E814673", 
-	# 	"E295021", 
-	# 	"E022269", 
-	# 	"E336273", 
-	# 	"E322150", 
-	# 	"E217306", 
-	# 	"E946844", 
-	# 	"E075972", 
-	# 	"E080164", 
-	# 	"E301086", 
-	# 	"E258342", 
-	# 	"E283773", 
-	# 	"E121986", 
-	# 	"E927494", 
-	# 	"E781049", 
-	# 	"E677231", 
-	# 	"E189842", 
-	# 	"E423948", 
-	# 	"E410174", 
-	# 	"E065452", 
-	# 	"E601526", 
-	# 	"E169735", 
-	# 	"E396618", 
-	# 	"E722419", 
-	# 	"E217569", 
-	# 	"E354978", 
-	# 	"E865859", 
-	# 	"E623449", 
-	# 	"E259608", 
-	# 	"E562813", 
-	# 	"E681028", 
-	# 	"E439851", 
-	# 	"E342635", 
-	# 	"E441144", 
-	# 	"E986336", 
-	# 	"E873608", 
-	# 	"E165572", 
-	# 	"E023638", 
-	# 	"E380036", 
-	# 	"E485372", 
-	# 	"E814740", 
-	# 	"E844816", 
-	# 	"E152371", 
-	# 	"E954695", 
-	# 	"E248166", 
-	# 	"E849426", 
-	# 	"E284043", 
-	# 	"E560215", 
-	# 	"E208118", 
-	# 	"E748563", 
-	# 	"E777305", 
-	# 	"E077316", 
-	# 	"E585338", 
-	# 	"E302358", 
-	# 	"E697145", 
-	# 	"E697767", 
-	# 	"E068244", 
-	# 	"E548363", 
-	# 	"E135984", 
-	# 	"E120426", 
-	# 	"E044567", 
-	# 	"E937473", 
-	# 	"E824319", 
-	# 	"E391888", 
-	# 	"E119169", 
-	# 	"E132020", 
-	# 	"E167930", 
-	# 	"E443968", 
-	# 	"E162533", 
-	# 	"E094259", 
-	# 	"E687886", 
-	# 	"E503061", 
-	# 	"E626322", 
-	# 	"E646146", 
-	# 	"E482371", 
-	# 	"E232386", 
-	# 	"E244568", 
-	# 	"E747743", 
-	# 	"E206118", 
-	# 	"E375130", 
-	# 	"E291671", 
-	# 	"E162434", 
-	# 	"E487331", 
-	# 	"E856671", 
-	# 	"E242745", 
-	# 	"E562627", 
-	# 	"E684555", 
-	# 	"E389612", 
-	# 	"E527643", 
-	# 	"E621578", 
-	# 	"E895023", 
-	# 	"E654350", 
-	# 	"E775603", 
-	# 	"E456355", 
-	# 	"E243615", 
-	# 	"E707003", 
-	# 	"E866183", 
-	# 	"E260502", 
-	# 	"E644779", 
-	# 	"E470502", 
-	# 	"E062265", 
-	# 	"E854394", 
-	# 	"E689254", 
-	# 	"E966709", 
-	# 	"E504027", 
-	# 	"E105418", 
-	# 	"E387510", 
-	# 	"E050099", 
-	# 	"E870808", 
-	# 	"E999730", 
-	# 	"E095055", 
-	# 	"E853217", 
-	# 	"E754827", 
-	# 	"E313065", 
-	# 	"E184644", 
-	# 	"E607955", 
-	# 	"E059864", 
-	# 	"E439866", 
-	# 	"E622209", 
-	# 	"E843237", 
-	# 	"E082356", 
-	# 	"E616325", 
-	# 	"E222035", 
-	# 	"E962634", 
-	# 	"E843655", 
-	# 	"E838657", 
-	# 	"E569362", 
-	# 	"E858943", 
-	# 	"E744369", 
-	# 	"E563976", 
-	# 	"E818177", 
-	# 	"E178988", 
-	# 	"E048102", 
-	# 	"E189356", 
-	# 	"E914217", 
-	# 	"E827321", 
-	# 	"E182944", 
-	# 	"E885371", 
-	# 	"E637864", 
-	# 	"E779446", 
-	# 	"E314629", 
-	# 	"E255279", 
-	# 	"E781931", 
-	# 	"E552938", 
-	# 	"E554301", 
-	# 	"E641234", 
-	# 	"E941429", 
-	# 	"E040007", 
-	# 	"E398435", 
-	# 	"E061608", 
-	# 	"E072965", 
-	# 	"E481417", 
-	# 	"E020374", 
-	# 	"E195585", 
-	# 	"E901884", 
-	# 	"E368021", 
-	# 	"E263189", 
-	# 	"E132117", 
-	# 	"E939034", 
-	# 	"E463437", 
-	# 	"E672247", 
-	# 	"E034079", 
-	# 	"E242645", 
-	# 	"E429315", 
-	# 	"E304340", 
-	# 	"E473086", 
-	# 	"E392377", 
-	# 	"E130814", 
-	# 	"E045518", 
-	# 	"E676905", 
-	# 	"E569770", 
-	# 	"E023482", 
-	# 	"E770282", 
-	# 	"E254578", 
-	# 	"E194636", 
-	# 	"E194003", 
-	# 	"E177144", 
-	# 	"E531898", 
-	# 	"E061560", 
-	# 	"E749941", 
-	# 	"E316487", 
-	# 	"E798422", 
-	# 	"E571257", 
-	# 	"E082804", 
-	# 	"E287761", 
-	# 	"E417197", 
-	# 	"E425194", 
-	# 	"E396195", 
-	# 	"E533847", 
-	# 	"E668211", 
-	# 	"E161638", 
-	# 	"E319118", 
-	# 	"E235794", 
-	# 	"E545998", 
-	# 	"E540519", 
-	# 	"E107975", 
-	# 	"E264808", 
-	# 	"E795585", 
-	# 	"E247456", 
-	# 	"E356754", 
-	# 	"E920716", 
-	# 	"E108836", 
-	# 	"E018547", 
-	# 	"E082370", 
-	# 	"E536842", 
-	# 	"E151669", 
-	# 	"E637184", 
-	# 	"E759708", 
-	# 	"E524271", 
-	# 	"E031095", 
-	# 	"E811279", 
-	# 	"E003447", 
-	# 	"E523670", 
-	# 	"E356577", 
-	# 	"E110634", 
-	# 	"E598292", 
-	# 	"E940135", 
-	# 	"E017735", 
-	# 	"E881245", 
-	# 	"E169188", 
-	# 	"E073507", 
-	# 	"E036657", 
-	# 	"E413016", 
-	# 	"E644262", 
-	# 	"E851222", 
-	# 	"E977246", 
-	# 	"E253723", 
-	# 	"E263222", 
-	# 	"E550012", 
-	# 	"E216977", 
-	# 	"E351450", 
-	# 	"E200452", 
-	# 	"E022991", 
-	# 	"E792716", 
-	# 	"E243669", 
-	# 	"E767712", 
-	# 	"E392768", 
-	# 	"E463408", 
-	# 	"E600861", 
-	# 	"E353137", 
-	# 	"E589284", 
-	# 	"E111081", 
-	# 	"E293514", 
-	# 	"E849549", 
-	# 	"E269678", 
-	# 	"E128884", 
-	# 	"E390070", 
-	# 	"E244628", 
-	# 	"E330932", 
-	# 	"E699677", 
-	# 	"E731490", 
-	# 	"E742274", 
-	# 	"E093068", 
-	# 	"E927475", 
-	# 	"E449359", 
-	# 	"E347325", 
-	# 	"E043673", 
-	# 	"E171070", 
-	# 	"E135072", 
-	# 	"E784471", 
-	# 	"E399844", 
-	# 	"E531794", 
-	# 	"E788429", 
-	# 	"E099660", 
-	# 	"E414102", 
-	# 	"E175420", 
-	# 	"E315915", 
-	# 	"E189666", 
-	# 	"E625652", 
-	# 	"E770533", 
-	# 	"E011914", 
-	# 	"E055718", 
-	# 	"E011821", 
-	# 	"E229656", 
-	# 	"E664689", 
-	# 	"E084338", 
-	# 	"E302529", 
-	# 	"E214365", 
-	# 	"E974393", 
-	# 	"E815069", 
-	# 	"E374724", 
-	# 	"E984972", 
-	# 	"E041780", 
-	# 	"E151410", 
-	# 	"E285516", 
-	# 	"E882258", 
-	# 	"E788819", 
-	# 	"E949500", 
-	# 	"E664232", 
-	# 	"E044978", 
-	# 	"E891655", 
-	# 	"E291831", 
-	# 	"E890091", 
-	# 	"E997743", 
-	# 	"E269306", 
-	# 	"E336458", 
-	# 	"E923722", 
-	# 	"E122162", 
-	# 	"E300966", 
-	# 	"E187639", 
-	# 	"E978742", 
-	# 	"E769556", 
-	# 	"E614182", 
-	# 	"E303887", 
-	# 	"E687156", 
-	# 	"E644271", 
-	# 	"E321169", 
-	# 	"E122205", 
-	# 	"E887674", 
-	# 	"E248679", 
-	# 	"E407725", 
-	# 	"E285034", 
-	# 	"E110296", 
-	# 	"E731325", 
-	# 	"E791049", 
-	# 	"E735017", 
-	# 	"E794645", 
-	# 	"E705064", 
-	# 	"E366522", 
-	# 	"E706285", 
-	# 	"E116814", 
-	# 	"E022624", 
-	# 	"E997066", 
-	# 	"E988891", 
-	# 	"E406586", 
-	# 	"E260302", 
-	# 	"E847680", 
-	# 	"E092597", 
-	# 	"E192028", 
-	# 	"E812074", 
-	# 	"E262081", 
-	# 	"E185575", 
-	# 	"E093809", 
-	# 	"E824863", 
-	# 	"E333676", 
-	# 	"E150300", 
-	# 	"E278087", 
-	# 	"E118176", 
-	# 	"E407604", 
-	# 	"E654208", 
-	# 	"E355807", 
-	# 	"E166619", 
-	# 	"E560878", 
-	# 	"E572505", 
-	# 	"E738600", 
-	# 	"E292484", 
-	# 	"E627226", 
-	# 	"E135279", 
-	# 	"E756110", 
-	# 	"E192088", 
-	# 	"E646472", 
-	# 	"E642143", 
-	# 	"E979451", 
-	# 	"E103641", 
-	# 	"E059377", 
-	# 	"E397013", 
-	# 	"E551175", 
-	# 	"E742729", 
-	# 	"E732471", 
-	# 	"E222347", 
-	# 	"E529491", 
-	# 	"E581929", 
-	# 	"E008457", 
-	# 	"E531124", 
-	# 	"E582283", 
-	# 	"E371394", 
-	# 	"E343918", 
-	# 	"E885226", 
-	# 	"E510971", 
-	# 	"E567343", 
-	# 	"E156237", 
-	# 	"E911338", 
-	# 	"E365102", 
-	# 	"E722809", 
-	# 	"E254166", 
-	# 	"E907751", 
-	# 	"E303328", 
-	# 	"E538437", 
-	# 	"E895554", 
-	# 	"E042557", 
-	# 	"E670973", 
-	# 	"E214606", 
-	# 	"E144483", 
-	# 	"E460586", 
-	# 	"E814054", 
-	# 	"E585439", 
-	# 	"E480733", 
-	# 	"E701756", 
-	# 	"E270715", 
-	# 	"E166634", 
-	# 	"E595981", 
-	# 	"E636750", 
-	# 	"E870304", 
-	# 	"E478568", 
-	# 	"E250925", 
-	# 	"E582714", 
-	# 	"E143221", 
-	# 	"E021333", 
-	# 	"E435170", 
-	# 	"E301318", 
-	# 	"E995796", 
-	# 	"E082594", 
-	# 	"E746705", 
-	# 	"E888099", 
-	# 	"E183749", 
-	# 	"E440909", 
-	# 	"E865570", 
-	# 	"E724551", 
-	# 	"E699923", 
-	# 	"E958394", 
-	# 	"E149675", 
-	# 	"E370952", 
-	# 	"E752078", 
-	# 	"E207024", 
-	# 	"E207024", 
-	# 	"E334753", 
-	# 	"E183433", 
-	# 	"E526883", 
-	# 	"E336575", 
-	# 	"E204203", 
-	# 	"E680920", 
-	# 	"E941600", 
-	# 	"E412038", 
-	# 	"E416431", 
-	# 	"E295185", 
-	# 	"E560176", 
-	# 	"E492532", 
-	# 	"E865773", 
-	# 	"E761279", 
-	# 	"E520873", 
-	# 	"E606154", 
-	# 	"E174651", 
-	# 	"E297642", 
-	# 	"E380476", 
-	# 	"E579799", 
-	# 	"E053220", 
-	# 	"E066580", 
-	# 	"E490493", 
-	# 	"E521488", 
-	# 	"E513607", 
-	# 	"E099037", 
-	# 	"E845333", 
-	# 	"E966984", 
-	# 	"E494609", 
-	# 	"E522316", 
-	# 	"E257268", 
-	# 	"E817104", 
-	# 	"E374199", 
-	# 	"E594658", 
-	# 	"E255090", 
-	# 	"E229697", 
-	# 	"E688153", 
-	# 	"E394224", 
-	# 	"E692030", 
-	# 	"E001090", 
-	# 	"E959610", 
-	# 	"E720659", 
-	# 	"E645599", 
-	# 	"E466428", 
-	# 	"E020513", 
-	# 	"E037866", 
-	# 	"E851997", 
-	# 	"E916529", 
-	# 	"E123123", 
-	# 	"E085416", 
-	# 	"E906171", 
-	# 	"E488675", 
-	# 	"E106820", 
-	# 	"E362648", 
-	# 	"E528989", 
-	# 	"E159781", 
-	# 	"E672047", 
-	# 	"E099941", 
-	# 	"E674374", 
-	# 	"E171459", 
-	# 	"E903390", 
-	# 	"E547627", 
-	# 	"E066274", 
-	# 	"E341465", 
-	# 	"E207938", 
-	# 	"E769498", 
-	# 	"E434138", 
-	# 	"E260914", 
-	# 	"E244392", 
-	# 	"E677072", 
-	# 	"E524824", 
-	# 	"E658454", 
-	# 	"E483974", 
-	# 	"E194925", 
-	# 	"E519013", 
-	# 	"E354439", 
-	# 	"E969610", 
-	# 	"E418776", 
-	# 	"E085257", 
-	# 	"E779523", 
-	# 	"E684358", 
-	# 	"E063665", 
-	# 	"E651208", 
-	# 	"E783057", 
-	# 	"E340565", 
-	# 	"E418096", 
-	# 	"E530091", 
-	# 	"E195170", 
-	# 	"E655211", 
-	# 	"E369244", 
-	# 	"E039786", 
-	# 	"E545599", 
-	# 	"E735890", 
-	# 	"E051214", 
-	# 	"E967317", 
-	# 	"E379763", 
-	# 	"E069306", 
-	# 	"E920776", 
-	# 	"E932090", 
-	# 	"E539329", 
-	# 	"E421160", 
-	# 	"E832060", 
-	# 	"E181803", 
-	# 	"E933003", 
-	# 	"E011121", 
-	# 	"E565312", 
-	# 	"E565392", 
-	# 	"E127955", 
-	# 	"E105565", 
-	# 	"E204603", 
-	# 	"E059160", 
-	# 	"E750555", 
-	# 	"E361309", 
-	# 	"E774529", 
-	# 	"E529099",
-	# 	"E455362", 
-	# 	"E663377", 
-	# 	"E361543", 
-	# 	"E423144", 
-	# 	"E249232", 
-	# 	"E110997", 
-	# 	"E899269", 
-	# 	"E016779", 
-	# 	"E595829", 
-	# 	"E399109", 
-	# 	"E940372", 
-	# 	"E953583", 
-	# 	"E509318", 
-	# 	"E423062", 
-	# 	"E954590", 
-	# 	"E802456", 
-	# 	"E972814", 
-	# 	"E266040", 
-	# 	"E449612", 
-	# 	"E639225", 
-	# 	"E202876", 
-	# 	"E155245", 
-	# 	"E502007", 
-	# 	"E582173", 
-	# 	"E686902", 
-	# 	"E080077", 
-	# 	"E854492", 
-	# 	"E029927", 
-	# 	"E477070", 
-	# 	"E742342", 
-	# 	"E702627", 
-	# 	"E542723", 
-	# 	"E840005", 
-	# 	"E853352", 
-	# 	"E248193", 
-	# 	"E914406", 
-	# 	"E153099", 
-	# 	"E482343", 
-	# 	"E178894", 
-	# 	"E296461", 
-	# 	"E321821", 
-	# 	"E220410", 
-	# 	"E434376", 
-	# 	"E725740", 
-	# 	"E140651", 
-	# 	"E079846", 
-	# 	"E494367", 
-	# 	"E463923", 
-	# 	"E671051", 
-	# 	"E674402", 
-	# 	"E786724", 
-	# 	"E480153", 
-	# 	"E548706", 
-	# 	"E828636", 
-	# 	"E719124", 
-	# 	"E468902", 
-	# 	"E636409", 
-	# 	"E585435", 
-	# 	"E887920", 
-	# 	"E106639", 
-	# 	"E339100", 
-	# 	"E638013", 
-	# 	"E792084" ]
-	# clean_to_process = []
-	# for item in experiments:
-	# 	if filesystem == 'ceph':
-	# 		clean_to_process.append({
-	# 			'file': 's3a://cnag/' + item[1],
-	# 			'id': item[3]
-	# 		})
-	# 	else:
-	# 		clean_to_process.append({
-	# 			#'file': item[2],
-	# 			#'id': item[3]
-	# 			'file': '/test/rdconnect/2545/{}.{}.g.vcf.bgz'.format(item, chrom),
-	# 			'id': item
-	# 		})
-
+	
 	clean_to_process = []
 	for item in experiments:
 		if filesystem == 'ceph':
@@ -1093,38 +332,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 
 
 
-def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog(), experiments = []):
-	# self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
-	# self.log.info('Entering step "dense_matrix_grouping"')
-
-	# if not isConfig:
-	# 	self.log.error('No configuration was provided')
-	# 	raise NoConfigurationException('No configuration was provided')
-
-	# if not isHl:
-	# 	self.log.error('No pointer to HAIL module was provided')
-	# 	raise NoHailContextException('No pointer to HAIL module was provided')
-
-	# self.log.debug('OVERWRITING chrom to chrom-21')
-
-	# chrom = 21
-	# sparse_path = path.join(self.config['applications/combine/sparse_matrix_path'], 'chrom-{}'.format(chrom))
-	# sparse_matrix = hl.read_matrix_table(sparse_path)
-
-	# experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
-	# self.log.debug('Obtained a total of {} experiments from sparse matrix (chrom 21)'.format(len(experiments_in_matrix)))
-
-	# all_group = get.experiment_by_group(config, self.log, False)
-	# self.log.debug('Obtained a total of {} experiments for the group'.format(len(all_group)))
-
-	# full_ids_in_matrix = [ x for x in all_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-	# print('full_ids_in_matrix', len( full_ids_in_matrix ))
-	# print('\t', full_ids_in_matrix[ : 10 ])
-
-	# experiments_and_families = get.experiments_and_family(full_ids_in_matrix, self.config)
-	# print('experiments_and_families', len( experiments_and_families ))
-	# print('\t', experiments_and_families[ : 10 ])
-
+def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog(), experiments = [], N = 1000):
 	isSelf = True
 	if self is None:
 		isSelf = False
@@ -1146,8 +354,6 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 	self.log.debug('> Argument "experiments" filled with "{}"'.format(experiments))
 	self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
-	
-
 
 	if self is None:
 		self.log.info('> Since "self" is provided "experiments" will not be used.')
@@ -1179,33 +385,8 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 		experiments_to_proc = [ x[3] for x in experiments ]
 
 	
-	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(experiments)))
-	self.log.debug('> First and last sample: {} // {}'.format(experiments[0], experiments[len(experiments) - 1]))
-
-	# packs = []
-	# n = 200
-	# for ii in range(0, len(full_samples), n):  
-	# 	packs.append(','.join(full_samples[ii:ii + n]))
-	# self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
-
-	# url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
-	# headers = { #'accept': 'application/json', 
-	# 	#'Content-Type': 'application/json', 
-	# 	'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
-	# 	'Host': self.config['applications/datamanagement/host'] }
-
-	# self.log.debug('> Created query URL for data-management: {}'.format(url))
-
-	# table = {}
-	# for ii, samlist in enumerate(packs):
-	# 	q_url = url + '?experiments=' + samlist
-	# 	response = requests.get(q_url, headers = headers, verify = False)
-	# 	if response.status_code != 200:
-	# 		self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
-	# 		return 
-	# 	else:
-	# 		data = json.loads(response.content)
-	# 		table.update(data)
+	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(experiments_to_proc)))
+	self.log.debug('> First and last sample: {} // {}'.format(experiments_to_proc[0], experiments_to_proc[len(experiments_to_proc) - 1]))
 
 	self.log.debug('> Query DM to gather PhenoStore ids.')
 	full_experiments = get.experiment_by_group(self.config, self.log)
@@ -1213,10 +394,102 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	print("full_experiments\n", full_experiments)
 
 	exp_for_ps = [ (x['RD_Connect_ID_Experiment'], x['Participant_ID']) for x in full_experiments if x['RD_Connect_ID_Experiment'] in experiments_to_proc ]
-	print("exp_for_ps:", exp_for_ps)
-
-
 	exp_and_fam = get.experiments_and_family(exp_for_ps, self.config)
-	print("exp_and_fam:", exp_and_fam)
+	exp_in_dm = get.experiments_in_dm_traking(exp_for_ps, self.config, self.log)
+	print("exp_in_dm:", exp_in_dm)
+	org_dm = _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N = N, self.config, self.log)
+	print("org_dm:", org_dm)
+
+	with open('dense_matrix_assignation', 'w') as fw:
+		for row in org_dm:
+			fw.write('\t'.join(row) + '\n')
+
+	cmd = """
+		if [ $(git status --porcelain | wc -l) -gt 0 ]; then 
+			git add dense_matrix_assignation
+			git commit -m "Added 'dense_matrix_assignation'."
+			git push origin $gitea_branch
+		fi
+	"""
+	system(cmd)
 
 	return self
+
+
+
+def _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, config, log):
+	"""
+		exp_and_fam: list with (RD-Connect, PhenoStore, Family)
+		exp_in_dm: list with "fam//dm_idx//es_idx" were fam states for family
+			dm_index number of dense matrix, and es_index issue where the
+			samples was added/updated
+		N: number of max. experiment per dense matrix
+	"""
+
+	# Obtain experiments to be added to dense matrices
+	to_be_added = [ kk for kk in exp_in_dm.keys() if exp_in_dm[ kk ] == "" ]
+	to_be_added = [ [ xx for xx in exp_and_fam if xx[0] == kk ][ 0 ] for kk in to_be_added ]
+
+	# Split the information from DM according to the experiments already in dense matrices
+	exp_in_dm = [ [ kk ] + exp_in_dm[ kk ].split('//') for kk in exp_in_dm.keys() ]
+	for ii in range(len(exp_in_dm)):
+		if len(exp_in_dm[ii]) != 4:
+			exp_in_dm[ii] = exp_in_dm[ii] + ['', '']
+	log.debug('nexp_in_dm: {}'.format(exp_in_dm))
+
+	# Get which families have already members in dense matrices
+	freq_fam = dict(Counter([ x[ 1 ] for x in exp_in_dm if x[ 1 ] != '' ]))
+	log.debug('freq_fam: {}'.format(freq_fam))
+
+	# Identify which experiments have other family members in dense matrices
+	to_be_added = [ kk + [ kk[ 2 ] in freq_fam.keys() ] for kk in to_be_added ]
+	log.debug('to_be_added: {}'.format(to_be_added))
+	# If there are experiments with members in previous dense matrices get
+	# those experiments so they can be moved to new dense matrices all together
+	if sum([ xx[ 3 ] for xx in to_be_added]) != 0:
+		log.info('There are experiments that need to be re-assigned')
+		fam_dis = list(set([ xx[ 2 ] for xx in to_be_added if xx[ 3 ]]))
+		log.debug('fam_dis: {}'.format(fam_dis))
+		exp_dis = [ xx for xx in exp_in_dm if xx[ 1 ] in fam_dis ]
+		log.debug('exp_dis: {}'.format(exp_dis))
+		to_be_added += [ [ xx[ 0 ], '', xx[ 1 ] ] for xx in exp_dis ]
+		to_be_added = sorted([ [ xx[ 0 ], xx[ 2 ], -1, '', True ] for xx in to_be_added ], key = lambda x: x[ 1 ])
+	else:
+		log.info('There are NO experiments that need to be re-assigned')
+		to_be_added = sorted([ [ xx[ 0 ], xx[ 2 ], -1, '', True ] for xx in to_be_added ], key = lambda x: x[ 1 ])
+
+	# Let's get the last dense matrix created and check if experiments can be added
+	last_dm = dict(Counter([ x[ 2 ] for x in exp_in_dm if x[ 2 ] != '' ])).items()
+	if len(last_dm) > 0:
+		last_dm = sorted(last_dm, key = lambda x: -int(x[ 0 ]))[ 0 ]
+		if last_dm[ 1 ] >= N:
+			last_dm = [int(last_dm[ 0 ]) + 1, 0]
+		else:
+			last_dm = [int(last_dm[ 0 ]), last_dm[ 1 ]]
+	else:
+		last_dm = [0, 0]
+	log.debug('last_dm: {}'.format(last_dm))
+
+	# Assign all members of the same family to the last dense matrix. If the 
+	# number of experiments exceeds, create a new dense matrix.
+	for fam in sorted(list(set([ xx[ 1 ] for xx in to_be_added]))):
+		for ii in range(len(to_be_added)):
+			if to_be_added[ ii ][ 1 ] == fam:
+				to_be_added[ ii ][ 2 ] = last_dm[ 0 ]
+				to_be_added[ ii ][ 3 ] = config['resources/elasticsearch/index_name'].replace('nmtrx', str(last_dm[ 0 ]))
+				last_dm[ 1 ] += 1
+		if last_dm[ 1 ] >= N:
+			last_dm = [int(last_dm[ 0 ]) + 1, 0]
+
+	log.debug('to_be_added: {}'.format(to_be_added))
+
+	# Gather the information for those experiments that have not to be updated
+	not_updated = [ [ xx[ 0 ], xx[ 1 ], int(xx[ 2 ]), xx[ 3 ], False ] for xx in exp_in_dm if xx[ 0 ] not in [ yy[ 0 ] for yy in to_be_added ] ]
+	log.debug('not_updated: {}'.format(not_updated))
+
+	assignation = to_be_added + not_updated
+	return assignation
+
+
+
+
