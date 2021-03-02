@@ -232,8 +232,10 @@ def experiments_in_dm_traking(pids, config, log, n = 1000):
 	data = {}
 	for samlist in packs:
 		q_url = url + '?experiments=' + samlist
+		print(q_url)
 		resp = requests.get(url, headers = headers, verify = False)
 		x = json.loads(resp.content)
+		print(x)
 		for k in x.keys():
 			data[ k ] = x[ k ]
 	return data
