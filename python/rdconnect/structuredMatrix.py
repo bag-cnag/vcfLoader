@@ -402,7 +402,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	with open('dense_matrix_assignation', 'w') as fw:
 		for row in org_dm:
-			fw.write('\t'.join(row) + '\n')
+			fw.write('\t'.join([ str(x) for x in row ]) + '\n')
 
 	cmd = """
 		if [ $(git status --porcelain | wc -l) -gt 0 ]; then 
