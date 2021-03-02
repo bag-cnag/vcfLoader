@@ -213,6 +213,7 @@ def experiments_in_dm_traking(pids, config, log, n = 1000):
 	is PhentoStore Id.
 
 	"""
+	pids = [ x[ 0 ] for x in pids ]
 	url = config['applications/datamanagement/ip']
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
