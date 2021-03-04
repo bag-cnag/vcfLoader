@@ -414,7 +414,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	"""
 	system(cmd)
 
-	return self
+	return org_dm
 
 
 
