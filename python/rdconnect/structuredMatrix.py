@@ -326,7 +326,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 	dm_to_create = sorted(list(set([ x[ 2 ] for x in to_add ])))
 
 	print("to_add:", to_add)
-	print("dm_to_create": dm_to_create)
+	print("dm_to_create:", dm_to_create)
 	
 
 	
