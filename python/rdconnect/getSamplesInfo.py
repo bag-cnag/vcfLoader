@@ -198,6 +198,8 @@ def experiments_and_family(pids, config, sort_output = True):
 			fam = '---'
 		else: 
 			fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
+		if fam == 'none':
+			fam = ''
 		parsed[ pid ] = fam
 	rst = [ [ pak[ 0 ], pak[ 1 ], parsed[ pak[ 1 ] ] ] for pak in pids ]
 	if sort_output:
@@ -230,12 +232,11 @@ def experiments_in_dm_traking(pids, config, log, n = 1000):
 		packs.append(','.join(pids[ii:ii+n]))
 
 	data = {}
-	for samlist in packs:
+	for ii, samlist in enumerate(packs):
+		log.debug('> Querying batch #{}/{}'.format(ii, len(packs)))
 		q_url = url + '?experiments=' + samlist
-		print(q_url)
 		resp = requests.get(q_url, headers = headers, verify = False)
 		x = json.loads(resp.content)
-		print(x)
 		for k in x.keys():
 			data[ k ] = x[ k ]
 	return data

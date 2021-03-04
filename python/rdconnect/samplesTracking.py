@@ -8,13 +8,6 @@ from rdconnect.classGenome import SparseMatrix
 import rdconnect.setSamplesInfo as samples
 
 
-# hdfs <- abans / llista de experimetns a moure ........................ (DONE)
-# genomdb <- sparse_matrix ............................................. (DONE)
-# dm compilation <- dense
-# in_platform / index <- annotated m.vcf or annotated dense matrix ..... (DONE)
-
-
-
 def sample_index(self = None, config = None, hl = None, log = None):
 	""" This function allows to update the index information for a set of 
 	experiments in data-management.
@@ -201,7 +194,7 @@ def sample_in_genomedb(self = None, config = None, hl = None, log = None):
 	return self
 
 
-def samples_in_dm(self = None, config = None, hl = None, log = None):
+def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = None, n = 1000):
 	""" This function allows to update the "in_platform" information for a set 
 	of  experiments in data-management.
 
@@ -223,6 +216,8 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 		provided or set to None the logger is looked into the GenomicData in 
 		self. If no logger is in the provided nor in the GenomicData, then no
 		log is performed.
+	mapping: Mapping of experiment-dense_matrix obtained from 
+		dense_matrix_grouping.
 	"""
 	isSelf = True
 	if self is None:
@@ -230,6 +225,10 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering updating step "DM - samples_in_dm"')
+
+	if mapping is None:
+		self.log.error('No mapping was provided')
+		raise NoConfigurationException('No mapping was provided')		
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
@@ -239,36 +238,43 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 		self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
 		self.config['process/chrom'] = '21'
 
-	smallBatch = self.config['applications/combine/sz_small_batch']
-	largeBatch = self.config['applications/combine/sz_large_batch']
-
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
-	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
 
-	self.log.debug('> Overwriting chrom to chrom-21')
-	chrom = 21
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
 
-	if self is None:
-		sparse_path = self.config['applications/combine/sparse_matrix_path']
+	url = config['applications/datamanagement/api_sm'].format(url, config['applications/api_group'])
+	headers = { 
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}	
+	log.debug('Querying experiment\'s dm annotation using url "{}"'.format(url))
 
-		# Get version of sparse matrix
-		version = path.basename(path.normpath(sparse_path))
-		base = sparse_path.replace(version, '')
-		self.log.debug('> Detected version of sparse matrix {}'.format(version))
-		self.log.debug('> Argument "sparse_path" filled with "{}"'.format(sparse_path))
+	mapping2 = [ x for x in mapping if x[3] ]
+	log.info('Obtained {} experiments from which {} will be updated.'.format(len(mapping), len(mapping2)))
 
-		# Load sparse matrix
-		try:
-			self.data = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
-			self.log.info('> Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
-		except:
-			self.log.error('> Sparse matrix {}/chrom-{} could not be found'.format(version, chrom))
-			return 
+	# Prepare batch of updates
+	packs = []
+	for ii in range(0, len(mapping2), n):
+		data = {}
+		for xx in  mapping2[ii:ii+n]:
+			data.update({ xx[0]: '//'.join(xx[1:2]) })
+		packs.append(data)
 
-	full_samples = [ y.get('s') for y in self.data.col.collect() ]
-	self.log.debug('> Number of samples in sparse matrix: {}'.format(len(full_samples)))
-	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
+
+	for ii, samlist in enumerate(packs):
+		resp = requests.post(q_url, headers = headers, json = samlist, verify = False)
+		if resp.status_code != 200:
+			log.error('> Querying batch #{}/{} failed with error {} and content "{}".'.format(ii, len(packs), resp.status_code, resp.text))
+		else:
+			log.debug('> Querying batch #{}/{} resulted in {}.'.format(ii, len(packs), resp.status_code))
+	
+
+	return self
+	
+
+
 
 	# packs = []
 	# n = 200

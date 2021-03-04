@@ -405,6 +405,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 			fw.write('\t'.join([ str(x) for x in row ]) + '\n')
 
 	cmd = """
+		cd spark_config &&
 		if [ $(git status --porcelain | wc -l) -gt 0 ]; then 
 			git add dense_matrix_assignation
 			git commit -m "Added 'dense_matrix_assignation'."
@@ -420,9 +421,8 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 def _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, config, log):
 	"""
 		exp_and_fam: list with (RD-Connect, PhenoStore, Family)
-		exp_in_dm: list with "fam//dm_idx//es_idx" were fam states for family
-			dm_index number of dense matrix, and es_index issue where the
-			samples was added/updated
+		exp_in_dm: list with "fam//dm_idx" were fam states for family and
+			dm_index number of dense matrix
 		N: number of max. experiment per dense matrix
 	"""
 
@@ -476,7 +476,7 @@ def _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, config, log):
 		for ii in range(len(to_be_added)):
 			if to_be_added[ ii ][ 1 ] == fam:
 				to_be_added[ ii ][ 2 ] = last_dm[ 0 ]
-				to_be_added[ ii ][ 3 ] = config['resources/elasticsearch/index_name'].replace('nmtrx', str(last_dm[ 0 ]))
+				#to_be_added[ ii ][ 3 ] = config['resources/elasticsearch/index_name'].replace('nmtrx', str(last_dm[ 0 ]))
 				last_dm[ 1 ] += 1
 		if last_dm[ 1 ] >= N:
 			last_dm = [int(last_dm[ 0 ]) + 1, 0]
