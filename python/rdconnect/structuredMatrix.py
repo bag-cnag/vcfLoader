@@ -275,7 +275,7 @@ def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
 
 	return rst
 
-def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog()):
+def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog(), experiments = []):
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_dense_matrices"')
 
@@ -287,7 +287,6 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		self.log.error('No pointer to HAIL module was provided')
 		raise NoHailContextException('No pointer to HAIL module was provided')
 
-
 	chrom = utils.chrom_str_to_int(str(config['process/chrom']))
 	dense_matrix_path = self.config['applications/combine/dense_matrix_path']
 	sparse_matrix_path = self.config['applications/combine/sparse_matrix_path']
@@ -297,24 +296,33 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 	self.log.debug('> Argument "dense_matrix_path" filled with "{}"'.format(dense_matrix_path))
 	self.log.debug('> Argument "sparse_matrix_path" filled with "{}"'.format(sparse_matrix_path))
 
-	#mapping = load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
+	if not isSelf:
+		if sparse_matrix_path is None:
+			raise NoConfigurationException('No information on "sparse_matrix_path" was provided.')
 
-	if sparse_matrix_path is None:
-		raise NoConfigurationException('No information on "sparse_matrix_path" was provided.')
-
-	path_matrix = '{0}/chrom-{1}'.format(sparse_matrix_path, chrom)
-	self.log.debug('Loading sparse matrix from in {0}'.format(path_matrix))
-	sparse_matrix = hl.read_matrix_table(path_matrix)
+		path_matrix = '{0}/chrom-{1}'.format(sparse_matrix_path, chrom)
+		self.log.debug('> Loading sparse matrix from in {0}'.format(path_matrix))
+		self.data = hl.read_matrix_table(path_matrix)
 
 	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
-	self.log.debug('Total of {0} experiments in sparse matrix'.format( len( experiments_in_matrix ) ))
+	self.log.debug('> Total of {0} experiments in sparse matrix'.format( len( experiments_in_matrix ) ))
+
+	if len(experiments) == 0:
+		self.log.info('No experiments were provided, DM will be queried to obtain the experiments to add to dense matrices (multivcf & es: waiting)')
+		exp_in_dm = get.experiments_in_dm_traking(exp_for_ps, self.config, self.log)
+
+
+		print("exp_in_dm", exp_in_dm)
+
+	import sys
+	sys.exit()
 
 	idx = 0
 	try:
 		#for idx, batch in enumerate( mapping ):
 		#	self.log.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
 		#	sam = hl.literal([ x[ 0 ] for x in batch ], 'array<str>')
-		sam = hl.literal(experiments_in_matrix, 'array<str>')
+		sam = hl.literal(experiments, 'array<str>')
 		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
 		small_matrix = small_matrix.key_rows_by('locus', 'alleles')
 		small_matrix = hl.experimental.sparse_split_multi(small_matrix, filter_changed_loci = True)
