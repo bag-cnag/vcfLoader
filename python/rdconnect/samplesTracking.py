@@ -262,8 +262,9 @@ def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = N
 			data.update({ xx[0]: '//'.join([ str(x) for x in xx[1:2] ]) })
 		packs.append(data)
 
-	print(mapping2)
-	print(packs)
+	print("mapping", mapping)
+	print("mapping2", mapping2)
+	print("packs", packs)
 
 	for ii, samlist in enumerate(packs):
 		resp = requests.post(url, headers = headers, json = samlist, verify = False)
