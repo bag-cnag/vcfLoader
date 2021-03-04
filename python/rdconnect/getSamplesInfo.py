@@ -237,9 +237,12 @@ def experiments_in_dm_traking(pids, config, log, n = 1000):
 		log.debug('> Querying batch #{}/{}'.format(ii, len(packs)))
 		q_url = url + '?experiments=' + samlist
 		resp = requests.get(q_url, headers = headers, verify = False)
-		x = json.loads(resp.content)
-		for k in x.keys():
-			data[ k ] = x[ k ]
+		print(resp.status_code)
+		print(resp.text)
+		if resp.status_code == 200:
+			x = json.loads(resp.content)
+			for k in x.keys():
+				data[ k ] = x[ k ]
 	return data
 
 	
