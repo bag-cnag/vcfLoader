@@ -264,7 +264,7 @@ def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = N
 
 
 	for ii, samlist in enumerate(packs):
-		resp = requests.post(q_url, headers = headers, json = samlist, verify = False)
+		resp = requests.post(url, headers = headers, json = samlist, verify = False)
 		if resp.status_code != 200:
 			log.error('> Querying batch #{}/{} failed with error {} and content "{}".'.format(ii, len(packs), resp.status_code, resp.text))
 		else:
