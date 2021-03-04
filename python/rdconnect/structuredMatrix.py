@@ -314,13 +314,20 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 
 	if len(experiments) == 0:
 		self.log.info('No experiments were provided, DM will be queried to obtain the experiments to add to dense matrices (multivcf & es: waiting)')
-		exp_in_dm = get.experiments_in_dm_traking([ (x, '') for x in experiments_in_matrix ], self.config, self.log)
-		print("exp_in_dm", exp_in_dm)
+		experiments = get.experiments_in_dm_traking([ (x, '') for x in experiments_in_matrix ], self.config, self.log)
+	
+	print("experiments", experiments)
 
-		exp_sts = _get_experiments_to_dm_(self.config, self.log)
-		print("exp_sts:", exp_sts)
-	else:
-		pass
+	exp_sts = [ x['RD_Connect_ID_Experiment'] for x in _get_experiments_to_dm_(self.config, self.log) ]
+	print("exp_sts:", exp_sts)
+
+	to_add = [ x for x in experiments.keys() if x[1] in exp_sts ]
+	to_add = [ [ x ] + experiments[ x ].split('//') for x in to_add ]
+	dm_to_create = sorted(list(set([ x[ 2 ] for x in to_add ])))
+
+	print("to_add:", to_add)
+	print("dm_to_create": dm_to_create)
+	
 
 	
 
@@ -541,9 +548,9 @@ def _get_experiments_to_dm_(config, log):
 		sys.exit(2)
 	
 	rst = response.json()
+	rst = rst['items']
 
 	if rst['_meta']['total_pages'] > 1:
-		rst = rst['items']
 		for ii in range(2, rst['_meta']['total_pages'] + 1):
 			data["page"] = ii
 			response = requests.post(url, json = data, headers = headers, verify = False)
