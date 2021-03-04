@@ -390,8 +390,8 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 
 	self.log.debug('> Query DM to gather PhenoStore ids.')
 	full_experiments = get.experiment_by_group(self.config, self.log)
-	print("experiments_to_proc:", experiments_to_proc)
-	print("full_experiments\n", full_experiments)
+	#print("experiments_to_proc:", experiments_to_proc)
+	#print("full_experiments\n", full_experiments)
 
 	exp_for_ps = [ (x['RD_Connect_ID_Experiment'], x['Participant_ID']) for x in full_experiments if x['RD_Connect_ID_Experiment'] in experiments_to_proc ]
 	exp_and_fam = get.experiments_and_family(exp_for_ps, self.config)
@@ -400,7 +400,7 @@ def dense_matrix_grouping(self = None, config = None, hl = None, log = VoidLog()
 	org_dm = _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, self.config, self.log)
 	print("org_dm:", org_dm)
 
-	with open('dense_matrix_assignation', 'w') as fw:
+	with open('spark_config/dense_matrix_assignation', 'w') as fw:
 		for row in org_dm:
 			fw.write('\t'.join([ str(x) for x in row ]) + '\n')
 
@@ -453,10 +453,10 @@ def _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, config, log):
 		exp_dis = [ xx for xx in exp_in_dm if xx[ 1 ] in fam_dis ]
 		log.debug('exp_dis: {}'.format(exp_dis))
 		to_be_added += [ [ xx[ 0 ], '', xx[ 1 ] ] for xx in exp_dis ]
-		to_be_added = sorted([ [ xx[ 0 ], xx[ 2 ], -1, '', True ] for xx in to_be_added ], key = lambda x: x[ 1 ])
+		to_be_added = sorted([ [ xx[ 0 ], xx[ 2 ], -1, True ] for xx in to_be_added ], key = lambda x: x[ 1 ])
 	else:
 		log.info('There are NO experiments that need to be re-assigned')
-		to_be_added = sorted([ [ xx[ 0 ], xx[ 2 ], -1, '', True ] for xx in to_be_added ], key = lambda x: x[ 1 ])
+		to_be_added = sorted([ [ xx[ 0 ], xx[ 2 ], -1, True ] for xx in to_be_added ], key = lambda x: x[ 1 ])
 
 	# Let's get the last dense matrix created and check if experiments can be added
 	last_dm = dict(Counter([ x[ 2 ] for x in exp_in_dm if x[ 2 ] != '' ])).items()
@@ -484,7 +484,7 @@ def _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, config, log):
 	log.debug('to_be_added: {}'.format(to_be_added))
 
 	# Gather the information for those experiments that have not to be updated
-	not_updated = [ [ xx[ 0 ], xx[ 1 ], int(xx[ 2 ]), xx[ 3 ], False ] for xx in exp_in_dm if xx[ 0 ] not in [ yy[ 0 ] for yy in to_be_added ] ]
+	not_updated = [ [ xx[ 0 ], xx[ 1 ], int(xx[ 2 ]), False ] for xx in exp_in_dm if xx[ 0 ] not in [ yy[ 0 ] for yy in to_be_added ] ]
 	log.debug('not_updated: {}'.format(not_updated))
 
 	assignation = to_be_added + not_updated
