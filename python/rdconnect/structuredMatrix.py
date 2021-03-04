@@ -318,7 +318,9 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 	
 	print("experiments", experiments)
 
-	exp_sts = [ x['RD_Connect_ID_Experiment'] for x in _get_experiments_to_dm_(self.config, self.log) ]
+	exp_sts = _get_experiments_to_dm_(self.config, self.log)
+	print("exp_sts:", exp_sts)
+	exp_sts = [ x['RD_Connect_ID_Experiment'] for x in exp_sts ]
 	print("exp_sts:", exp_sts)
 
 	to_add = [ x for x in experiments.keys() if x[1] in exp_sts ]
@@ -548,6 +550,7 @@ def _get_experiments_to_dm_(config, log):
 		sys.exit(2)
 	
 	rst = response.json()
+	print("rst:", rst)
 	rst = rst['items']
 
 	if rst['_meta']['total_pages'] > 1:
