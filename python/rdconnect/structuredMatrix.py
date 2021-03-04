@@ -316,12 +316,8 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		self.log.info('No experiments were provided, DM will be queried to obtain the experiments to add to dense matrices (multivcf & es: waiting)')
 		experiments = get.experiments_in_dm_traking([ (x, '') for x in experiments_in_matrix ], self.config, self.log)
 	
-	print("experiments", experiments)
-
 	exp_sts = _get_experiments_to_dm_(self.config, self.log)
-	print("exp_sts:", exp_sts)
 	exp_sts = [ x['RD_Connect_ID_Experiment'] for x in exp_sts ]
-	print("exp_sts:", exp_sts)
 
 	to_add = [ x for x in experiments.keys() if x in exp_sts ]
 	to_add = [ [ x ] + experiments[ x ].split('//') for x in to_add ]
@@ -330,28 +326,21 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 	print("to_add:", to_add)
 	print("dm_to_create:", dm_to_create)
 	
-
-	
-
-	import sys
-	sys.exit()
-
-	idx = 0
 	try:
-		#for idx, batch in enumerate( mapping ):
-		#	self.log.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
-		#	sam = hl.literal([ x[ 0 ] for x in batch ], 'array<str>')
-		sam = hl.literal(experiments, 'array<str>')
-		small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
-		small_matrix = small_matrix.key_rows_by('locus', 'alleles')
-		small_matrix = hl.experimental.sparse_split_multi(small_matrix, filter_changed_loci = True)
-		small_matrix = hl.experimental.densify(small_matrix)
-		small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.GT.is_non_ref()))
-		small_matrix = hl.split_multi_hts(small_matrix, keep_star = False)	
-		path = '{0}/chrom-{1}-mtx-{2}'.format(dense_matrix_path, chrom, idx)
-		self.log.info('Writing dense matrix {} to disk ({})'.format(idx, path))
-		small_matrix.write(path, overwrite = True)
-		self.log.debug( "Ending writing dense matrix" )
+		for idx, dm in enumerate( dm_to_create ):
+			self.log.debug( "Flatting and filtering dense matrix {} (#{})".format(idx, dm))
+			sam = hl.literal([ x[ 0 ] for x in to_add if x[ 2 ] == dm ], 'array<str>')
+			#sam = hl.literal(experiments, 'array<str>')
+			small_matrix = sparse_matrix.filter_cols(sam.contains(sparse_matrix[ 's' ]))
+			small_matrix = small_matrix.key_rows_by('locus', 'alleles')
+			small_matrix = hl.experimental.sparse_split_multi(small_matrix, filter_changed_loci = True)
+			small_matrix = hl.experimental.densify(small_matrix)
+			small_matrix = small_matrix.filter_rows(hl.agg.any(small_matrix.GT.is_non_ref()))
+			small_matrix = hl.split_multi_hts(small_matrix, keep_star = False)	
+			path = '{0}/chrom-{1}-mtx-{2}'.format(dense_matrix_path, chrom, dm)
+			self.log.info('Writing dense matrix {} (#{}) to disk ({})'.format(dm, idx, path))
+			small_matrix.write(path, overwrite = True)
+			self.log.debug("Ending writing dense matrix")
 	except Exception as ex:
 		raise ex
 
