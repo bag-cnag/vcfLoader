@@ -317,7 +317,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		exp_in_dm = get.experiments_in_dm_traking([ (x, '') for x in experiments_in_matrix ], self.config, self.log)
 		print("exp_in_dm", exp_in_dm)
 
-		exp_sts = get._get_experiments_to_dm_(self.config, self.log)
+		exp_sts = _get_experiments_to_dm_(self.config, self.log)
 		print("exp_sts:", exp_sts)
 	else:
 		pass
