@@ -259,7 +259,8 @@ def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = N
 	for ii in range(0, len(mapping2), n):
 		data = {}
 		for xx in  mapping2[ii:ii+n]:
-			data.update({ xx[0]: '//'.join([ str(x) for x in xx[1:2] ]) })
+			print(xx, xx[0], xx[1], xx[])
+			data.update({ xx[0]: '//'.join([ str(x) for x in xx[1:-1] ]) })
 		packs.append(data)
 
 	print("mapping", mapping)
