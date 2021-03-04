@@ -514,10 +514,7 @@ def _get_experiments_to_dm_(config, log):
 	if not url.startswith('http://') and not url.startswith('https://'):
 		url = 'https://{0}'.format(url)
 
-	if is_playground:
-		url = config['applications/datamanagement/api_exp_status_list_playground'].format(url)
-	else:
-		url = config['applications/datamanagement/api_exp_status_list'].format(url)
+	url = config['applications/datamanagement/api_exp_status_list'].format(url)
 
 	log.info('Entering step "get_experiments_prepared"')
 	log.debug('> Argument "chrom" filled with "{}"'.format(chrm_str))
