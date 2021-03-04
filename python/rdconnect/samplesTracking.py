@@ -272,3 +272,45 @@ def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = N
 			log.debug('> Querying batch #{}/{} resulted in {}.'.format(ii, len(packs), resp.status_code))
 
 	return self
+
+
+
+def samples_to_dm(config, log):
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
+	if is_playground:
+		url = config['applications/datamanagement/api_exp_status_list_playground'].format(url)
+	else:
+		url = config['applications/datamanagement/api_exp_status_list'].format(url)
+
+	log.info('Entering step "get_experiments_prepared"')
+	log.debug('> Argument "chrom" filled with "{}"'.format(chrm_str))
+	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
+	log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
+
+	headers = { 
+		'accept': 'application/json', 'Content-Type': 'application/json',
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}
+	
+	data = { "page": 1, "pageSize": 5000, 
+		"fields": [ "RD_Connect_ID_Experiment", "mapping", "variantCalling", "genomicsdb", "hdfs", "es", "in_platform" ],
+		"sorted": [ { "id": "RD_Connect_ID_Experiment", "desc": False} ],
+		"filtered": [
+			{ "id": "variantCalling", "value": "pass" }, 
+			{ "id": "hdfs",           "value": "pass" },
+			{ "id": "genomicsdb",     "value": "pass" },
+			{ "id": "multivcf",       "value": "waiting" },
+			{ "id": "es",             "value": "waiting" }
+		]
+	}
+	log.debug('> Querying DM using URL "{0}"'.format(url))
+
+	response = requests.post(url, json = data, headers = headers, verify = False)
+	if response.status_code != 200:
+		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+		sys.exit(2)

@@ -317,7 +317,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		exp_in_dm = get.experiments_in_dm_traking([ (x, '') for x in experiments_in_matrix ], self.config, self.log)
 		print("exp_in_dm", exp_in_dm)
 
-		exp_sts = get.experiment_status(self.config, self.log)
+		exp_sts = get._get_experiments_to_dm_(self.config, self.log)
 		print("exp_sts:", exp_sts)
 	else:
 		pass
@@ -509,5 +509,57 @@ def _experiments_with_dm_traking_(exp_and_fam, exp_in_dm, N, config, log):
 	return assignation
 
 
+def _get_experiments_to_dm_(config, log):
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
 
+	if is_playground:
+		url = config['applications/datamanagement/api_exp_status_list_playground'].format(url)
+	else:
+		url = config['applications/datamanagement/api_exp_status_list'].format(url)
+
+	log.info('Entering step "get_experiments_prepared"')
+	log.debug('> Argument "chrom" filled with "{}"'.format(chrm_str))
+	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
+	log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
+
+	headers = { 
+		'accept': 'application/json', 'Content-Type': 'application/json',
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}
+	
+	data = { "page": 1, "pageSize": 5000, 
+		"fields": [ "RD_Connect_ID_Experiment", "mapping", "variantCalling", "genomicsdb", "hdfs", "es", "in_platform" ],
+		"sorted": [ { "id": "RD_Connect_ID_Experiment", "desc": False} ],
+		"filtered": [
+			{ "id": "variantCalling", "value": "pass" }, 
+			{ "id": "hdfs",           "value": "pass" },
+			{ "id": "genomicsdb",     "value": "pass" },
+			{ "id": "multivcf",       "value": "waiting" },
+			{ "id": "es",             "value": "waiting" }
+		]
+	}
+	log.debug('> Querying DM using URL "{0}"'.format(url))
+
+	response = requests.post(url, json = data, headers = headers, verify = False)
+	if response.status_code != 200:
+		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+		sys.exit(2)
+	
+	rst = response.json()
+
+	if rst['_meta']['total_pages'] > 1:
+		rst = rst['items']
+		for ii in range(2, rst['_meta']['total_pages'] + 1):
+			data["page"] = ii
+			response = requests.post(url, json = data, headers = headers, verify = False)
+			if response.status_code != 200:
+				log.error('Query DM for experiment list (iteration {}) resulted in a {} message'.format(str(ii), str(response.status_code)))
+				sys.exit(2)
+			rst.append(response.json()['items'])
+
+	return rst
 

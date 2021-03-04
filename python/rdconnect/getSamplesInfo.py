@@ -122,24 +122,28 @@ def experiment_status(config, log = VoidLog(), is_playground = False):
 	is_playground: bool, optional
 		Boolean indicating it playground URLs shall be used.
 	"""
-	url = config['applications/datamanagement/ip']
-	if not url.startswith('http://') and not url.startswith('https://'):
-		url = 'https://{0}'.format(url)
+	# url = config['applications/datamanagement/ip']
+	# if not url.startswith('http://') and not url.startswith('https://'):
+	# 	url = 'https://{0}'.format(url)
 
-	if is_playground:
-		url = config['applications/datamanagement/api_exp_status_playground'].format(
-			url, config['applications/api_group'])
-	else:
-		url = config['applications/datamanagement/api_exp_status'].format(
-			url, config['applications/api_group'])
-	headers = { 
-		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
-		'Host': config['applications/datamanagement/host'] 
-	}	
-	log.debug('Querying experiment\'s status using url "{}"'.format(url))
-	resp = requests.get(url, headers = headers, verify = False)
-	data = json.loads(resp.content)
-	return data
+	# if is_playground:
+	# 	url = config['applications/datamanagement/api_exp_status_playground'].format(
+	# 		url, config['applications/api_group'])
+	# else:
+	# 	url = config['applications/datamanagement/api_exp_status'].format(
+	# 		url, config['applications/api_group'])
+	# headers = { 
+	# 	'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+	# 	'Host': config['applications/datamanagement/host'] 
+	# }	
+	# log.debug('Querying experiment\'s status using url "{}"'.format(url))
+	# resp = requests.get(url, headers = headers, verify = False)
+	# data = json.loads(resp.content)
+	# return data
+	raise(Exception("Not implemented"))
+
+
+	
 
 
 
