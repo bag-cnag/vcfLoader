@@ -262,6 +262,7 @@ def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = N
 			data.update({ xx[0]: '//'.join([ str(x) for x in xx[1:2] ]) })
 		packs.append(data)
 
+	print(mapping2)
 	print(packs)
 
 	for ii, samlist in enumerate(packs):
