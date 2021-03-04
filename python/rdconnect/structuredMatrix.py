@@ -275,7 +275,12 @@ def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
 
 	return rst
 
+
 def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLog(), experiments = []):
+	isSelf = True
+	if self is None:
+		isSelf = False
+
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_dense_matrices"')
 
