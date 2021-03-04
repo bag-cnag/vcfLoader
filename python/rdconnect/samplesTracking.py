@@ -270,39 +270,5 @@ def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = N
 			log.error('> Querying batch #{}/{} failed with error {} and content "{}".'.format(ii, len(packs), resp.status_code, resp.text))
 		else:
 			log.debug('> Querying batch #{}/{} resulted in {}.'.format(ii, len(packs), resp.status_code))
-	
 
-	return self
-	
-
-
-
-	# packs = []
-	# n = 200
-	# for ii in range(0, len(full_samples), n):  
-	# 	packs.append(','.join(full_samples[ii:ii + n]))
-
-	# self.log.debug('> Data-management will be queried {} times, each time with {} experiments maximum'.format(len(packs), n))
-
-	# url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
-	# headers = { 'accept': 'application/json', 
-	# 	'Content-Type': 'application/json', 
-	# 	'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
-	# 	'Host': self.config['applications/datamanagement/host'] }
-
-	# self.log.debug('> Created query URL for data-management: {}'.format(url))
-
-	# table = {}
-	# for ii, samlist in enumerate(packs):
-	# 	q_url = url + '?experiment=' + samlist
-	# 	response = requests.post(q_url, headers = headers, verify = False)
-	# 	print(q_url)
-	# 	print(headers)
-	# 	if response.status_code != 200:
-	# 		self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
-	# 		return 
-	# 	else:
-	# 		data = json.loads(resp.content)
-	# 		table.update(data)
-	# print(table)
 	return self
