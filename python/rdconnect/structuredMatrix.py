@@ -550,11 +550,11 @@ def _get_experiments_to_dm_(config, log):
 		sys.exit(2)
 	
 	rst = response.json()
-	print("rst:", rst)
+	page = rst['_meta']['total_pages']
 	rst = rst['items']
 
-	if rst['_meta']['total_pages'] > 1:
-		for ii in range(2, rst['_meta']['total_pages'] + 1):
+	if page > 1:
+		for ii in range(2, page + 1):
 			data["page"] = ii
 			response = requests.post(url, json = data, headers = headers, verify = False)
 			if response.status_code != 200:
