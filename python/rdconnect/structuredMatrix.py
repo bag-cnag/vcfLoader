@@ -309,8 +309,8 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		self.log.debug('> Loading sparse matrix from in {0}'.format(path_matrix))
 		self.data = hl.read_matrix_table(path_matrix)
 
-	experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
-	self.log.debug('> Total of {0} experiments in sparse matrix'.format( len( experiments_in_matrix ) ))
+	experiments_in_matrix = [ x.get( 's' ) for x in self.data.col.collect() ]
+	self.log.debug('> Total of {0} experiments in sparse matrix'.format(len(experiments_in_matrix)))
 
 	if len(experiments) == 0:
 		self.log.info('No experiments were provided, DM will be queried to obtain the experiments to add to dense matrices (multivcf & es: waiting)')
