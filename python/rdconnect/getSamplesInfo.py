@@ -191,6 +191,7 @@ def experiments_and_family(pids, config, sort_output = True):
 			raise Exception("Communication with PhenosTore giving \"{}\" returned 'dict' instead of 'list' with content \"{}\"".format(str(body), str(x)))
 		for y in x:
 			data += x
+	print("--------->", data)
 	parsed = {}
 	for elm in data:
 		pid = list( elm.keys() )[ 0 ]
