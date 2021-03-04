@@ -323,7 +323,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 	exp_sts = [ x['RD_Connect_ID_Experiment'] for x in exp_sts ]
 	print("exp_sts:", exp_sts)
 
-	to_add = [ x for x in experiments.keys() if x[1] in exp_sts ]
+	to_add = [ x for x in experiments.keys() if x in exp_sts ]
 	to_add = [ [ x ] + experiments[ x ].split('//') for x in to_add ]
 	dm_to_create = sorted(list(set([ x[ 2 ] for x in to_add ])))
 
