@@ -516,12 +516,6 @@ def _get_experiments_to_dm_(config, log):
 
 	url = config['applications/datamanagement/api_exp_status_list'].format(url)
 
-	log.info('Entering step "get_experiments_prepared"')
-	log.debug('> Argument "chrom" filled with "{}"'.format(chrm_str))
-	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
-	log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
-
 	headers = { 
 		'accept': 'application/json', 'Content-Type': 'application/json',
 		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
