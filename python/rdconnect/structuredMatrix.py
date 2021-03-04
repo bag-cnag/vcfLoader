@@ -314,10 +314,11 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 
 	if len(experiments) == 0:
 		self.log.info('No experiments were provided, DM will be queried to obtain the experiments to add to dense matrices (multivcf & es: waiting)')
-		exp_in_dm = get.experiments_in_dm_traking(exp_for_ps, self.config, self.log)
+		exp_in_dm = get.experiments_in_dm_traking(experiments_in_matrix, self.config, self.log)
+	else:
+		exp_in_dm = get.experiments_in_dm_traking(experiments, self.config, self.log)
 
-
-		print("exp_in_dm", exp_in_dm)
+	print("exp_in_dm", exp_in_dm)
 
 	import sys
 	sys.exit()
