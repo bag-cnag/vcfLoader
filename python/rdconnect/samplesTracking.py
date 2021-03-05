@@ -308,6 +308,7 @@ def samples_to_dm(config, log):
 			{ "id": "es",             "value": "waiting" }
 		]
 	}
+	
 	log.debug('> Querying DM using URL "{0}"'.format(url))
 
 	response = requests.post(url, json = data, headers = headers, verify = False)

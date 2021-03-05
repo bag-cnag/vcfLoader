@@ -145,6 +145,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	base = sparse_path.replace(version, '')
 	self.log.debug('> Detected version of sparse matrix {}'.format(version))
 
+	print("clean_to_process:", clean_to_process)
+
 	try:
 		self.data = hl.read_matrix_table(_name_with_chrom(sparse_path, chrom))
 		self.log.info('Sparse matrix {}/chrom-{} was loaded'.format(version, chrom))
@@ -167,6 +169,9 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	self.log.info('Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
 	batches = _create_batches(clean_to_process, version, largeBatch, smallBatch)
 	
+
+	print("batches:", batches)
+
 	last = None
 	for idx1, batch in enumerate(batches):
 		self.log.info('Processing large batch {}/{} {}'.format(idx1, len(batches), batch[ 'version' ]))
