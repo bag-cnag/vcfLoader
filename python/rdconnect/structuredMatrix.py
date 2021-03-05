@@ -126,6 +126,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	# 		'id': itm['RD_Connect_ID_Experiment'],
 	# 		'pid': itm['Participant_ID']
 	# 	})
+
+	print("experiments:", experiments)
 	
 	clean_to_process = []
 	for item in experiments:
@@ -194,6 +196,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		revisions_to_collect = [ version ] + revisions_to_collect
 
 	self.log.info('Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
+	print(revisions_to_collect)
 	
 	for ii in range(1, len(revisions_to_collect)):
 		last = _combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ][ 0 ], 'version'), chrom)
