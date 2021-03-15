@@ -288,7 +288,7 @@ def annotateSomatic(hl, dataset):
         :param HailTable dataset: The Hail table formatted variants to annotate
     """
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,
-                                                         gtInt=dataset.GT,
+                                                         gtInt=dataset.GT_cons,
                                                          dp_avg=dataset.DP_avg,
                                                          dp_ref_avg=dataset.DP_REF_avg,
                                                          dp_alt_avg=dataset.DP_ALT_avg,
