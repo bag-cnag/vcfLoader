@@ -292,7 +292,7 @@ def annotateSomatic(hl, dataset):
                                                          dp_avg=dataset.DP_avg,
                                                          dp_ref_avg=dataset.AD_avg[0],
                                                          dp_alt_avg=dataset.AD_avg[1],
-                                                         vaf_avg=dataset.AF_avg,gt=hl.str(dataset.GT),
+                                                         vaf_avg=dataset.AF_avg,gt=hl.str(dataset.GT_cons),
                                                          nprogs=dataset.info.NPROGS,
                                                          progs=dataset.info.PROGS.split(","))) \
                      .drop('rsid','qual','filters','info')
