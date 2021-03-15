@@ -290,11 +290,11 @@ def annotateSomatic(hl, dataset):
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,
                                                          gtInt=dataset.GT_cons,
                                                          dp_avg=dataset.DP_avg,
-                                                         dp_ref_avg=dataset.AD_avg.split(",")[0],
-                                                         dp_alt_avg=dataset.AD_avg.split(",")[1],
-                                                         vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),
+                                                         dp_ref_avg=dataset.AD_avg[0],
+                                                         dp_alt_avg=dataset.AD_avg[1],
+                                                         vaf_avg=dataset.AF_avg,gt=hl.str(dataset.GT),
                                                          nprogs=dataset.info.NPROGS,
-                                                         progs=hl.delimit(dataset.info.PROGS,","))) \
+                                                         progs=dataset.info.PROGS.split(","))) \
                      .drop('rsid','qual','filters','info')
     dataset = dataset.annotate_rows(ref=dataset.alleles[0],
                                     alt=dataset.alleles[1],
