@@ -173,7 +173,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	batches = _create_batches(clean_to_process, version, largeBatch, smallBatch)
 	
 
-	print("batches:", batches)
+	#print("batches:", batches)
 
 	last = None
 	for idx1, batch in enumerate(batches):
@@ -186,8 +186,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 				vsr = batch[ 'version' ]
 			small_batch_path = _name_with_chrom(path.join(base, vsr), chrom)
 			self.log.info('     . Loading pack #{} of {} gVCF ({})'.format(idx2, len(pack[ 'content' ]), small_batch_path))
-			#for f in pack['content']:
-			#	print(f)
+			for f in pack['content']:
+				print(f)
 			last = _load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
 			accum = small_batch_path
 
