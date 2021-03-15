@@ -79,7 +79,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	if filesystem == 'hdfs':
 		self.log.debug('> Argument "destination_hdfs" filled with "{}" it will be used'.format(destination_hdfs))
 		self.log.debug('> Argument "destination_ceph" filled with "{}" it will not be used'.format(destination_ceph))
-		destination_path = destination_hdfds
+		destination_path = destination_hdfs
 	else:
 		self.log.debug('> Argument "destination_hdfs" filled with "{}" it will not be used'.format(destination_hdfs))
 		self.log.debug('> Argument "destination_ceph" filled with "{}" it will be used'.format(destination_ceph))
