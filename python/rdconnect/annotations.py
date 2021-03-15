@@ -290,8 +290,8 @@ def annotateSomatic(hl, dataset):
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,
                                                          gtInt=dataset.GT_cons,
                                                          dp_avg=dataset.DP_avg,
-                                                         dp_ref_avg=dataset.DP_REF_avg,
-                                                         dp_alt_avg=dataset.DP_ALT_avg,
+                                                         dp_ref_avg=dataset.AD_avg.split(",")[0],
+                                                         dp_alt_avg=dataset.AD_avg.split(",")[1],
                                                          vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),
                                                          nprogs=dataset.info.NPROGS,
                                                          progs=hl.delimit(dataset.info.PROGS,","))) \
