@@ -144,7 +144,8 @@ def importSomaticFile(hl, file_path, num_partitions):
         :param String file_path: Path from which to import the file
         :param Int num_partitions: Number of partitions when importing the file
     """
-    dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions)) 
+    dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
+    dataset=dataset.filter_rows(dataset.locus.contig!="hs37d5")
     return annotateSomatic(hl,dataset)
     
 def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
