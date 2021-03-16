@@ -321,7 +321,7 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 		path_matrix = '{0}/chrom-{1}'.format(sparse_matrix_path, chrom)
 		self.log.debug('> Loading sparse matrix from in {0}'.format(path_matrix))
 		self.data = hl.read_matrix_table(path_matrix)
-		print("---->", [ y.get('s') for y in self.data.col.collect() ])
+		#print("---->", [ y.get('s') for y in self.data.col.collect() ])
 
 	experiments_in_matrix = [ x.get( 's' ) for x in self.data.col.collect() ]
 	self.log.debug('> Total of {0} experiments in sparse matrix'.format(len(experiments_in_matrix)))
@@ -342,7 +342,8 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 	to_add = [ [ x ] + experiments[ x ].split('//') for x in to_add ]
 	dm_to_create = sorted(list(set([ x[ 2 ] for x in to_add ])))
 
-	#print("to_add:", to_add)
+	dm_to_create= [ '0' ]
+	print("to_add:", to_add)
 	print("dm_to_create:", dm_to_create)
 	
 	try:
