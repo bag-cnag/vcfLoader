@@ -336,7 +336,8 @@ def append_to_dense_matrices(self = None, config = None, hl = None, log = VoidLo
 	#to_add = [ [ x ] + experiments[ x ].split('//') for x in to_add ]
 	#dm_to_create = sorted(list(set([ x[ 2 ] for x in to_add ])))
 
-	to_add = [ (x, '', '0') for x in experiments_in_matrix ]
+	#to_add = [ (x, '', '0') for x in experiments_in_matrix ]
+	to_add = [['AS5135', '', '0'], ['AS5134', '', '0'], ['AS5133', '', '0'], ['AS5137', '', '0'], ['AS5138', '', '0']]
 	dm_to_create = [ '0' ]
 	print("to_add:", to_add)
 	print("dm_to_create:", dm_to_create)
