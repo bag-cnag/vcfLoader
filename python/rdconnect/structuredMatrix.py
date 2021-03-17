@@ -144,6 +144,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	print("clean_to_process")
 	print(clean_to_process)
 	print(experiments_selection)
+	print(self.config['process/experiments_list'])
+	print(config['process/experiments_list'])
 	if experiments_selection=="manual":
 	    experiments=self.config['process/experiments_list']
 	    experiments_folder= self.config['process/experiments_list_source_folder']
