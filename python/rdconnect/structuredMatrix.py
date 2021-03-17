@@ -47,7 +47,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	"""
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_sparse_matrix"')
-
+	print(self.config['process/experiments_list'])
+	print(config['process/experiments_list'])
 	if not isConfig:
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
