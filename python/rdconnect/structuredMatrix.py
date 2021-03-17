@@ -64,8 +64,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	smallBatch = self.config['applications/combine/sz_small_batch']
 	largeBatch = self.config['applications/combine/sz_large_batch']
-
-
+	print(config["applications/experiments_list"])
+	print(self.config["applications/experiments_list"])
 	chrom_str = chrom
 	if chrom_str == '23':
 		chrom_str = 'MT'
