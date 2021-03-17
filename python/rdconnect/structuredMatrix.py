@@ -64,8 +64,7 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 
 	smallBatch = self.config['applications/combine/sz_small_batch']
 	largeBatch = self.config['applications/combine/sz_large_batch']
-	print(config["applications/experiments_list"])
-	print(self.config["applications/experiments_list"])
+
 	chrom_str = chrom
 	if chrom_str == '23':
 		chrom_str = 'MT'
@@ -173,6 +172,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 	#		clean_to_process = [ z for z in clean_to_process if z['id'] not in x ]
 
 	# Create batches of samples to be loaded
+	print("clean_to_process")
+	print(clean_to_process)
 	self.log.info('Starting step 1 - creation of cumulative matrices of {} experiments, incrementing {} experiments at a time'.format(largeBatch, smallBatch))
 	batches = _create_batches(clean_to_process, version, largeBatch, smallBatch)
 	
