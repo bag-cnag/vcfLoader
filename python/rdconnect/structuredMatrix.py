@@ -45,7 +45,6 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		self. If no logger is in the provided nor in the GenomicData, then no
 	log is performed.
 	"""
-	print(self.config['process/experiments_list'])
 	print(config['process/experiments_list'])
 	self, isConfig, isHl = utils.check_class_and_config(None, config, hl, log, class_to = SparseMatrix)
 	self.log.info('Entering step "append_to_sparse_matrix"')
