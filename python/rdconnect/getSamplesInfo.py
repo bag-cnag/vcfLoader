@@ -45,6 +45,7 @@ def experiments(config, log = VoidLog(), is_playground = False):
 	data = json.loads(resp.content)
 	return data
 
+
 def experiment_by_group(config, log = VoidLog(), is_playground = False):
 	"""Function used to query data-management and get a list of experiments
 	that belongs to a specific group of users.
@@ -121,24 +122,28 @@ def experiment_status(config, log = VoidLog(), is_playground = False):
 	is_playground: bool, optional
 		Boolean indicating it playground URLs shall be used.
 	"""
-	url = config['applications/datamanagement/ip']
-	if not url.startswith('http://') and not url.startswith('https://'):
-		url = 'https://{0}'.format(url)
+	# url = config['applications/datamanagement/ip']
+	# if not url.startswith('http://') and not url.startswith('https://'):
+	# 	url = 'https://{0}'.format(url)
 
-	if is_playground:
-		url = config['applications/datamanagement/api_exp_status_playground'].format(
-			url, config['applications/api_group'])
-	else:
-		url = config['applications/datamanagement/api_exp_status'].format(
-			url, config['applications/api_group'])
-	headers = { 
-		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
-		'Host': config['applications/datamanagement/host'] 
-	}	
-	log.debug('Querying experiment\'s status using url "{}"'.format(url))
-	resp = requests.get(url, headers = headers, verify = False)
-	data = json.loads(resp.content)
-	return data
+	# if is_playground:
+	# 	url = config['applications/datamanagement/api_exp_status_playground'].format(
+	# 		url, config['applications/api_group'])
+	# else:
+	# 	url = config['applications/datamanagement/api_exp_status'].format(
+	# 		url, config['applications/api_group'])
+	# headers = { 
+	# 	'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+	# 	'Host': config['applications/datamanagement/host'] 
+	# }	
+	# log.debug('Querying experiment\'s status using url "{}"'.format(url))
+	# resp = requests.get(url, headers = headers, verify = False)
+	# data = json.loads(resp.content)
+	# return data
+	raise(Exception("Not implemented"))
+
+
+	
 
 
 
@@ -168,16 +173,29 @@ def experiments_to_process(experiment_available, experiment_status, check_hdfs =
 	
 
 def experiments_and_family(pids, config, sort_output = True):
+	"""
+	pids: A list of tuples. Position 0 is RD-Connect Experiment ID, position 1
+	is PhentoStore Id.
+
+	"""
 	url = config['applications/phenostore/api_exp_mul'].format(config['applications/phenostore/ip'])
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
 	headers = { 'Content-Type': 'application/json', 
 		'Authorization': config['application/kc_token'], 
-		'Host': config['applications/datamanagement/host'] 
+		'Host': config['applications/phenostore/host'] 
 	}
-	data=[]
-	for i in range(0,(len(pids)//1000)+1) :
-		body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
-		resp = requests.post( url, headers = headers, json = body, verify = False )
-		data = data + resp.json()
+	data = []
+	for ii in range(0,(len(pids)//1000)+1) :
+		#body = { 'patients': [ { 'id': x[ 'Participant_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
+		body = { 'patients': [ { 'id': x[ 1 ] } for x in pids[(ii*1000):((ii+1)*1000)] ] }
+		resp = requests.post(url, headers = headers, json = body, verify = False)
+		x = resp.json()
+		if x is dict:
+			raise Exception("Communication with PhenosTore giving \"{}\" returned 'dict' instead of 'list' with content \"{}\"".format(str(body), str(x)))
+		for y in x:
+			data += x
+	print("--------->", data)
 	parsed = {}
 	for elm in data:
 		pid = list( elm.keys() )[ 0 ]
@@ -185,9 +203,52 @@ def experiments_and_family(pids, config, sort_output = True):
 			fam = '---'
 		else: 
 			fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
+		if fam == 'none':
+			fam = ''
 		parsed[ pid ] = fam
-	rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Participant_ID' ], parsed[ pak[ 'Participant_ID' ] ] ] for pak in pids ]
+	rst = [ [ pak[ 0 ], pak[ 1 ], parsed[ pak[ 1 ] ] ] for pak in pids ]
 	if sort_output:
 		return sorted( rst, key = lambda x: x[ 2 ] )
 	else:
 		return rst
+
+
+
+def experiments_in_dm_traking(pids, config, log, n = 1000):
+	"""
+	pids: A list of tuples. Position 0 is RD-Connect Experiment ID, position 1
+	is PhentoStore Id.
+
+	"""
+	print(pids)
+	pids = [ x[ 0 ] for x in pids ]
+	print(pids)
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
+	url = config['applications/datamanagement/api_sm'].format(url, config['applications/api_group'])
+	headers = { 
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}	
+	log.debug('Querying experiment\'s dm annotation using url "{}"'.format(url))
+
+	packs = []
+	for ii in range(0, len(pids), n):
+		packs.append(','.join(pids[ii:ii+n]))
+
+	data = {}
+	for ii, samlist in enumerate(packs):
+		log.debug('> Querying batch #{}/{}'.format(ii, len(packs)))
+		q_url = url + '?experiments=' + samlist
+		resp = requests.get(q_url, headers = headers, verify = False)
+		print(resp.status_code)
+		print(resp.text)
+		if resp.status_code == 200:
+			x = json.loads(resp.content)
+			for k in x.keys():
+				data[ k ] = x[ k ]
+	return data
+
+	

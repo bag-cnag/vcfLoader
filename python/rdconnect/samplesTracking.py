@@ -5,17 +5,25 @@ import requests
 import rdconnect.utils as utils
 from rdconnect.classException import *
 from rdconnect.classGenome import SparseMatrix
+import rdconnect.setSamplesInfo as samples
+
 
 def sample_index(self = None, config = None, hl = None, log = None):
 	""" This function allows to update the index information for a set of 
 	experiments in data-management.
 
-	The function requires of a GenimcData object (as self) or a configuration
+	The function requires of a GenomicData object (as self) or a configuration
 	pointing to a location (aka. HDFS' folder) containing a MatrixTable (HAIL).
 	The experiments in the MatrixTable will be the ones which index information 
 	will be updated.
+
+	If no GenomicData is provided, chromosome 21 of the last annotated matrix
+	(gnomeADEx) will be loaded and used as reference to get the samples to be
+	updated.
+
+	This function relies on the set_experiment from setSamplesInfo.
+
 	Parameters
-	
 	----------
 	config: ConfigFile, optional
 		Configuration for this step of the pipeline. If not provided or set to
@@ -34,65 +42,30 @@ def sample_index(self = None, config = None, hl = None, log = None):
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
-	self.log.info('Entering updating step "DM - INDEX"')
+	self.log.info('Entering updating step "DM - index"')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
-		log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
-		self.config['process/chrom'] = '21'
-
-	source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
-	source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
-	source_path = os.path.join(source_path, source_file)
-
 	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-	self.log.debug('> Argument "index_name" filled with "{}"'.format(self.config['resources/elasticsearch/index_name']))
+	if not isSelf:
+		if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
 
-	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/api_group'])
-	headers = { 'accept': 'application/json', 
-		'Content-Type': 'application/json', 
-		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
-		'Host': self.config['applications/datamanagement/host'] }
-	data = "{\"dataset\":\"" + self.config['resources/elasticsearch/index_name'] + "\"}"
-	
-	# vcf = self.hl.split_multi_hts(self.hl.import_vcf(str(source_path), array_elements_required = False, force_bgz = True, min_partitions = 2))
-	# full_samples = [y.get('s') for y in vcf.col.collect()]
-	mtbl = self.hl.methods.read_matrix_table(source_path)
-	full_samples = [ y.get('s') for y in mtbl.col.collect() ]
+			self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
+			self.config['process/chrom'] = '21'
 
-	self.log.info('> Experiments in loaded VCF: {}'.format(len(full_samples)))
-	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
-	self.log.debug('> Provided update content: "{}"'.format(str(data)))
-	self.log.debug('> Created query URL for data-management: {}'.format(url))
+			gnomeADEx_annotated_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+			gnomeADEx_annotated_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+			gnomeADEx_annotated_file = utils.destination_gnomadex(os.path.join(gnomeADEx_annotated_path, self.config['resources/elasticsearch/version']), gnomeADEx_annotated_file)
 
-	for sam in full_samples:
-		q_url = url + '&experiment=' + sam
-		response = requests.post(q_url, data = data, headers = headers, verify = False)
-		if response.status_code != 200:
-			q_url = url + '&forceupdate=true&experiment=' + sam
-			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
-			if response2.status_code != 200:
-				self.log.error('> Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
-			else:
-				self.log.warning('> Query for "{}" resulted in {}. Forced update was successful with {}'.format(sam, response.status_code, response2.status_code))
-				
-				# data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
-				# 	\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
-				# 	\"qc\": \"pass\",					\"coverage\": \"pass\", \
-				# 	\"cnv\": \"waiting\",				\"variantCalling\": \"pass\", \
-				# 	\"rohs\": \"pass\",					\"genomicsdb\": \"pass\", \
-				# 	\"multivcf\": \"pass\",				\"hdfs\": \"pass\", \
-				# 	\"es\": \"pass\",					\"in_platform\": \"pass\", \
-				# 	\"dataset\":\"" + index_name + "\" \
-				# }"
-				# response2 = requests.post(q_url, data = data, headers = headers, verify = False)
-				# if response2.status_code != 200:
-				# 	accum.append((sam, response, response2))
+			self.log.info('Since no data was provided gnomeADEx annotated set will be loaded (set: "{}"")'.format())
+			self.data = hl.read_matrix_table(gnomeADEx_annotated_file)
 
+	full_samples = [ y.get('s') for y in self.data.col.collect() ]
+	self.log.debug('Total of {0} experiments were loaded'.format(len(full_samples)))
+
+	samples.set_experiment(config = self.config, hl = self.hl, log = self.log, samples = full_samples, flag = 'dataset', value = self.config['resources/elasticsearch/index_name'])
 	return self
 
 
@@ -100,12 +73,18 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 	""" This function allows to update the "in_platform" information for a set 
 	of  experiments in data-management.
 
-	The function requires of a GenimcData object (as self) or a configuration
+	The function requires of a GenomicData object (as self) or a configuration
 	pointing to a location (aka. HDFS' folder) containing a MatrixTable (HAIL).
-	The experiments in the MatrixTable will be the ones which index information 
+	The experiments in the MatrixTable will be the ones which status information 
 	will be updated.
+
+	If no GenomicData is provided, chromosome 21 of the last annotated matrix
+	(gnomeADEx) will be loaded and used as reference to get the samples to be
+	updated.
+
+	This function relies on the set_experiment from setSamplesInfo.
+
 	Parameters
-	
 	----------
 	config: ConfigFile, optional
 		Configuration for this step of the pipeline. If not provided or set to
@@ -124,78 +103,48 @@ def sample_in_platform(self = None, config = None, hl = None, log = None):
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log)
-	self.log.info('Entering updating step "DM - IN_PLATFORM"')
+	self.log.info('Entering updating step "DM - in_platform"')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
-		self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
-		self.config['process/chrom'] = '21'
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+	if not isSelf:
+		if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
 
-	if self is None:
-		source_file = utils.create_chrom_filename(self.config['process/source_file'], self.config['process/chrom'])
-		source_path = utils.create_chrom_filename(self.config['process/source_path'], self.config['process/chrom'])
-		source_path = os.path.join(source_path, source_file)
+			self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
+			self.config['process/chrom'] = '21'
 
-		self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-		self.log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
-		self.log.debug('> Argument "index_name" filled with "{}"'.format(self.config['resources/elasticsearch/index_name']))
+			gnomeADEx_annotated_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
+			gnomeADEx_annotated_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
+			gnomeADEx_annotated_file = utils.destination_gnomadex(os.path.join(gnomeADEx_annotated_path, self.config['resources/elasticsearch/version']), gnomeADEx_annotated_file)
 
-		self.data = self.hl.methods.read_matrix_table(source_path)
+			self.log.info('Since no data was provided gnomeADEx annotated set will be loaded (set: "{}")'.format(gnomeADEx_annotated_file))
+			self.data = hl.read_matrix_table(gnomeADEx_annotated_file)
 
-	url = 'https://' + self.config['applications/datamanagement/api_exp_status'].format(self.config['applications/datamanagement/ip'], self.config['applications/api_group'])
-	headers = { 'accept': 'application/json', 
-		'Content-Type': 'application/json', 
-		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
-		'Host': self.config['applications/datamanagement/host'] }
-	data = "{\"in_platform\":\"pass\"}"
-	
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
+	self.log.debug('Total of {0} experiments were loaded'.format(len(full_samples)))
 
-	self.log.info('> Experiments in loaded VCF: {}'.format(len(full_samples)))
-	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
-	self.log.debug('> Provided update content: "{}"'.format(str(data)))
-	self.log.debug('> Created query URL for data-management: {}'.format(url))
-
-	for sam in full_samples:
-		q_url = url + '&experiment=' + sam
-		response = requests.post(q_url, data = data, headers = headers, verify = False)
-		if response.status_code != 200:
-			q_url = url + '&forceupdate=true&experiment=' + sam
-			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
-			if response2.status_code != 200:
-				self.log.error('> Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
-			else:
-				self.log.warning('> Query for "{}" resulted in {}. Forced update was successful with {}'.format(sam, response.status_code, response2.status_code))
-				
-				# data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
-				# 	\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
-				# 	\"qc\": \"pass\",					\"coverage\": \"pass\", \
-				# 	\"cnv\": \"waiting\",				\"variantCalling\": \"pass\", \
-				# 	\"rohs\": \"pass\",					\"genomicsdb\": \"pass\", \
-				# 	\"multivcf\": \"pass\",				\"hdfs\": \"pass\", \
-				# 	\"es\": \"pass\",					\"in_platform\": \"pass\", \
-				# 	\"dataset\":\"" + index_name + "\" \
-				# }"
-				# response2 = requests.post(q_url, data = data, headers = headers, verify = False)
-				# if response2.status_code != 200:
-				# 	accum.append((sam, response, response2))
-
+	samples.set_experiment(config = self.config, hl = self.hl, log = self.log, samples = full_samples, flag = 'in_platform', value = 'pass')
 	return self
 
 
-def samples_in_dm(self = None, config = None, hl = None, log = None):
-	""" This function allows to update the "in_platform" information for a set 
-	of  experiments in data-management.
+def sample_in_genomedb(self = None, config = None, hl = None, log = None):
+	""" This function allows to update the "genomedb" information for a set 
+	of experiments in data-management.
 
-	The function requires of a GenimcData object (as self) or a configuration
-	pointing to a location (aka. HDFS' folder) containing a MatrixTable (HAIL).
-	The experiments in the MatrixTable will be the ones which index information 
-	will be updated.
+	The function requires of a SparseMatrix object (as self) or a configuration
+	pointing to a location (aka. HDFS' folder) containing the MatrixTable (HAIL)
+	created for a SparseMatrix. The experiments in the MatrixTable will be the 
+	ones which status information will be updated.
+
+	If no SparseMatrix is provided, chromosome 21 will be loaded and used as 
+	reference to get the samples to be updated.
+
+	This function relies on the set_experiment from setSamplesInfo.
+
 	Parameters
-	
 	----------
 	config: ConfigFile, optional
 		Configuration for this step of the pipeline. If not provided or set to
@@ -214,25 +163,12 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 		isSelf = False
 
 	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to=SparseMatrix)
-	self.log.info('Entering gathering step "samples_in_dm"')
+	self.log.info('Entering updating step "DM - genomedb"')
 
 	if not isConfig:
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
-		self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
-		self.config['process/chrom'] = '21'
-
-	smallBatch = self.config['applications/combine/sz_small_batch']
-	largeBatch = self.config['applications/combine/sz_large_batch']
-
-	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
-	self.log.debug('> Argument "largeBatch" filled with "{}"'.format(largeBatch))
-	self.log.debug('> Argument "smallBatch" filled with "{}"'.format(smallBatch))
-
-	self.log.debug('> Overwriting chrom to chrom-21')
-	chrom = 21
 
 	if self is None:
 		sparse_path = self.config['applications/combine/sparse_matrix_path']
@@ -252,32 +188,130 @@ def samples_in_dm(self = None, config = None, hl = None, log = None):
 			return 
 
 	full_samples = [ y.get('s') for y in self.data.col.collect() ]
-	self.log.debug('> Number of samples in sparse matrix: {} ({}/{})'.format(len(full_samples), full_samples[ 0 ], full_samples[ -1 ]))
-	self.log.debug('> First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
+	self.log.debug('Total of {0} experiments in sparse matrix'.format(len(full_samples)))
 
-	packs, n = [], 200
-	for ii in range(0, len(full_samples), n):  
-		packs = ','.join(full_samples[ii:ii + n])
-
-	self.log.debug('> Data-management will be queried {} times, each time with {} experiments'.format(len(packs), n))
-
-	url = 'https://' + self.config['applications/datamanagement/api_sm'].format(self.config['applications/datamanagement/ip'])
-	headers = { 'accept': 'application/json', 
-		'Content-Type': 'application/json', 
-		'Authorization': 'Token {0}'.format(self.config['applications/datamanagement/token']),
-		'Host': self.config['applications/datamanagement/host'] }
-
-	self.log.debug('> Created query URL for data-management: {}'.format(url))
-
-	table = {}
-	for ii, samlist in enumerate(packs):
-		q_url = url + '?experiment=' + samlist
-		response = requests.post(q_url, data = data, headers = headers, verify = False)
-		if response.status_code != 200:
-			self.log.error('> Data-management returned {} ("{}") when queried with #{} batch of experiments'.format(response.status_code, response.text, ii))
-			return 
-		else:
-			data = json.loads(resp.content)
-			table.update(data)
-	print(table)
+	samples.set_experiment(config = self.config, hl = self.hl, log = self.log, samples = full_samples, flag = 'genomicsdb', value = 'pass')
 	return self
+
+
+def samples_in_dm(self = None, config = None, hl = None, log = None, mapping = None, n = 1000):
+	""" This function allows to update the "in_platform" information for a set 
+	of  experiments in data-management.
+
+	The function requires of a GenimcData object (as self) or a configuration
+	pointing to a location (aka. HDFS' folder) containing a MatrixTable (HAIL).
+	The experiments in the MatrixTable will be the ones which index information 
+	will be updated.
+	Parameters
+	
+	----------
+	config: ConfigFile, optional
+		Configuration for this step of the pipeline. If not provided or set to
+		None the configuration is looked into the GenomicData in self.
+	hl: context, optional
+		HAIL context. If not provided or set to None the reference to the 
+		module is looked into the GenomicData in self.
+	log: logger, optional
+		A logger to have track of the steps used in the loading process. If not
+		provided or set to None the logger is looked into the GenomicData in 
+		self. If no logger is in the provided nor in the GenomicData, then no
+		log is performed.
+	mapping: Mapping of experiment-dense_matrix obtained from 
+		dense_matrix_grouping.
+	"""
+	isSelf = True
+	if self is None:
+		isSelf = False
+
+	self, isConfig, isHl = utils.check_class_and_config(self, config, hl, log, class_to = SparseMatrix)
+	self.log.info('Entering updating step "DM - samples_in_dm"')
+
+	if mapping is None:
+		self.log.error('No mapping was provided')
+		raise NoConfigurationException('No mapping was provided')		
+
+	if not isConfig:
+		self.log.error('No configuration was provided')
+		raise NoConfigurationException('No configuration was provided')
+
+	if not 'process/chrom' in self.config.keys() or str(self.config['process/chrom']) != '21':
+		self.log.warning('Provided configuration with no chromosome attached ("process/chrom") or it was not chromosome 21. Chromosome 21 will be used.')
+		self.config['process/chrom'] = '21'
+
+	self.log.debug('> Argument "self" was set' if isSelf else '> Argument "self" was not set')
+
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
+	url = config['applications/datamanagement/api_sm'].format(url, config['applications/api_group'])
+	headers = { 
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}	
+	log.debug('Querying experiment\'s dm annotation using url "{}"'.format(url))
+
+	mapping2 = [ x for x in mapping if x[3] ]
+	log.info('Obtained {} experiments from which {} will be updated.'.format(len(mapping), len(mapping2)))
+
+	# Prepare batch of updates
+	packs = []
+	for ii in range(0, len(mapping2), n):
+		data = {}
+		for xx in  mapping2[ii:ii+n]:
+			data.update({ xx[0]: '//'.join([ str(x) for x in xx[1:-1] ]) })
+		packs.append(data)
+
+	print("packs", packs)
+
+	for ii, samlist in enumerate(packs):
+		resp = requests.post(url, headers = headers, json = samlist, verify = False)
+		if resp.status_code != 200:
+			log.error('> Querying batch #{}/{} failed with error {} and content "{}".'.format(ii, len(packs), resp.status_code, resp.text))
+		else:
+			log.debug('> Querying batch #{}/{} resulted in {}.'.format(ii, len(packs), resp.status_code))
+
+	return self
+
+
+
+def samples_to_dm(config, log):
+	url = config['applications/datamanagement/ip']
+	if not url.startswith('http://') and not url.startswith('https://'):
+		url = 'https://{0}'.format(url)
+
+	if is_playground:
+		url = config['applications/datamanagement/api_exp_status_list_playground'].format(url)
+	else:
+		url = config['applications/datamanagement/api_exp_status_list'].format(url)
+
+	log.info('Entering step "get_experiments_prepared"')
+	log.debug('> Argument "chrom" filled with "{}"'.format(chrm_str))
+	log.debug('> Argument "source_path" filled with "{}"'.format(source_path))
+	log.debug('> Argument "destination_hdfs" filled with "{}"'.format(destination_hdfs))
+	log.debug('> Argument "destination_ceph" filled with "{}"'.format(destination_ceph))
+
+	headers = { 
+		'accept': 'application/json', 'Content-Type': 'application/json',
+		'Authorization': 'Token {0}'.format(config['applications/datamanagement/token']),
+		'Host': config['applications/datamanagement/host'] 
+	}
+	
+	data = { "page": 1, "pageSize": 5000, 
+		"fields": [ "RD_Connect_ID_Experiment", "mapping", "variantCalling", "genomicsdb", "hdfs", "es", "in_platform" ],
+		"sorted": [ { "id": "RD_Connect_ID_Experiment", "desc": False} ],
+		"filtered": [
+			{ "id": "variantCalling", "value": "pass" }, 
+			{ "id": "hdfs",           "value": "pass" },
+			{ "id": "genomicsdb",     "value": "pass" },
+			{ "id": "multivcf",       "value": "waiting" },
+			{ "id": "es",             "value": "waiting" }
+		]
+	}
+	
+	log.debug('> Querying DM using URL "{0}"'.format(url))
+
+	response = requests.post(url, json = data, headers = headers, verify = False)
+	if response.status_code != 200:
+		log.error('Query DM for experiment list resulted in a {} message'.format(str(response.status_code)))
+		sys.exit(2)

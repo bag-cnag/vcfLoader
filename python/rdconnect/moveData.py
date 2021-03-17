@@ -79,10 +79,6 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	
 	data = "{\"page\": 1, \"pageSize\": "  + str(batch) + ", \"fields\": [\"RD_Connect_ID_Experiment\",\"mapping\",\"variantCalling\",\"genomicsdb\",\"hdfs\",\"es\",\"in_platform\"],\"sorted\": [{\"id\": \"RD_Connect_ID_Experiment\",\"desc\": false}],\"filtered\": [{\"id\": \"variantCalling\",\"value\": \"pass\"},{\"id\": \"hdfs\",\"value\": \"waiting\"},{\"id\": \"genomicsdb\",\"value\": \"waiting\"},{\"id\": \"es\",\"value\": \"waiting\"}]}"
 	log.debug('> Querying DM using URL "{0}"'.format(url))
-
-	log.debug(headers)
-	log.debug(data)
-	log.debug(url)
 	
 	response = requests.post(url, data = data, headers = headers, verify = False)
 	if response.status_code != 200:
@@ -96,6 +92,8 @@ def get_experiments_prepared(config, log = VoidLog(), batch = 500, is_playground
 	log.debug('> Obtained a total of "{}" samples for the group'.format(len(all_group)))
 	
 	to_process_group = [ x for x in all_group if x['RD_Connect_ID_Experiment'] in to_process ]
+
+	log.debug('> Obtained a total of "{}" samples for the group to be processed and mapped'.format(len(to_process_group)))
 	with open('transfer_files.txt', 'w') as fw:
 		for ii, xx in enumerate(to_process_group):
 			for chrm in chrm_str:
