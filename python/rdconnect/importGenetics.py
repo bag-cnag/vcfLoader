@@ -58,7 +58,7 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 			ad = utils.truncateAt( hl,self.data.AD[ 1 ] / hl.sum( self.data.AD ),"2" ), # hl.sum( self.data.AD ),"2" ),
 			dp = self.data.DP,
 			gtInt = self.data.GT,
-			gt = hl.str( self.data.GT ),
+			gt = hl.str( hl.call(self.data.GT[0],self.data.GT[1], phased=False) ),
 			gq = self.data.GQ
 		)
 	)
@@ -178,7 +178,7 @@ def germline(config = None, hl = None, log = None):
 		ad = utils.truncateAt(hl,self.data.AD[ 1 ]/hl.sum(self.data.AD), '2'),
 		dp = self.data.DP,
 		gtInt = self.data.GT,
-		gt = hl.str(self.data.GT),
+		gt = hl.str( hl.call(self.data.GT[0],self.data.GT[1], phased=False) ),
 		gq = self.data.GQ
 	)).drop('rsid','qual','filters','info')
 	self.data = self.data.annotate_rows(
