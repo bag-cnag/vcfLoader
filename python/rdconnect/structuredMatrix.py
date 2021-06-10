@@ -237,8 +237,8 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
 		return x
+	interval = utils.get_chrom_intervals(chrom, partitions, hl)
 	try:
-		interval = utils.get_chrom_intervals(chrom, partitions, hl)
 		vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
 
 		if previous_version_path == None:
@@ -252,8 +252,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		return comb
 	except Exception as xx:
 		print('HAIL RAISED AN ERROR LOADING GVCF - STARTING ONE-PER-ONE LOADING')
-
-		interval = utils.get_chrom_intervals(chrom, partitions, hl)
+		print(str(xx))
 		exp = []
 		for idx, ex in enumerate(experiments):
 			print("Processing file {} ({})".format(ex[ 'file' ], idx))
