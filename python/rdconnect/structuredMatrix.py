@@ -230,36 +230,14 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		))
 		return x
 	def importFiles(files):
-		try:
-			x = hl.import_vcfs(
-				files,
-				partitions = interval[ 'interval' ], 
-				reference_genome = interval[ 'reference_genome' ], 
-				array_elements_required = interval[ 'array_elements_required' ]
-			)
-			return x
-		except Exception as ex:
-			print('HAIL encontered an error')
-			print(str(ex))
-			print('I\'m going to try to load the gVCF one at a time')
-			x = hl.import_vcfs(
-				files[0],
-				partitions = interval[ 'interval' ], 
-				reference_genome = interval[ 'reference_genome' ], 
-				array_elements_required = interval[ 'array_elements_required' ]
-			)
-			for ff in files[1:]:
-				try:
-					x.append(hl.import_vcfs(
-						ff,
-						partitions = interval[ 'interval' ], 
-						reference_genome = interval[ 'reference_genome' ], 
-						array_elements_required = interval[ 'array_elements_required' ]
-					))
-				except:
-					print('HAIL found an issue in file "{}"'.format(ff))
-			return x
-
+		x = hl.import_vcfs(
+			files,
+			partitions = interval[ 'interval' ], 
+			reference_genome = interval[ 'reference_genome' ], 
+			array_elements_required = interval[ 'array_elements_required' ]
+		)
+		return x
+	"""
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
 	vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
 
@@ -270,9 +248,26 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		previous = previous.key_rows_by('locus')
 		comb = combine_gvcfs([ previous ] + vcfs)
 
-	#comb = comb.key_rows_by('locus', 'alleles')
 	comb.write(version_path, overwrite = True)
 	return comb
+	"""
+
+	interval = utils.get_chrom_intervals(chrom, partitions, hl)
+	exp = []
+	for idx, ex in enumerate(experiments):
+		print("Processing file {} ({})".format(ex[ 'file' ], idx))
+		x = importFiles([ ex[ 'file' ] ])
+		x = transformFile(x)
+		if(idx > 0):
+			exp = combine_gvcfs(exp + x)
+		exp.write(version_path, overwrite = True)
+	
+	if previous_version_path != None:
+		previous = hl.read_matrix_table(previous_version_path)
+		previous = previous.key_rows_by('locus')
+		comb = combine_gvcfs([ previous ] + exp)
+		comb.write(version_path, overwrite = True)
+	
 
 
 def _create_batches(experiments, version, largeSize = 500, smallSize = 100):
