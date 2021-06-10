@@ -237,38 +237,41 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 			array_elements_required = interval[ 'array_elements_required' ]
 		)
 		return x
-	"""
-	interval = utils.get_chrom_intervals(chrom, partitions, hl)
-	vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
+	try:
+		interval = utils.get_chrom_intervals(chrom, partitions, hl)
+		vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
 
-	if previous_version_path == None:
-		comb = combine_gvcfs(vcfs)
-	else:
-		previous = hl.read_matrix_table(previous_version_path)
-		previous = previous.key_rows_by('locus')
-		comb = combine_gvcfs([ previous ] + vcfs)
-
-	comb.write(version_path, overwrite = True)
-	return comb
-	"""
-
-	interval = utils.get_chrom_intervals(chrom, partitions, hl)
-	exp = []
-	for idx, ex in enumerate(experiments):
-		print("Processing file {} ({})".format(ex[ 'file' ], idx))
-		x = importFiles([ ex[ 'file' ] ])
-		x = [ transformFile(x[ 0 ]) ]
-		if(idx > 0):
-			exp = combine_gvcfs([ exp ] + x)
+		if previous_version_path == None:
+			comb = combine_gvcfs(vcfs)
 		else:
-			exp = combine_gvcfs(x)
-		exp.write(version_path, overwrite = True)
-	
-	if previous_version_path != None:
-		previous = hl.read_matrix_table(previous_version_path)
-		previous = previous.key_rows_by('locus')
-		comb = combine_gvcfs([ previous ] + exp)
+			previous = hl.read_matrix_table(previous_version_path)
+			previous = previous.key_rows_by('locus')
+			comb = combine_gvcfs([ previous ] + vcfs)
+
 		comb.write(version_path, overwrite = True)
+		return comb
+	except Exception as xx:
+		print('HAIL RAISED AN ERROR LOADING GVCF - STARTING ONE-PER-ONE LOADING')
+
+		interval = utils.get_chrom_intervals(chrom, partitions, hl)
+		exp = []
+		for idx, ex in enumerate(experiments):
+			print("Processing file {} ({})".format(ex[ 'file' ], idx))
+			x = importFiles([ ex[ 'file' ] ])
+			x = [ transformFile(x[ 0 ]) ]
+			if(idx > 0):
+				exp = combine_gvcfs([ exp ] + x)
+			else:
+				exp = combine_gvcfs(x)
+			exp.write(version_path, overwrite = True)
+		
+		if previous_version_path != None:
+			previous = hl.read_matrix_table(previous_version_path)
+			previous = previous.key_rows_by('locus')
+			comb = combine_gvcfs([ previous ] + exp)
+			comb.write(version_path, overwrite = True)
+		
+		return comb
 	
 
 
