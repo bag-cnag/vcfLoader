@@ -257,7 +257,7 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 	for idx, ex in enumerate(experiments):
 		print("Processing file {} ({})".format(ex[ 'file' ], idx))
 		x = importFiles([ ex[ 'file' ] ])
-		x = transformFile(x)
+		x = [ transformFile(x[ 0 ]) ]
 		if(idx > 0):
 			exp = combine_gvcfs(exp + x)
 		exp.write(version_path, overwrite = True)
