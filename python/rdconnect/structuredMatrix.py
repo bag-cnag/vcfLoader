@@ -230,13 +230,35 @@ def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, part
 		))
 		return x
 	def importFiles(files):
-		x = hl.import_vcfs(
-			files,
-			partitions = interval[ 'interval' ], 
-			reference_genome = interval[ 'reference_genome' ], 
-			array_elements_required = interval[ 'array_elements_required' ]
-		)
-		return x
+		try:
+			x = hl.import_vcfs(
+				files,
+				partitions = interval[ 'interval' ], 
+				reference_genome = interval[ 'reference_genome' ], 
+				array_elements_required = interval[ 'array_elements_required' ]
+			)
+			return x
+		except Exception as ex:
+			print('HAIL encontered an error')
+			print(str(ex))
+			print('I\'m going to try to load the gVCF one at a time')
+			x = hl.import_vcfs(
+				files[0],
+				partitions = interval[ 'interval' ], 
+				reference_genome = interval[ 'reference_genome' ], 
+				array_elements_required = interval[ 'array_elements_required' ]
+			)
+			for ff in files[1:]:
+				try:
+					x.append(hl.import_vcfs(
+						ff,
+						partitions = interval[ 'interval' ], 
+						reference_genome = interval[ 'reference_genome' ], 
+						array_elements_required = interval[ 'array_elements_required' ]
+					))
+				except:
+					print('HAIL found an issue in file "{}"'.format(ff))
+			return x
 
 	interval = utils.get_chrom_intervals(chrom, partitions, hl)
 	vcfs = [ transformFile(mt) for mt in importFiles([ x[ 'file' ] for x in experiments ]) ]
