@@ -183,8 +183,8 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 				vsr = batch[ 'version' ]
 			small_batch_path = _name_with_chrom(path.join(base, vsr), chrom)
 			self.log.info('     . Loading pack #{} of {} gVCF ({})'.format(idx2, len(pack[ 'content' ]), small_batch_path))
-			for f in pack['content']:
-				print(f)
+			#for f in pack['content']:
+			#	print(f)
 			last = _load_gvcf(self.hl, pack[ 'content' ], small_batch_path, accum, chrom, config[ 'applications/combine/partitions_chromosome' ])
 			accum = small_batch_path
 
@@ -194,10 +194,10 @@ def append_to_sparse_matrix(self = None, config = None, hl = None, log = VoidLog
 		revisions_to_collect = [ version ] + revisions_to_collect
 
 	self.log.info('Starting step 2 - merging {} cumulative matrices'.format(len(revisions_to_collect)))
-	print("revisions_to_collect", revisions_to_collect)
+	#print("revisions_to_collect", revisions_to_collect)
 	
 	for ii in range(1, len(revisions_to_collect)):
-		print(revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], chrom)
+		#print(revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], chrom)
 		last = _combine_mt(self.hl, base, revisions_to_collect[ ii-1 ], revisions_to_collect[ ii ], utils.version_bump(revisions_to_collect[ ii ], 'version'), chrom)
 
 	self.data = last
@@ -217,9 +217,9 @@ def _combine_mt(hl, base, ver1, ver2, verD, chrom):
 	sm_1 = sm_1.key_rows_by('locus')
 	sm_2 = sm_2.key_rows_by('locus')
 	comb = combine_gvcfs([ sm_1 ] + [ sm_2 ])
-	print(type(comb))
+	#print(type(comb))
 	comb.write(smD, overwrite = True)
-	print(type(comb))
+	#print(type(comb))
 	return comb
 
 
