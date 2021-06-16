@@ -188,7 +188,7 @@ def _removeDot(hl, n, precision):
 		:param String n: Number to format
 		:param String p: Decimal precision
 	"""
-	return hl.cond(n.startswith('.'),0.0,_truncateAt(hl,hl.float(n),precision))
+	return hl.if_else(n.startswith('.'),0.0,_truncateAt(hl,hl.float(n),precision))
 
 
 def dbnsfp(self = None, config = None, hl = None, log = None):
@@ -373,10 +373,10 @@ def _clinvar_filtering(hl, annotation, is_filter_field):
 	])
 	filtered = None
 	if is_filter_field:
-		filtered = hl.map(lambda z: hl.cond(clin_sigs.contains(z), hl.struct(clnsig=clin_sigs[z]), hl.struct(clnsig="-1")), annotation)
+		filtered = hl.map(lambda z: hl.if_else(clin_sigs.contains(z), hl.struct(clnsig=clin_sigs[z]), hl.struct(clnsig="-1")), annotation)
 		filtered = hl.filter(lambda e: e['clnsig'] != '-1', filtered)    
 	else: 
-		filtered = hl.map(lambda z: hl.cond(clin_sigs.contains(z), clin_sigs[z], '-1'), annotation)
+		filtered = hl.map(lambda z: hl.if_else(clin_sigs.contains(z), clin_sigs[z], '-1'), annotation)
 		filtered = hl.filter(lambda e: e != '-1', filtered)  
 	return filtered
 
@@ -391,7 +391,7 @@ def _clinvar_preprocess(hl, annotation, is_filter_field):
 		.replace('\\:',',') \
 		.replace('\\|',',') \
 		.split(','), annotation)
-	preprocessed = hl.map(lambda y: hl.cond(y[0] == '_', y[1:], y), preprocessed)
+	preprocessed = hl.map(lambda y: hl.if_else(y[0] == '_', y[1:], y), preprocessed)
 	return _clinvar_filtering(hl,preprocessed,is_filter_field)
 
 
@@ -456,10 +456,10 @@ def clinvar(self = None, config = None, hl = None, log = None):
 		self.file = []
 
 	self.data = self.data.annotate_rows(
-		clinvar_id = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), clinvar[self.data.locus, self.data.alleles].rsid, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL[0].split(':')[0]),
+		clinvar_id = self.hl.if_else(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), clinvar[self.data.locus, self.data.alleles].rsid, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL[0].split(':')[0]),
 		clinvar_clnsigconf = self.hl.delimit(clinvar[self.data.locus, self.data.alleles].info.CLNSIGCONF),
-		clinvar_clnsig = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), self.hl.delimit(_clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,False), "|"), self.hl.delimit(_clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, False), "|")),
-		clinvar_filter = self.hl.cond(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), _clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,True), _clinvar_preprocess(self.hl, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, True))
+		clinvar_clnsig = self.hl.if_else(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), self.hl.delimit(_clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,False), "|"), self.hl.delimit(_clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, False), "|")),
+		clinvar_filter = self.hl.if_else(self.hl.is_defined(clinvar[self.data.locus, self.data.alleles].info.CLNSIG[clinvar[self.data.locus, self.data.alleles].a_index-1]), _clinvar_preprocess(self.hl,clinvar[self.data.locus, self.data.alleles].info.CLNSIG,True), _clinvar_preprocess(self.hl, clinvar[self.data.locus, self.data.alleles].info.CLNSIGINCL, True))
 	)
 
 	self.state = ['ClinVar'] + self.state
@@ -531,13 +531,13 @@ def gnomADEx(self = None, config = None, hl = None, log = None):
 		self.file = []
 
 	self.data = self.data.annotate_rows(
-		gnomad_af = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_ac = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_an = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN),gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN, 0.0),
-		gnomad_af_popmax = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_ac_popmax = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_an_popmax = self.hl.cond(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
-		gnomad_filter = self.hl.cond(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
+		gnomad_af = self.hl.if_else(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_ac = self.hl.if_else(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_an = self.hl.if_else(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN),gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN, 0.0),
+		gnomad_af_popmax = self.hl.if_else(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_ac_popmax = self.hl.if_else(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_an_popmax = self.hl.if_else(self.hl.is_defined(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1]), gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[self.data.locus, self.data.alleles].a_index-1], 0.0),
+		gnomad_filter = self.hl.if_else(gnomad[self.data.locus, self.data.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
 	)
 
 	self.state = ['gnomeADEx'] + self.state
@@ -606,9 +606,9 @@ def internal_freq(self = None, config = None, hl = None, log = None):
 		self.file = []
 
 	self.data = self.data.annotate_rows(
-		freqIntGermline = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].freqIntGermline), int_freq[self.data.locus, self.data.alleles].freqIntGermline, 0.0),
-		freqIntGermlineNum = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].num), int_freq[self.data.locus, self.data.alleles].num, 0.0),
-		freqIntGermlineDem = self.hl.cond(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].dem), int_freq[self.data.locus, self.data.alleles].dem, 0.0),
+		freqIntGermline = self.hl.if_else(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].freqIntGermline), int_freq[self.data.locus, self.data.alleles].freqIntGermline, 0.0),
+		freqIntGermlineNum = self.hl.if_else(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].num), int_freq[self.data.locus, self.data.alleles].num, 0.0),
+		freqIntGermlineDem = self.hl.if_else(self.hl.is_defined(int_freq[self.data.locus, self.data.alleles].dem), int_freq[self.data.locus, self.data.alleles].dem, 0.0),
 	)
 
 	self.state = ['internal_freq'] + self.state

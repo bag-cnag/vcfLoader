@@ -69,7 +69,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 	self.log.debug('> Querying {0} experiments using url "{1}"'.format(str(len(samples)), url))
 	
 	for ii, sam in enumerate(samples):
-		q_url = url + '&forceupdate=true&experiment=' + sam
+		q_url = url + '&experiment=' + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			q_url = url + '&forceupdate=true&experiment=' + sam
@@ -86,7 +86,7 @@ def set_experiment(self = None, config = None, hl = None, log = VoidLog(), is_pl
 			if response2.status_code != 200:
 				self.log.error('Query for "{}" resulted in {} ({}). Forced update failed with {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
 			else:
-				q_url = url + '&experiment=' + sam
+				q_url = url + '&forceupdate=true&experiment=' + sam
 				response = requests.post(q_url, data = data, headers = headers, verify = False)
 				if response.status_code != 200:
 					self.log.error('After query with "forceupdate", next query for "{}" resulted in {} ({}). Forced update resulted in {} ({})'.format(sam, response.status_code, response.text, response2.status_code, response2.text))
