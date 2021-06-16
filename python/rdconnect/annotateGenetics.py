@@ -115,7 +115,7 @@ def vep(self = None, config = None, hl = None, log = None):
 		self.state = []
 		self.file = []
 
-	self.data = self.hl.vep(self.data, vep_config)
+	self.data = self.hl.vep(self.data, vep_config, tolerate_parse_error = True)
 	self.data = self.data.annotate_rows(
 		effs = self.hl.cond(
 			self.hl.is_defined(self.data.vep.transcript_consequences),
