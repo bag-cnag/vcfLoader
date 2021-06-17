@@ -327,5 +327,7 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 	variants.write.format('org.elasticsearch.spark.sql')\
 		.options(**es_conf)\
 		.save('{}/{}'.format(index_name, self.config['resources/elasticsearch/type']), mode = 'append')
+	variants.close()
+	del(variants)
 
 	return self
