@@ -287,9 +287,9 @@ def push_snv(self = None, config = None, hl = None, sql = None, log = None):
 		self.log.error('No configuration was provided')
 		raise NoConfigurationException('No configuration was provided')
 
-	if not isHl:
-		self.log.error('No pointer to HAIL module was provided')
-		raise NoHailContextException('No pointer to HAIL module was provided')
+	#if not isHl:
+	#	self.log.error('No pointer to HAIL module was provided')
+	#	raise NoHailContextException('No pointer to HAIL module was provided')
 
 	destination_file = utils.create_chrom_filename(self.config['process/destination_file'], self.config['process/chrom'])
 	destination_path = utils.create_chrom_filename(self.config['process/destination_path'], self.config['process/chrom'])
