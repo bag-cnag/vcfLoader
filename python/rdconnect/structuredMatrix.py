@@ -216,6 +216,7 @@ def _combine_mt(hl, base, ver1, ver2, verD, chrom):
 	sm_2 = hl.read_matrix_table(sm2)
 	sm_1 = sm_1.key_rows_by('locus')
 	sm_2 = sm_2.key_rows_by('locus')
+	sm_2 = sm_2.select_entries(*sm_1.entry)
 	comb = combine_gvcfs([ sm_1 ] + [ sm_2 ])
 	#print(type(comb))
 	comb.write(smD, overwrite = True)
@@ -226,7 +227,7 @@ def _combine_mt(hl, base, ver1, ver2, verD, chrom):
 def _load_gvcf(hl, experiments, version_path, previous_version_path, chrom, partitions):
 	def transformFile(mt):
 		x = transform_gvcf(mt.annotate_rows(
-			info = mt.info.annotate(MQ_DP = hl.null(hl.tint32), VarDP = hl.null(hl.tint32), QUALapprox = hl.null(hl.tint32))
+			info = mt.info.annotate(MQ_DP = hl.missing(hl.tint32), VarDP = hl.missing(hl.tint32), QUALapprox = hl.missing(hl.tint32))
 		))
 		return x
 	def importFiles(files):
