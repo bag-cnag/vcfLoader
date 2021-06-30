@@ -51,7 +51,7 @@ def dense_matrix(self = None, config = None, hl = None, log = VoidLog()):
 	x = [ y.get('s') for y in self.data.col.collect() ]
 	self.log.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
 	self.log.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
-	self.log.debug( 'Starting "transmute_entries"' )
+	self.log.debug( 'Starting "dense_matrix - transmute_entries"' )
 	self.data = self.data.transmute_entries(
 		sample = hl.struct(
 			sample = self.data.s,
